@@ -95,26 +95,32 @@ hotel-chatbot-n8n    running
 2. Thêm các node theo thứ tự:
    ```
    [Manual Trigger] 
-       → [Read Directory] (Đọc danh sách file trong thư mục)
-       → [Read Write File from Disk] (Đọc nội dung từng file)
-       → [Postgres PGVector Store (Insert)] (Lưu trữ Vector)
-   ```
+    → [Postgres: Reset Tri Thức] (Xóa dữ liệu cũ trước khi nạp mới)
+    → [Read Directory] (Đọc danh sách file trong thư mục)
+    → [Read Write File from Disk] (Đọc nội dung từng file)
+    → [Postgres PGVector Store (Insert)] (Lưu trữ Vector mới)
+```
 
 ### Chi tiết cấu hình từng node:
 
 #### Node 1: Manual Trigger
 - Mặc định, không cần cấu hình gì.
 
-#### Node 2: Read Directory (Đọc thư mục)
+#### Node 2: Postgres (Reset Tri Thức)
+- **Operation**: `Execute a SQL Query`
+- **Query**: `TRUNCATE TABLE knowledge_documents;`
+- **Credentials**: Chọn Postgres credential đã tạo ở Bước 6.
+
+#### Node 3: Read Directory (Đọc thư mục)
 - **Path**: `/home/node/knowledge`
 - **Options**: Bật **`Detailed Output`** thành `True` (nếu cần). Node này sẽ tìm thấy các file như `faq.md`, `hotel-info.md`, v.v.
 
-#### Node 3: Read Write File from Disk (Đọc file)
+#### Node 4: Read Write File from Disk (Đọc file)
 - **Operation**: `Read File`
 - **File Path**: `/home/node/knowledge/{{ $json.name }}`
 - **Output Binary Field**: `data`
 
-#### Node 4: Postgres PGVector Store (Insert Documents)
+#### Node 5: Postgres PGVector Store (Insert Documents)
 - **Table Name**: `knowledge_documents`
 - **Vector Column Name**: `embedding`
 - **Content Column Name**: `content`
