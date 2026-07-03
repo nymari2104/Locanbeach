@@ -1,120 +1,96 @@
-# Ocean Breeze Resort - Câu Hỏi Thường Gặp / FAQ
+# The House - Lộc An Beach - Câu Hỏi Thường Gặp / FAQ
 
-## 📍 Về Khách Sạn / About the Hotel
+## Về Khách Sạn / About the Hotel
 
-**Q: Khách sạn ở đâu? / Where is the hotel located?**
-A: Ocean Breeze Resort nằm tại 123 Đường Biển Xanh, cách trung tâm thành phố 15 phút lái xe và cách sân bay 25km (khoảng 35 phút). Resort nằm ngay trên bãi biển cát trắng.
+**Q: Resort ở đâu? / Where is the resort located?**
+A: The House - Lộc An Beach nằm tại địa chỉ: bãi biển Lộc An, ấp an Điền, xã Phước Hải, Bà Rịa, thành phố Hồ Chí Minh, Vietnam. Khu nghỉ dưỡng chỉ cách bãi biển Lộc An đúng 100m (khoảng 2 phút đi bộ).
 
-**Q: Khách sạn có mấy sao? / What is the hotel's star rating?**
-A: Ocean Breeze Resort là khu nghỉ dưỡng đạt tiêu chuẩn 4 sao quốc tế.
+**Q: Resort có tiêu chuẩn mấy sao? / What is the star rating?**
+A: The House là khu nghỉ dưỡng kết hợp cắm trại dã ngoại (Glamping) yên bình, thiên hướng thoải mái và tự nhiên, mang lại không gian thư giãn tối đa cho bạn.
 
-**Q: Có bãi biển riêng không? / Do you have a private beach?**
-A: Có! Chúng tôi có bãi biển riêng dài 200m với ghế tắm nắng, ô che và khăn biển miễn phí cho khách lưu trú. Bãi biển mở cửa từ 06:00 - 18:00.
+**Q: Có gần biển không? / Is it near the beach?**
+A: Có, resort nằm cách bãi biển Lộc An chỉ 100m, rất thuận tiện để bạn đi bộ ra tắm biển, ngắm bình minh hoặc dạo biển.
 
 **Q: Có hồ bơi không? / Is there a swimming pool?**
-A: Có, resort có hồ bơi vô cực 25m nhìn ra biển, miễn phí cho khách lưu trú. Mở cửa 06:00 - 21:00. Có khu vực hồ bơi trẻ em riêng (sâu 0.5m).
+A: Có, bên mình có hồ bơi ngoài trời mát lạnh mở cửa miễn phí cho khách lưu trú từ 06:00 - 21:00. Hồ bơi có cả khu vực dành riêng cho người lớn và khu vực nông hơn cho trẻ em vui chơi an toàn.
+
+**Q: Có những tiện ích giải trí nào khác? / What other facilities do you have?**
+A: Ngoài hồ bơi, bên mình có hồ nước tự nhiên để câu cá giải trí tự do, khu vực đốt lửa trại tập thể vào buổi tối, khu vực bếp nấu ăn chung cho du khách và bàn nướng BBQ ngoài trời cực chill.
 
 ---
 
-## 🏨 Đặt Phòng / Booking
+## Đặt Phòng & Cắm Trại / Booking & Glamping
 
 **Q: Giá phòng bao nhiêu? / What are the room rates?**
-A: Giá phòng từ 800.000đ/đêm (Phòng Tiêu Chuẩn Hướng Biển) đến 5.000.000đ/đêm (Suite Tổng Thống). Giá cuối tuần và ngày lễ có phụ thu. Đặt trực tiếp qua hotline/website được giảm 10%.
+A: Giá phòng tại The House thay đổi linh hoạt tùy theo hạng phòng và thời điểm bạn đi (ngày thường, cuối tuần hoặc dịp Lễ Tết). Bạn vui lòng nhắn cho mình ngày đi dự kiến, số đêm nghỉ và số lượng khách để mình kiểm tra giá chính xác trên hệ thống cho bạn nhé.
 
-**Q: Làm sao để đặt phòng? / How can I make a reservation?**
-A: Bạn có thể đặt phòng qua:
-1. Hotline: 0901 234 567
-2. Website: www.oceanbreezeresort.vn
-3. Email: booking@oceanbreezeresort.vn
-4. Nhắn tin qua Facebook Messenger
-5. Các nền tảng OTA: Booking.com, Agoda, Traveloka
+**Q: Các phòng được trang bị nệm gì? / What mattresses are used?**
+A: Tất cả các phòng nghỉ tại The House đều được trang bị nệm lò xo cao cấp tiêu chuẩn khách sạn 5 sao để bảo đảm giấc ngủ êm ái và thoải mái nhất cho bạn trong kỳ nghỉ.
+
+**Q: Có dịch vụ cắm trại không? / Do you have camping services?**
+A: Có, bên mình có bãi cỏ cắm trại rộng rãi. Bạn có thể thuê lều dựng sẵn cao cấp (Glamping) của bên mình hoặc tự mang lều cá nhân đến để dựng trại nhé.
 
 **Q: Cần đặt cọc bao nhiêu? / What is the deposit requirement?**
-A: Đặt phòng online cần đặt cọc 50%. Thanh toán đủ khi nhận phòng. Chấp nhận: chuyển khoản, Visa/Mastercard, MoMo, ZaloPay.
+A: Để giữ phòng chắc chắn trên hệ thống, bạn vui lòng đặt cọc trước một phần tổng tiền phòng bằng chuyển khoản hoặc ví điện tử. Số tiền còn lại sẽ thanh toán khi nhận phòng.
 
-**Q: Chính sách hủy phòng? / What is the cancellation policy?**
-A: Hủy trước 48h: hoàn 100%. Hủy 24-48h trước: hoàn 50%. Hủy trong ngày hoặc no-show: không hoàn tiền.
-
-**Q: Có phòng cho gia đình đông người không? / Do you have rooms for large families?**
-A: Có! Suite Gia Đình (Family Suite) chứa tối đa 5 người với 2 phòng ngủ, bếp nhỏ, và góc vui chơi trẻ em. Giá từ 2.500.000đ/đêm.
+**Q: Chính sách hủy phòng như thế nào? / What is the cancellation policy?**
+A: Hủy trước 48h so với giờ check-in: hoàn cọc 100%. Hủy trước 24h - 48h: hoàn cọc 50%. Hủy dưới 24h hoặc không đến (no-show): không hoàn lại tiền cọc.
 
 ---
 
-## 🕐 Check-in / Check-out
+## Check-in / Check-out
 
 **Q: Giờ nhận phòng và trả phòng? / What are check-in and check-out times?**
-A: Check-in từ 14:00, check-out trước 12:00 trưa.
+A: Giờ nhận phòng tiêu chuẩn là từ 14:00 và giờ trả phòng là trước 12:00 trưa hôm sau.
 
 **Q: Có nhận phòng sớm hoặc trả phòng muộn không? / Can I get early check-in or late check-out?**
-A: Có! Early check-in từ 12:00 phụ thu 200.000đ. Late check-out đến 14:00 phụ thu 200.000đ. Sau 14:00 tính thêm 1 đêm. Tùy thuộc tình trạng phòng trống.
+A: Có, nhận phòng sớm hoặc trả phòng muộn sẽ có tính phụ thu phí theo quy định (tùy thuộc vào tình trạng phòng trống thực tế của bên mình). Trả phòng muộn sau 14:00 sẽ tính phí tương đương 1 đêm phòng.
 
 **Q: Cần mang giấy tờ gì khi check-in? / What documents do I need for check-in?**
-A: Vui lòng mang theo CCCD hoặc Hộ chiếu gốc. Khách quốc tế cần hộ chiếu và visa (nếu có).
+A: Bạn vui lòng mang theo bản gốc CCCD hoặc Hộ chiếu để làm thủ tục nhận phòng tại quầy lễ tân nhé.
+
+**Q: Có thể share phòng hoặc ở ghép thêm người không? / Can I share a room or add more guests?**
+A: Bạn hoàn toàn có thể share phòng hoặc ở ghép chung với bạn bè, người thân, miễn là tổng số khách lưu trú không vượt quá giới hạn sức chứa tối đa quy định của từng hạng phòng. Trong trường hợp muốn ở thêm người vượt quá số giường tiêu chuẩn, bạn có thể đăng ký kê thêm giường phụ (extra bed) có tính phụ thu theo quy định của resort, hoặc đặt thêm phòng mới để đảm bảo không gian nghỉ ngơi thoải mái nhất nhé.
 
 ---
 
-## 🍽️ Ẩm Thực / Dining
+## Ẩm Thực & BBQ / Dining & BBQ
 
 **Q: Bữa sáng có miễn phí không? / Is breakfast included?**
-A: Buffet sáng miễn phí cho khách Presidential Suite. Các phòng khác: 200.000đ/người. Phục vụ 06:30 - 10:00.
+A: Có, bữa sáng và cà phê sáng thơm ngon hoàn toàn miễn phí cho tất cả khách lưu trú tại The House và đã bao gồm sẵn trong giá phòng.
 
-**Q: Có nhà hàng trong khách sạn không? / Are there restaurants in the hotel?**
-A: Có 3 điểm ẩm thực:
-1. Nhà hàng chính (buffet sáng + ẩm thực quốc tế)
-2. The Blue Coral - Nhà hàng hải sản view biển (11:00 - 22:00)
-3. Sky Bar - Cocktail bar sân thượng (16:00 - 00:00, nhạc sống cuối tuần)
+**Q: Có thể tự nấu ăn không? / Can I cook by myself?**
+A: Được nhé, bên mình có khu vực bếp chế biến và nấu ăn chung được trang bị đầy đủ dụng cụ nấu nướng. Bạn có thể tự mua đồ ăn về chế biến tại đây hoàn toàn miễn phí.
 
-**Q: Có dịch vụ phòng (room service) không? / Is room service available?**
-A: Có, dịch vụ phòng hoạt động 24/7. Phụ thu 50.000đ/đơn. Menu đầy đủ và đồ ăn nhẹ đêm khuya.
+**Q: Dịch vụ BBQ tại resort thế nào? / How about the BBQ services?**
+A: Bên mình có sẵn bàn nướng BBQ sân vườn ngoài trời. Bạn có thể thuê bếp tự nướng đồ ăn của mình hoặc đặt trước các Set BBQ chuẩn bị sẵn do bên mình phục vụ nhé. Vui lòng đặt set ăn trước ít nhất 4 tiếng với lễ tân.
 
 ---
 
-## 🏄 Hoạt Động & Tour / Activities & Tours
+## Khuyến Mãi / Promotions
 
-**Q: Có những hoạt động gì? / What activities are available?**
-A: 
-- Bơi lội tại hồ bơi vô cực và bãi biển riêng (miễn phí)
-- Tour khám phá đảo trọn ngày (800.000đ/người)
-- Tour câu cá hoàng hôn + BBQ (600.000đ/người)
-- Spa & massage (từ 500.000đ)
-- Phòng gym hiện đại (miễn phí)
-- Kids Club cho trẻ 4-12 tuổi (miễn phí)
-- Thuê xe máy khám phá (150.000đ/ngày)
-
-**Q: Đặt tour ở đâu? / Where can I book tours?**
-A: Đặt tour tại quầy lễ tân, qua chatbot, hoặc gọi nội bộ từ phòng. Cần đặt trước ít nhất 1 ngày.
+**Q: Resort đang có chương trình khuyến mãi gì không? / Are there any current promotions?**
+A: Hiện tại bên mình chưa áp dụng chương trình khuyến mãi mới nào trên hệ thống. Tuy nhiên, nếu bạn đi đoàn đông hoặc đặt phòng sớm, hãy liên hệ trực tiếp hotline để bên mình hỗ trợ kiểm tra chính sách ưu đãi riêng tốt nhất cho bạn nha.
 
 ---
 
-## 🚗 Di Chuyển / Transportation
+## Di Chuyển & Đi Lại / Transportation
 
-**Q: Có dịch vụ đưa đón sân bay không? / Do you offer airport transfer?**
-A: Có! Xe 4 chỗ: 300.000đ/lượt, xe 7 chỗ: 500.000đ/lượt. Hoạt động 24/7. Đặt trước ít nhất 12 giờ.
+**Q: Có xe đưa đón sân bay hoặc ga xe lửa không? / Do you offer airport transfer?**
+A: Hiện tại bên mình chưa có dịch vụ xe đưa đón riêng của khu nghỉ dưỡng. Bạn có thể tự lái xe cá nhân đến (bên mình có bãi đỗ xe rộng rãi miễn phí) hoặc bắt các hãng xe khách limousine tuyến TP.HCM - Vũng Tàu - Lộc An đón trả tận nơi cực kỳ tiện lợi nhé.
 
-**Q: Từ sân bay đến khách sạn bao xa? / How far is the airport?**
-A: Khoảng 25km, mất khoảng 35 phút lái xe tùy giao thông.
-
-**Q: Có chỗ đỗ xe không? / Is parking available?**
-A: Có bãi đỗ xe miễn phí: 20 chỗ ô tô + 50 chỗ xe máy, có camera giám sát 24/7.
-
-**Q: Có cho thuê xe máy không? / Can I rent a motorbike?**
-A: Có! Xe số: 150.000đ/ngày, xe tay ga: 200.000đ/ngày. Bao gồm mũ bảo hiểm. Cần CCCD/hộ chiếu và đặt cọc 500.000đ.
+**Q: Có chỗ đỗ xe ô tô không? / Is parking available?**
+A: Có, bên mình có bãi đỗ xe máy và xe ô tô rộng rãi, hoàn toàn miễn phí và có camera giám sát an ninh túc trực.
 
 ---
 
-## 📶 Tiện Ích Khác / Other Amenities
+## Chính Sách Khác / Other Policies
 
-**Q: Có WiFi miễn phí không? / Is WiFi free?**
-A: Có, WiFi tốc độ cao miễn phí trong toàn bộ resort. Mạng: OceanBreeze_Guest, mật khẩu nhận tại lễ tân.
+**Q: Có cho mang theo thú cưng không? / Are pets allowed?**
+A: Nhằm đảm bảo không gian yên tĩnh và vệ sinh chung, bên mình áp dụng chính sách không cho phép mang theo thú cưng (chó, mèo...) vào khu nghỉ dưỡng dưới mọi hình thức. Mong bạn thông cảm nhé.
+
+**Q: WiFi ở resort thế nào? / What about the WiFi?**
+A: Bên mình cung cấp WiFi tốc độ cao miễn phí trong toàn bộ khuôn viên resort. Tên mạng là: TheHouse_Guest, mật khẩu truy cập sẽ được gửi tới bạn khi bạn làm thủ tục nhận phòng.
 
 **Q: Có dịch vụ giặt ủi không? / Is laundry service available?**
-A: Có! Giặt thường: 50.000đ/kg (trong ngày). Giặt nhanh: 80.000đ/kg (3 giờ). Nhận 07:00 - 19:00.
-
-**Q: Có cho mang thú cưng không? / Are pets allowed?**
-A: Chấp nhận thú cưng dưới 10kg, phụ thu 200.000đ/đêm. Thú cưng phải dắt dây ở khu vực chung. Không vào nhà hàng và hồ bơi.
-
-**Q: Trẻ em có chính sách gì? / What is the children's policy?**
-A: Dưới 6 tuổi miễn phí (ngủ chung giường bố mẹ). 6-12 tuổi: 200.000đ/đêm + giường phụ. Kids Club miễn phí cho trẻ 4-12 tuổi.
-
-**Q: Có an toàn không? / Is the resort safe?**
-A: Resort có hệ thống camera giám sát 24/7, bảo vệ túc trực, két an toàn trong phòng, và khu bãi biển có nhân viên cứu hộ.
+A: Có, bên mình có nhận giặt ủi đồ cho khách và có tính phí dịch vụ theo cân. Đồ gửi trước 10:00 sáng sẽ được giao trả lại trong ngày.

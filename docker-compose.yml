@@ -44,7 +44,6 @@ services:
       N8N_HOST: localhost
       N8N_PORT: 5678
       N8N_PROTOCOL: http
-      WEBHOOK_URL: https://${SUBDOMAIN:-ocean-breeze-resort-chatbot}.loca.lt/
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-mvp-local-encryption-key-change-in-prod}
       # Timezone Vietnam
       GENERIC_TIMEZONE: Asia/Ho_Chi_Minh
@@ -52,10 +51,12 @@ services:
       # Enable AI features
       N8N_AI_ENABLED: "true"
       # Credentials from .env
-      N8N_RUNNERS_ENABLED: "true"
+      N8N_RUNNERS_ENABLED: "false"
       # Environment Variable Access
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
+      ZERNIO_API_KEY: ${ZERNIO_API_KEY}
       N8N_ENFORCE_SETTINGS_FILE_FOR_ENV_VARIABLES: "false"
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
       # Whitelist local folder access
       N8N_RESTRICT_FILE_ACCESS_TO: "/home/node/knowledge"
       # Facebook API environment variables for workflow use
@@ -91,8 +92,8 @@ services:
     image: cloudflare/cloudflared:latest
     container_name: hotel-chatbot-tunnel
     restart: unless-stopped
-    # Generates a free trycloudflare.com tunnel pointing to n8n port 5678
-    command: tunnel --no-autoupdate --url http://n8n:5678
+    # Generates a free trycloudflare.com tunnel using HTTP2 protocol over port 443 (firewall-friendly)
+    command: tunnel --no-autoupdate --protocol http2 --url http://n8n:5678
     depends_on:
       - n8n
     networks:

@@ -1,0 +1,910 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Tìm xem khách hàng này Ä‘ã nhắn tin trÆ°á»›c Ä‘ó chưa\nWITH existing_session AS (\n    SELECT id FROM chat_sessions \n    WHERE platform = 'facebook' AND platform_user_id = '{{ $json.senderId }}'\n    LIMIT 1\n),\n-- Nếu chưa, tự động tạo mới 1 Session ID\nnew_session AS (\n    INSERT INTO chat_sessions (platform, platform_user_id)\n    SELECT 'facebook', '{{ $json.senderId }}'\n    WHERE NOT EXISTS (SELECT 1 FROM existing_session)\n    RETURNING id\n)\nSELECT id FROM existing_session\nUNION ALL\nSELECT id FROM new_session;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -560,
+        -1920
+      ],
+      "id": "5cd2f4c6-d282-4fa3-85b7-953ddf1fe85c",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "vlWTNL4WCSc0ldAq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Use this tool to search for information about The House - Lộc An Beach, including room types, amenities, services, policies, promotions, nearby locations, and frequently asked questions (FAQs).",
+        "topK": "=10"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        -976,
+        -2512
+      ],
+      "id": "941c1bca-a352-438a-b145-373aea214497",
+      "name": "hotel_knowledge"
+    },
+    {
+      "parameters": {
+        "tableName": "knowledge_documents",
+        "options": {
+          "columnNames": {
+            "values": {
+              "contentColumnName": "content"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        -1072,
+        -2304
+      ],
+      "id": "5dc423eb-00c8-4df7-b77f-92a84f944633",
+      "name": "Postgres PGVector Store",
+      "credentials": {
+        "postgres": {
+          "id": "vlWTNL4WCSc0ldAq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -992,
+        -2096
+      ],
+      "id": "61f34088-1bcd-4aae-a0de-5b69aee8050f",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "DCUxl0R5TTaKO0lU",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to run read-only SQL SELECT queries on the hotel database to check live room pricing, room availability, services details, or policies.\n\nAvailable tables:\n\nroom_types:\nid (int)\nname (varchar)\nname_vi (varchar) - Vietnamese name\ndescription_vi (text) - Detailed description\nmax_guests (int) - Max guests allowed\nsize_sqm (int) - Room size in square meters\nbase_price (decimal) - Nightly rate in VND\nweekend_price (decimal)\nholiday_price (decimal)\namenities (jsonb) - List of room amenities\nhotel_services:\nname (varchar)\nname_vi (varchar)\ncategory (varchar)\ndescription_vi (text)\nprice (decimal)\noperating_hours (varchar)\nhotel_policies:\npolicy_type (varchar) - 'checkin', 'checkout', 'cancellation', etc.\ntitle_vi (varchar)\ncontent_vi (text)\nRules:\n\nONLY execute SELECT queries. Never update or delete.\nIf a guest asks for recommendations, choose based on max_guests or price.\nReturn the results clearly",
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Table', ``, 'string') }}",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -80,
+        -1696
+      ],
+      "id": "ea91589b-392b-4039-bca3-42701e0b9793",
+      "name": "query_hotel_database",
+      "credentials": {
+        "postgres": {
+          "id": "vlWTNL4WCSc0ldAq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        -1696
+      ],
+      "id": "4f04d32f-6714-4e43-bc9c-f1b1cab20d77",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "Z4OzF6hNWSvkW3zc",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        -2304
+      ],
+      "id": "907c5a4d-6a88-4d6e-8293-96df34178f26",
+      "name": "Search statics knowledge",
+      "credentials": {
+        "groqApi": {
+          "id": "Z4OzF6hNWSvkW3zc",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.4,
+      "position": [
+        -208,
+        -1696
+      ],
+      "id": "75f0716c-0e44-4d75-8564-76171f2552e2",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "vlWTNL4WCSc0ldAq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "zernio",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1920,
+        -2048
+      ],
+      "id": "c6078aa6-37f1-4afc-b47c-c74c3da57f33",
+      "name": "Webhook",
+      "webhookId": "907c1132-f183-420a-a4b1-e364f543e3ed"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "comment",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "1f587afb-7b33-4585-bb4c-ba458780740e"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "77dd0969-73f2-47be-a4ae-2cfbbccaf9ce",
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "message",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1488,
+        -1952
+      ],
+      "id": "40cce54b-e6d6-4d31-9e0d-818594e3299b",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Process client message').item.json.messageText }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the friendly and helpful Facebook Page Admin for The House - Lộc An Beach - a quiet beachfront resort and glamping site located just 100m from Lộc An beach.\n\n## Role & Mission\n- Handle public comments on Facebook posts. You must sound like a real, helpful, and welcoming page admin.\n- Increase page engagement for general comments, and privately convert pricing/booking/service inquiries to Messenger.\n\n## Strict Rules\n1. RESPONSE STRUCTURE (JSON schema mapping):\n   - Your output will be parsed into `publicReply` and `privateReply` fields. You must tailor these fields based on the comment type.\n   - **For general/interactive comments** (compliments, general chatter, casual interaction, e.g. \"đẹp quá\", \"chill thế\"):\n     * Set `publicReply` to a short, friendly, and context-specific response addressing what the user said (1-2 sentences). Do NOT use generic template greetings like \"Chào bạn, mình có thể giúp gì được không?\". Be creative and social media-friendly.\n     * Set `privateReply` to an empty string \"\" (no private message is needed).\n   - **For pricing, room availability, booking, or event inquiries**:\n     * Set `publicReply` to a warm, friendly public comment response telling the guest that you have sent the details to their Inbox (Messenger). Do NOT post pricing/booking details publicly.\n     * Set `privateReply` to a comprehensive, personalized direct message to their inbox. List active rooms, rates, amenities, and ask how you can help them book. Keep it clean without markdown tables.\n\n2. PRONOUNS & TONE: Use a friendly, equal, and warm tone. Address yourself as \"mình\" and the guest as \"bạn\". Do NOT use formal honorifics like \"dạ\", \"em\", \"anh/chị\" unless necessary, keep it natural and friendly.\n3. NO EMOJIS: Do NOT include any emojis or icons in your public or private replies. Keep the text clean.\n4. NO MARKDOWN TABLES: Never use markdown tables (e.g., pipes | and dashes ---) to present information. Facebook Messenger does not support tables, and they will look broken. Always present lists, room types, services, and pricing using clean bullet points, bold text, and newline spacing.\n\n## Resort Details\n- Name: The House - Lộc An Beach\n- Location: 100m from Lộc An Beach, Lộc An, Đất Đỏ, Bà Rịa - Vũng Tàu\n- Key Facilities: Shared kitchen/cooking area, BBQ grills/tables, campfire area, swimming pool (adults & kids), fishing pond.\n- Room amenities: Standard hotel amenities, 5-star standard spring mattresses, free breakfast and coffee.\n- Services: Accommodation, camping/glamping, event organization (birthdays, weddings, team building).",
+          "enableStreaming": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1168,
+        -2736
+      ],
+      "id": "3f37e61f-7f1c-4283-8d70-bb18f8ae5f9f",
+      "name": "Social AI Agent",
+      "notesInFlow": false,
+      "retryOnFail": true,
+      "waitBetweenTries": 100
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        -2336
+      ],
+      "id": "982112cc-eaa1-468e-bfcc-94664bf853af",
+      "name": "Social Groq Model",
+      "credentials": {
+        "groqApi": {
+          "id": "Z4OzF6hNWSvkW3zc",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = items[0].json.output || {};\nlet codeNode = {};\ntry {\n  codeNode = $('Process client message').first().json || {};\n} catch (e) {\n  codeNode = {};\n}\n\nconst type = codeNode.type || \"\";\nconst commentId = codeNode.commentId || \"\";\nconst senderId = codeNode.senderId || \"\";\nconst postId = codeNode.postId || \"\";\nconst accountId = codeNode.accountId || \"\";\n\n// Đọc trực tiếp các trường từ JSON do Structured Output Parser phân tích\nconst publicReply = output.publicReply || \"\";\nconst privateReply = output.privateReply || \"\";\n\nreturn [{\n  json: {\n    type,\n    commentId,\n    postId,\n    accountId,\n    senderId,\n    publicReply,\n    privateReply\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        -2736
+      ],
+      "id": "28198cc7-5a2f-4729-8579-da74deace984",
+      "name": "Parse Social Response"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "4092a2bc-7ff7-4338-a216-80ff097eda95",
+                    "leftValue": "={{ $json.privateReply }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2b1e9ff3-4936-4489-b2a4-18764bdddbaa",
+                    "leftValue": "={{ $json.privateReply }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -352,
+        -2736
+      ],
+      "id": "b067598a-57be-415f-aa13-db2b177cf654",
+      "name": "Social Reply Switch"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zernio.com/api/v1/inbox/comments/{{ $('Process client message').first().json.postId }}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $env.ZERNIO_API_KEY }}\"\n}\n",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"accountId\": \"{{ $('Process client message').first().json.accountId }}\",\n  \"commentId\": \"{{ $('Process client message').first().json.commentId }}\",\n  \"message\": \"{{ $json.publicReply.replace(/\\\"/g, '\\\\\\\"').replace(/\\n/g, '\\\\n') }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -128,
+        -2832
+      ],
+      "id": "f1ea47f9-33a4-4c17-9897-3500a96ac0f6",
+      "name": "Send Public Comment (Only)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zernio.com/api/v1/inbox/comments/{{ $('Process client message').first().json.postId }}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $env.ZERNIO_API_KEY }}\"\n}\n",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"accountId\": \"{{ $('Process client message').first().json.accountId }}\",\n  \"commentId\": \"{{ $('Process client message').first().json.commentId }}\",\n  \"message\": \"{{ $json.publicReply.replace(/\\\"/g, '\\\\\\\"').replace(/\\n/g, '\\\\n') }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -128,
+        -2576
+      ],
+      "id": "cd835dd9-2b62-4c3a-b9e1-3aa40dc8a4c3",
+      "name": "Send Public Comment (Split)"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Process client message').item.json.messageText }}",
+        "options": {
+          "systemMessage": "You are the smart, warm, and helpful AI assistant for The House - Lộc An Beach - a quiet beachfront resort and glamping site located just 100m from Lộc An beach.\n\n## Role & Mission\n- Assist guests in private Messenger chats with inquiries regarding room types, rates, amenities, services, policies, and booking procedures.\n- Focus on helping the guest choose a room/tent and direct them to the booking hotline for confirmation.\n\n## Strict Rules\n1. LANGUAGE DETECTION: Always respond in the language used by the user. If the guest messages in Vietnamese, reply in Vietnamese. If in English, reply in English.\n\n2. MANDATORY LIVE DATABASE CHECK BEFORE ANY BOOKING/RECOMMENDATION: Always prioritize querying the live database via `query_hotel_database` before confirming availability, recommending features, or directing the guest to the booking hotline for ANY room type or service. \n   - TOOL CALL EFFICIENCY: Be precise when calling tools. Only query `query_hotel_database` for active rooms, services, pricing, and operating hours. Only query `hotel_knowledge` (RAG) for static policies (cancellation, check-in), FAQs, recommendations, or guides. Do not call both tools in a single turn unless absolutely necessary.\n\n3. DATA DISCREPANCY & RECONCILIATION: If the database query returns different room types, prices, or services compared to what is written in the static FAQ files (RAG) or earlier in the conversation, always prioritize the live database data.\n   - Politely explain to the guest that availability, pricing, and services are updated dynamically in real-time on the system.\n   - State the current correct information retrieved from the database, and help the guest choose from the currently active/available rooms or services. Do NOT copy-paste any rigid response templates.\n\n4. OFF-TOPIC HANDLER: If the user asks about general knowledge, software, logic, or topics completely unrelated to Lộc An Beach, travel in the area, or resort services, politely refuse to answer. Explain that you can only assist with inquiries related to the resort, and guide them back by suggesting topics like room types, camping, pool, fishing, BBQ, or events.\n\n5. NO INFORMATION HANDLING: If you query the tools (database or knowledge base) and the retrieved facts do not DIRECTLY and SPECIFICALLY answer the question asked, you must politely respond: \"Chào bạn, hiện tại mình chưa có thông tin chính thức về vấn đề này. Bạn vui lòng liên hệ hotline để lễ tân bên mình hỗ trợ trực tiếp cho bạn nhé.\" Never guess, make up policies, or answer from your own pre-trained knowledge.\n   - CRITICAL: If the tool returns information about a RELATED but DIFFERENT topic (e.g., the guest asks about room sharing but the tool only returns children/extra bed policies), you must NOT extrapolate or infer an answer. Treat it as \"no information found\" and trigger this fallback rule.\n\n6. CURRENCY FORMATTING: Format Vietnamese Dong with dot separators: e.g., 1.500.000đ.\n7. NO EMOJIS: Do NOT include any emojis or icons in your replies. Keep the text clean.\n8. CONTINUOUS ENGAGEMENT: Always end your response with an open-ended question or suggestion to keep the conversation going.\n9. PRONOUNS & TONE: Address yourself as \"mình\" and the guest as \"bạn\". Do NOT use formal honorifics like \"em\" or \"anh/chị\". Keep it natural, friendly, and warm.\n10. ESCALATION: For booking requests or urgent issues, direct the guest to call the hotline.\n\n11. NO MARKDOWN TABLES: Never use markdown tables (e.g., pipes | and dashes ---) to present information. Facebook Messenger does not support tables, and they will look broken. Always present lists, room types, services, and pricing using clean bullet points, bold text, and newline spacing.\n    - Example:\n      **Standard Sea View**\n      - Giới hạn: 2 khách\n      - Giá: 800.000đ\n      - Tiện nghi: Ban công hướng biển, minibar, Wi-Fi miễn phí\n\n12. MANDATORY TOOL CALL & ANTI-HALLUCINATION: You are strictly forbidden from answering any questions about the resort, rooms, services, pricing, or policies using your own pre-trained memory or general knowledge. For every hotel-related query, you MUST execute a tool call (either `query_hotel_database` or `hotel_knowledge`) first to retrieve the facts. If the tools return no information, or if you cannot find the answer in the retrieved facts, immediately trigger Rule 5 (No Information Handling).\n\n13. CHAT MEMORY IS NOT A KNOWLEDGE SOURCE: The chat history (conversation memory) exists ONLY to maintain conversational context (e.g., remembering the guest's name, which room they were discussing, or follow-up questions). You must NEVER treat previous messages or previous AI responses in the chat history as a source of truth for resort policies, pricing, services, or room information. Even if the exact same question was answered earlier in the conversation, you MUST call the appropriate tool again to retrieve fresh, verified facts before responding. If you find yourself about to answer a policy question based on what you said earlier in the chat, STOP and call a tool instead.\n\n## Resort Details\n- Name: The House - Lộc An Beach\n- Location: 100m from Lộc An Beach, Lộc An, Đất Đỏ, Bà Rịa - Vũng Tàu\n- Key Facilities: Shared kitchen/cooking area, BBQ grills/tables, campfire area, swimming pool (adults & kids), fishing pond.\n- Room amenities: Standard hotel amenities, 5-star standard spring mattresses, free breakfast and coffee.\n- Services: Accommodation, camping/glamping, event organization (birthdays, weddings, team building).\n",
+          "enableStreaming": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -288,
+        -1920
+      ],
+      "id": "b989eaee-0271-4bdb-a199-d3b2a9b627da",
+      "name": "Inbox Agent",
+      "notesInFlow": false,
+      "retryOnFail": true,
+      "waitBetweenTries": 100
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Lấy dữ liệu payload từ Zernio Webhook (hỗ trợ cả khi bọc trong 'body' hoặc ở ngoài root)\nconst payload = items[0].json.body || items[0].json || {};\n\nconst eventType = payload.event;\n\n// ── TRƯỜNG HỢP 1: Nhận tin nhắn/postback từ Messenger/Instagram (Inbox) ──\nif (eventType === 'message.received' || eventType === 'messaging_postbacks' || eventType === 'postback.received') {\n  const message = payload.message || {};\n  const conversation = payload.conversation || {};\n  const account = payload.account || {};\n  const postback = payload.postback || {};\n  \n  // Bỏ qua tin nhắn do chính Fanpage gửi đi (outgoing)\n  if (message.direction === 'outgoing' || message.sender?.isSelf) return [];\n\n  // Lấy nội dung tin nhắn hoặc payload của nút bấm (như nút Bắt đầu)\n  const messageText = (message.text || postback.payload || payload.text || \"\").trim();\n\n  return [{\n    json: {\n      type: 'message',\n      senderId: message.sender?.id || postback.sender?.id || payload.senderId,\n      conversationId: conversation.id || payload.conversationId,\n      accountId: account.id || payload.accountId,\n      messageText: messageText\n    }\n  }];\n}\n\n// ── TRƯỜNG HỢP 2: Nhận bình luận (Comment) trên bài viết ──\nif (eventType === 'comment.received') {\n  const comment = payload.comment || {};\n  const account = payload.account || {};\n\n  // Bỏ qua comment của chính Fanpage để tránh lặp (ID Fanpage: 106358191472644)\n  if (comment.author?.id === '106358191472644' || comment.author?.name === 'Trọ Uni') return [];\n\n  return [{\n    json: {\n      type: 'comment',\n      commentId: comment.id,\n      postId: comment.postId || comment.platformPostId,\n      senderId: comment.author?.id,\n      accountId: account.id,\n      messageText: comment.text || \"\"\n    }\n  }];\n}\n\nreturn []; // Bỏ qua các sự kiện khác\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1696,
+        -1952
+      ],
+      "id": "9d11809f-c6f2-4118-8d2d-aeb6b354d948",
+      "name": "Process client message"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"publicReply\": {\n      \"type\": \"string\",\n      \"description\": \"Nội dung phản hồi bình luận công khai. Ngắn gọn, tự nhiên, vui vẻ (1-2 câu).\"\n    },\n    \"privateReply\": {\n      \"type\": \"string\",\n      \"description\": \"Nội dung tin nhắn riêng tư inbox cho khách. Để trống nếu bình luận của khách chỉ là tương tác xã giao không cần inbox.\"\n    }\n  },\n  \"required\": [\n    \"publicReply\",\n    \"privateReply\"\n  ]\n}",
+        "autoFix": true,
+        "customizeRetryPrompt": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -688,
+        -2544
+      ],
+      "id": "1c367150-689b-4f22-9f2d-f1fc80a1f57a",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemma-4-31b-it",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -1200,
+        -2496
+      ],
+      "id": "fe8e49da-b95a-43dc-ada6-010d34d61429",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "DCUxl0R5TTaKO0lU",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zernio.com/api/v1/inbox/{{ $('Process client message').first().json.type === 'comment' ? 'comments/' + $('Process client message').first().json.postId + '/' + $('Process client message').first().json.commentId + '/private-reply' : 'conversations/' + $('Process client message').first().json.conversationId + '/messages' }}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $env.ZERNIO_API_KEY }}\"\n}\n",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"accountId\": \"{{ $('Process client message').first().json.accountId }}\",\n  \"message\": \"{{ $json.output.replace(/\\\"/g, '\\\\\\\"').replace(/\\n/g, '\\\\n') }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        80,
+        -1920
+      ],
+      "id": "52628f81-4d57-40f4-bcb9-e2b5d6ae5c0e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = items[0].json;\nconst text = (item.messageText || \"\").trim();\nconst type = item.type;\n\nlet isFAQ = false;\nlet replyText = \"\";\nlet quickReplies = [];\n\nconst welcomeKeywords = [\"bắt đầu\", \"menu\", \"chào\", \"hi\", \"hello\", \"tư vấn\"];\nconst isWelcome = welcomeKeywords.includes(text.toLowerCase());\n\nconst faq = {\n  \"welcome\": {\n    \"text\": \"Chào bạn! Chào mừng bạn đến với The House - Lộc An Beach, nơi lý tưởng để thư giãn, ngắm bình minh và tận hưởng không khí biển yên bình bên gia đình, bạn bè.\\n\\nBạn cần mình hỗ trợ thông tin nào dưới đây ạ?\",\n    \"replies\": [\"Đặt phòng & Trại\", \"Vui chơi & BBQ\", \"Sự kiện & Đoàn\", \"Vị trí & Đi lại\"]\n  },\n  \"đặt phòng & trại\": {\n    \"text\": \"Bên mình có các dịch vụ lưu trú sau để bạn lựa chọn nha. Bạn cần tư vấn chi tiết về phần nào ạ?\",\n    \"replies\": [\"Xem hạng phòng\", \"Đặt lều trại\", \"Tiện ích phòng\", \"Quay lại Menu\"]\n  },\n  \"xem hạng phòng\": {\n    \"text\": \"Bên mình có đa dạng hạng phòng nghỉ dưỡng phù hợp cho cặp đôi và gia đình. Đặc biệt, tất cả các phòng đều được trang bị nệm lò xo cao cấp tiêu chuẩn khách sạn 5 sao mang lại giấc ngủ êm ái nhất cho bạn.\\n\\nChi tiết hình ảnh và bảng giá mình sẽ gửi thêm cho bạn ngay nhé hoặc bạn có thể hỏi mình để mình kiểm tra phòng trống trên hệ thống nha.\",\n    \"replies\": [\"Đặt lều trại\", \"Tiện ích phòng\", \"Quay lại Menu\"]\n  },\n  \"đặt lều trại\": {\n    \"text\": \"Trải nghiệm ngủ lều hòa mình vào thiên nhiên bên biển Lộc An vô cùng thú vị. Bên mình có khu bãi cỏ cắm trại rộng rãi, có sẵn lều dựng sẵn cao cấp (Glamping) hoặc bạn có thể tự mang lều đến dựng nha.\",\n    \"replies\": [\"Xem hạng phòng\", \"Tiện ích phòng\", \"Quay lại Menu\"]\n  },\n  \"tiện ích phòng\": {\n    \"text\": \"Giá phòng nghỉ tại bên mình đã bao gồm miễn phí bữa sáng và cà phê sáng thơm ngon. Ngoài ra, bạn được tự do sử dụng hồ bơi (người lớn & trẻ em), hồ câu cá và khu vực chế biến nấu ăn chung nữa đó.\",\n    \"replies\": [\"Xem hạng phòng\", \"Đặt lều trại\", \"Quay lại Menu\"]\n  },\n  \"vui chơi & bbq\": {\n    \"text\": \"Tại The House - Lộc An Beach, bạn có thể thỏa thích trải nghiệm các hoạt động vui chơi giải trí và ẩm thực sau. Bạn quan tâm dịch vụ nào nhất ạ?\",\n    \"replies\": [\"Đặt bàn BBQ\", \"Hồ bơi & Câu cá\", \"Đốt lửa trại\", \"Quay lại Menu\"]\n  },\n  \"đặt bàn bbq\": {\n    \"text\": \"Buổi tối bên biển lộng gió, còn gì tuyệt hơn khi quây quần bên bếp than hồng. Bên mình có sẵn các bàn nướng BBQ ngoài trời cực chill. Bạn có thể tự mang đồ ăn đến chế biến tại khu nấu ăn chung, hoặc đặt trước các Set BBQ do bên mình chuẩn bị chu đáo nhé!\",\n    \"replies\": [\"Hồ bơi & Câu cá\", \"Đốt lửa trại\", \"Quay lại Menu\"]\n  },\n  \"hồ bơi & câu cá\": {\n    \"text\": \"Khu nghỉ dưỡng có hồ bơi mát lạnh dành cho cả người lớn và trẻ em rất an toàn. Bên cạnh đó, nếu bạn yêu thích sự thư thái thì có thể câu cá giải trí tự do tại hồ nước tự nhiên ngay trong khuôn viên của bên mình nha.\",\n    \"replies\": [\"Đặt bàn BBQ\", \"Đốt lửa trại\", \"Quay lại Menu\"]\n  },\n  \"đốt lửa trại\": {\n    \"text\": \"Bên mình có khu vực đốt lửa trại tập thể cực vui vào ban đêm. Rất thích hợp để các nhóm bạn, gia đình quây quần hát ca và nướng khoai bắp dưới bầu trời sao ấm áp.\",\n    \"replies\": [\"Đặt bàn BBQ\", \"Hồ bơi & Câu cá\", \"Quay lại Menu\"]\n  },\n  \"sự kiện & đoàn\": {\n    \"text\": \"Bên mình chuyên tổ chức các sự kiện lớn nhỏ cho du khách. Bạn đang lên kế hoạch cho sự kiện nào thế?\",\n    \"replies\": [\"Tiệc & Đám cưới\", \"Team Building\", \"Ưu đãi khách đoàn\", \"Quay lại Menu\"]\n  },\n  \"tiệc & đám cưới\": {\n    \"text\": \"Bên mình nhận set up không gian tiệc sinh nhật hoặc tiệc cưới lãng mạn ngoài trời bên biển Lộc An. Bạn vui lòng để lại số điện thoại cùng số lượng khách dự kiến nhé, nhân viên sự kiện bên mình sẽ liên hệ hỗ trợ bạn ngay lập tức.\",\n    \"replies\": [\"Team Building\", \"Ưu đãi khách đoàn\", \"Quay lại Menu\"]\n  },\n  \"team building\": {\n    \"text\": \"Với lợi thế bãi biển rộng và sân cỏ lớn, khu nghỉ dưỡng bên mình là nơi lý tưởng để tổ chức các trò chơi gắn kết Team Building. Bên mình có hỗ trợ trọn gói từ ăn ở, BBQ đến set up trò chơi bãi biển đó bạn.\",\n    \"replies\": [\"Tiệc & Đám cưới\", \"Ưu đãi khách đoàn\", \"Quay lại Menu\"]\n  },\n  \"ưu đãi khách đoàn\": {\n    \"text\": \"Bên mình luôn có mức chiết khấu cực tốt và tặng kèm các gói đốt lửa trại, tiệc nướng cho đoàn từ 10 khách trở lên. Bạn nhắn cho mình số khách dự kiến để mình tư vấn sâu hơn nha.\",\n    \"replies\": [\"Tiệc & Đám cưới\", \"Team Building\", \"Quay lại Menu\"]\n  },\n  \"vị trí & đi lại\": {\n    \"text\": \"Bạn đang cần tìm đường đi hay phương tiện di chuyển đến bên mình thế?\",\n    \"replies\": [\"Cách biển bao xa?\", \"Phương tiện đi lại\", \"Quay lại Menu\"]\n  },\n  \"cách biển bao xa?\": {\n    \"text\": \"Khu nghỉ dưỡng bên mình nằm ở vị trí cực kỳ đắc địa, chỉ cách bãi biển Lộc An đúng 100m (khoảng 2 phút đi bộ là bạn đã ra tới biển để chạm cát và ngắm bình minh tuyệt đẹp rồi đó).\",\n    \"replies\": [\"Phương tiện đi lại\", \"Quay lại Menu\"]\n  },\n  \"phương tiện đi lại\": {\n    \"text\": \"Hiện tại bên mình chưa có xe đưa đón riêng của khu nghỉ dưỡng. Tuy nhiên, mình có thể gửi vị trí Google Maps chi tiết hoặc gợi ý các nhà xe khách limousine chất lượng cao đi thẳng từ TP.HCM/các tỉnh đến Lộc An cực tiện lợi cho bạn nhé.\",\n    \"replies\": [\"Cách biển bao xa?\", \"Quay lại Menu\"]\n  }\n};\n\nconst normalizedText = text.toLowerCase().trim();\nlet faqKey = \"\";\n\nif (isWelcome) {\n  faqKey = \"welcome\";\n} else {\n  faqKey = Object.keys(faq).find(key => key === normalizedText) || \"\";\n}\n\nif (normalizedText === \"quay lại menu\") {\n  faqKey = \"welcome\";\n}\n\nif (faqKey && type === \"message\") {\n  isFAQ = true;\n  replyText = faq[faqKey].text;\n  quickReplies = faq[faqKey].replies.map(title => {\n    const cleanPayload = title.normalize(\"NFD\")\n      .replace(/[\\u0300-\\u036f]/g, \"\")\n      .replace(/đ/g, \"d\").replace(/Đ/g, \"D\")\n      .replace(/&/g, \"va\")\n      .replace(/[^a-zA-Z0-9\\s]/g, \"\")\n      .toUpperCase()\n      .trim()\n      .replace(/\\s+/g, \"_\");\n    return {\n      \"content_type\": \"text\",\n      \"title\": title,\n      \"payload\": cleanPayload\n    };\n  });\n}\n\nreturn [{\n  json: {\n    ...item,\n    isFAQ,\n    replyText,\n    quickReplies\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1184,
+        -1920
+      ],
+      "id": "e93f8e56-14ab-4a58-944a-87429d71c66f",
+      "name": "FAQ Handler"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "type": "boolean"
+                },
+                "conditions": [
+                  {
+                    "id": "67b93c83-7f3c-4a30-8bc2-10f845cf40ad",
+                    "leftValue": "={{ $json.isFAQ }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "name": "filter.operator.true"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extraOutput"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -928,
+        -1920
+      ],
+      "id": "8b5f3d32-47de-49e0-82a1-fa44ab4f952f",
+      "name": "Is FAQ"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zernio.com/api/v1/inbox/conversations/{{ $('Process client message').first().json.conversationId }}/messages",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n  \"Authorization\": \"Bearer {{ $env.ZERNIO_API_KEY }}\"\n}\n",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"accountId\": \"{{ $('Process client message').first().json.accountId }}\",\n  \"message\": \"{{ $json.replyText.replace(/\\\"/g, '\\\\\\\"').replace(/\\n/g, '\\\\n') }}\",\n  \"quickReplies\": {{ JSON.stringify($json.quickReplies) }}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -672,
+        -1728
+      ],
+      "id": "a4d3b876-bc30-4e31-9762-d961e687ac3c",
+      "name": "Send FAQ Response"
+    }
+  ],
+  "connections": {
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Inbox Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "hotel_knowledge": {
+      "ai_tool": [
+        [
+          {
+            "node": "Inbox Agent",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Social AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres PGVector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "hotel_knowledge",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "query_hotel_database": {
+      "ai_tool": [
+        [
+          {
+            "node": "Inbox Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Inbox Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search statics knowledge": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "hotel_knowledge",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Inbox Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Process client message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Social AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "FAQ Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAQ Handler": {
+      "main": [
+        [
+          {
+            "node": "Is FAQ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is FAQ": {
+      "main": [
+        [
+          {
+            "node": "Send FAQ Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Social AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Social Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Social Groq Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Social Response": {
+      "main": [
+        [
+          {
+            "node": "Social Reply Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Social Reply Switch": {
+      "main": [
+        [
+          {
+            "node": "Send Public Comment (Only)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Public Comment (Split)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Public Comment (Split)": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inbox Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process client message": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Social AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Social AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "headers": {
+          "host": "technology-resume-bingo-highlight.trycloudflare.com",
+          "user-agent": "Zernio-Webhooks/1.0",
+          "content-length": "581",
+          "accept-encoding": "gzip",
+          "cdn-loop": "cloudflare; subreqs=2",
+          "cf-connecting-ip": "2a06:98c0:3600::103",
+          "cf-ew-via": "15",
+          "cf-ipcountry": "US",
+          "cf-ray": "a13b660d9df0ec50-SIN",
+          "cf-visitor": "{\"scheme\":\"https\"}",
+          "cf-warp-tag-id": "f4045c30-9d5c-4507-95f6-dc6c789cafc2",
+          "cf-worker": "trycloudflare.com",
+          "connection": "keep-alive",
+          "content-type": "application/json",
+          "x-forwarded-for": "2a06:98c0:3600::103",
+          "x-forwarded-proto": "https",
+          "x-late-event": "comment.received",
+          "x-late-event-id": "ce7d9ae3-5b97-4c41-bda4-ca5864aefdfc",
+          "x-late-signature": "de26e195460d363840b4f00fce99ae6692938dad9c16dc559a31065915639625",
+          "x-zernio-event": "comment.received",
+          "x-zernio-event-id": "ce7d9ae3-5b97-4c41-bda4-ca5864aefdfc",
+          "x-zernio-signature": "de26e195460d363840b4f00fce99ae6692938dad9c16dc559a31065915639625"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "id": "ce7d9ae3-5b97-4c41-bda4-ca5864aefdfc",
+          "event": "comment.received",
+          "comment": {
+            "id": "1346990810896614_2072197117015166",
+            "postId": "",
+            "platformPostId": "106358191472644_1346990810896614",
+            "platform": "facebook",
+            "text": "còn phòng không?",
+            "author": {
+              "id": "27701363542809332",
+              "name": "Nguyễn Mạnh Cát"
+            },
+            "createdAt": "2026-06-30T07:18:38.000Z",
+            "isReply": false,
+            "parentCommentId": null
+          },
+          "post": {
+            "id": "",
+            "platformPostId": "106358191472644_1346990810896614"
+          },
+          "account": {
+            "id": "6a4252139d9472faae1dcbe7",
+            "platform": "facebook",
+            "username": "TroUniHub"
+          },
+          "timestamp": "2026-06-30T07:18:42.507Z"
+        },
+        "webhookUrl": "http://localhost:5678/webhook/zernio",
+        "executionMode": "production"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fe5ab3a6f012a47bc776edbcba5aa7cffd8cd613082125ea5e16c04606a2a8c9"
+  }
+}
