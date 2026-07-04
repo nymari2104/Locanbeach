@@ -46,7 +46,7 @@ export default function Home() {
             />
             <div className={styles.galleryMainContent}>
               <span className={`mono-text ${styles.badge}`}>Không gian</span>
-              <h2 className="headline-lg" style={{ color: "var(--color-pure-surface)", fontSize: "1.875rem" }}>
+              <h2 className="headline-lg" style={{ color: "var(--color-on-surface)", fontSize: "1.875rem" }}>
                 Giao hòa cùng thiên nhiên
               </h2>
             </div>
