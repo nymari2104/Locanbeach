@@ -83,9 +83,11 @@ export default async function RoomDetail({ params }: PageProps) {
         </div>
         <div className={styles.heroImageWrapper}>
           <Stack
-            randomRotation={true}
+            randomRotation={false}
             sensitivity={140}
             sendToBackOnClick={true}
+            autoplay={true}
+            autoplayDelay={5000}
             cards={[
               room.images.hero,
               room.images.decor,

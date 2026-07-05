@@ -172,8 +172,9 @@ export default function Stack({
                 className="card"
                 onClick={() => shouldEnableClick && handleSwipe(card.id, 'right')}
                 animate={{
-                  rotateZ: (stack.length - index - 1) * 2 + randomRotate,
-                  scale: 1 + index * 0.06 - stack.length * 0.06,
+                  rotateZ: (stack.length - index - 1) * 3 + randomRotate,
+                  x: (stack.length - index - 1) * 15,
+                  scale: 1 - (stack.length - index - 1) * 0.03,
                   transformOrigin: '50% 50%'
                 }}
                 initial={false}
