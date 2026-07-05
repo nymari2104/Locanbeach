@@ -161,7 +161,7 @@ export default function ImageStack({ images, alt }: ImageStackProps) {
                   ? (e) => handleMove(e.touches[0].clientX, e.touches[0].clientY)
                   : undefined
               }
-              onTouchEnd={isTopCard ? onTouchEnd : undefined}
+              onTouchEnd={isTopCard ? handleEnd : undefined}
             >
               <img src={images[imgIndex]} alt={`${alt} - ${imgIndex}`} className={styles.cardImage} />
               

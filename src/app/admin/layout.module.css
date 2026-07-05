@@ -10,7 +10,7 @@
 }
 @media (min-width: 768px) {
   .adminMain {
-    margin-left: 16rem; /* Match sidebar width */
+    margin-left: 18rem; /* Match sidebar width */
   }
 }
 

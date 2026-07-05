@@ -35,7 +35,7 @@ export default function AdminDashboard() {
             </span>
           </div>
           <div>
-            <p className={`mono-text ${styles.statLabel}`}>Tỷ lệ lấp đầy</p>
+            <p className={`mono-text ${styles.statLabel}`}>Tỷ lệ lấp đầy phòng</p>
             <h3 className={styles.statValue}>85%</h3>
           </div>
         </div>
@@ -51,24 +51,66 @@ export default function AdminDashboard() {
             </span>
           </div>
           <div>
-            <p className={`mono-text ${styles.statLabel}`}>Doanh thu tháng (VND)</p>
-            <h3 className={styles.statValue}>342M</h3>
+            <p className={`mono-text ${styles.statLabel}`}>Doanh thu tháng này</p>
+            <h3 className={styles.statValue}>342M₫</h3>
           </div>
         </div>
 
-        {/* Stat 3: Upcoming Events */}
-        <div className={`${styles.statCard} ${styles.accentCard}`}>
-          <div className={styles.accentBg1}></div>
-          <div className={styles.accentBg2}></div>
-          <div className={styles.statHeader} style={{ position: "relative", zIndex: 10 }}>
-            <div className={`${styles.iconWrapper} ${styles.accentIconWrapper}`}>
+        {/* Stat 3: Room Success Rate */}
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <div className={`${styles.iconWrapper}`} style={{ backgroundColor: "rgba(16, 185, 129, 0.1)", color: "#10b981" }}>
+              <span className="material-symbols-outlined">verified</span>
+            </div>
+            <span className={`mono-text ${styles.trendBadge}`}>
+              <span className={`material-symbols-outlined ${styles.trendIcon}`}>trending_up</span> +1.5%
+            </span>
+          </div>
+          <div>
+            <p className={`mono-text ${styles.statLabel}`}>Hiệu suất phục vụ phòng</p>
+            <h3 className={styles.statValue}>98.2%</h3>
+          </div>
+        </div>
+
+        {/* Stat 4: Active Events */}
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <div className={`${styles.iconWrapper}`} style={{ backgroundColor: "rgba(139, 92, 246, 0.1)", color: "#8b5cf6" }}>
               <span className="material-symbols-outlined">celebration</span>
             </div>
           </div>
-          <div style={{ position: "relative", zIndex: 10 }}>
-            <p className={`mono-text ${styles.accentLabel}`}>Sự kiện sắp tới</p>
-            <h3 className={styles.statValue} style={{ color: "var(--color-on-primary)" }}>4</h3>
-            <p className={styles.accentDesc}>Pool Party vào T7 tuần này</p>
+          <div>
+            <p className={`mono-text ${styles.statLabel}`}>Sự kiện đang chạy</p>
+            <h3 className={styles.statValue}>3</h3>
+          </div>
+        </div>
+
+        {/* Stat 5: Active Combos */}
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <div className={`${styles.iconWrapper}`} style={{ backgroundColor: "rgba(245, 158, 11, 0.1)", color: "#f59e0b" }}>
+              <span className="material-symbols-outlined">card_travel</span>
+            </div>
+          </div>
+          <div>
+            <p className={`mono-text ${styles.statLabel}`}>Gói Combo hoạt động</p>
+            <h3 className={styles.statValue}>5</h3>
+          </div>
+        </div>
+
+        {/* Stat 6: Tickets Sold */}
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <div className={`${styles.iconWrapper}`} style={{ backgroundColor: "rgba(236, 72, 153, 0.1)", color: "#ec4899" }}>
+              <span className="material-symbols-outlined">confirmation_number</span>
+            </div>
+            <span className={`mono-text ${styles.trendBadge}`}>
+              <span className={`material-symbols-outlined ${styles.trendIcon}`}>trending_up</span> +24%
+            </span>
+          </div>
+          <div>
+            <p className={`mono-text ${styles.statLabel}`}>Vé đã bán (Tuần này)</p>
+            <h3 className={styles.statValue}>142</h3>
           </div>
         </div>
 

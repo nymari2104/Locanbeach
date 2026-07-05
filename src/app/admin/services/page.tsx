@@ -3,98 +3,136 @@
 import { useState } from "react";
 import styles from "./page.module.css";
 
-export default function AdminRooms() {
+export default function AdminServices() {
   const [activeTab, setActiveTab] = useState("Tất cả");
+  const [activeStatus, setActiveStatus] = useState("Tất cả");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Form states
-  const [roomName, setRoomName] = useState("");
-  const [roomType, setRoomType] = useState("Deluxe Ocean View");
-  const [roomPrice, setRoomPrice] = useState("");
-  const [roomStatus, setRoomStatus] = useState("Hoạt động");
-  const [roomImage, setRoomImage] = useState("");
+  const [serviceName, setServiceName] = useState("");
+  const [serviceType, setServiceType] = useState("Spa & Trị liệu");
+  const [serviceHours, setServiceHours] = useState("");
+  const [servicePrice, setServicePrice] = useState("");
+  const [serviceStatus, setServiceStatus] = useState("Hoạt động");
+  const [serviceImage, setServiceImage] = useState("");
 
-  const [rooms, setRooms] = useState([
+  const [items, setItems] = useState([
     {
-      id: "101",
-      name: "P.101",
-      type: "Deluxe Ocean View",
-      status: "Hoạt động",
+      id: "srv-1",
+      type: "Spa & Trị liệu",
+      name: "Liệu trình Massage Thảo dược",
       statusClass: styles.badgeVacant,
-      price: "2,500,000 VND",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBzWvpCsujE0gUdYCAMms926CDG6fi2vNOn06xIBtxSmWZDdQ9oOeYm3sHs0M_3INXeGLZTdPLfaa8rG1zPmqZrmSO-k9Npu3H77Y98xJPMPQBq6JN6EeeTgceGCcrdV711q-OjCJRec0FLDh4CE1M4L3FSppdewyoRFORhsJSPpWC-kYdx7HGrrZ74rmPcM58idM-j6amNsPBIkwdSgH1j682rSmP_j2onCkkjBfdVRiv_9S3Uf2rm"
+      statusLabel: "Hoạt động",
+      hours: "09:00 - 21:00",
+      price: "450,000₫",
+      image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=500&auto=format"
     },
     {
-      id: "102",
-      name: "P.102",
-      type: "Standard Garden",
-      status: "Tạm ngưng",
+      id: "srv-2",
+      type: "Nhà hàng",
+      name: "Nhà hàng Hải sản Sunset",
+      statusClass: styles.badgeVacant,
+      statusLabel: "Hoạt động",
+      hours: "06:00 - 22:00",
+      price: "Theo thực đơn",
+      image: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?q=80&w=500&auto=format"
+    },
+    {
+      id: "srv-3",
+      type: "Giải trí",
+      name: "Cho thuê Jet Ski (Mô tô nước)",
       statusClass: styles.badgeOccupied,
-      price: "1,800,000 VND",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDVrfEMm_64wjGSfcJ89wbsphQ2QBo9RIo3zl2bqqMMtBl3SiVNVqGaeuxsmloTiRSY7iVCxcAh10Ou3ZUbirEctbW7Pw9pH3gZy69V6b1l1bdfVoXOEE32w8Gi04GwrQM6PitilCL9mp9VoY248HLTz4TpbY0zB18fXrbNXnb1eKOYP1ZotJLgOSRWqTXHjgOjbvazyvbTtWLK7ShQzOw07h7RYplzud_X0__sZtQ1Nx1QBD_rkV6r"
+      statusLabel: "Tạm ngưng",
+      hours: "08:00 - 18:00",
+      price: "800,000₫ / 30p",
+      image: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=500&auto=format"
     },
     {
-      id: "301",
-      name: "P.301",
-      type: "Penthouse Suite",
-      status: "Hoạt động",
+      id: "srv-4",
+      type: "Tiện ích",
+      name: "Đưa đón Sân bay cao cấp",
       statusClass: styles.badgeVacant,
-      price: "8,500,000 VND",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDyR9mfIQ7tfteUMNYUvph10Uk-2Uq1mf1WkBJGTynaOB2uX5nQfLUb3TGQr046-vQegB7OOC9xlKvvJYSNhY2D7kdhT92MsAKyf_nsXVOVG5JO_JqJpqDXoRVjnDpnzJfd2DQ0NVjZCvcgdKQ5HgDo6ZB3q_bJxBzZgSpQ1mzA6jA9WlpP896GwPFgvKfrTgUm0DSAs1CU6Gfy-vGAMPWlVsDsa4fYR0H0UeIg3mYs8RhZIYN_s0_4"
-    },
-    {
-      id: "103",
-      name: "P.103",
-      type: "Standard Garden",
-      status: "Hoạt động",
-      statusClass: styles.badgeVacant,
-      price: "1,800,000 VND",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBMH66fcmIRATTUTI_cuX14cCJ9H4e74W8OObldV7_UMRHo8dgIhX_FVX8yuKV4AkSLx7XlPGhXOn6PCOaQsFql2J64EbxaUqPrNePz3MnT_B7vskvTejLX24ti37rnfWgSpDUbSISnlz43V7aAE7rVds1bEd91FMxVmK4MYJs_fGgb14EuztcEPUUvaUyj47ZK0VmD6a4foTPsSpkJ7f1jX6Yb4wUUVcHKcvYGmN1a9Nq9iUfFcZbg"
+      statusLabel: "Hoạt động",
+      hours: "24/7",
+      price: "1,200,000₫ / lượt",
+      image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=500&auto=format"
     }
   ]);
 
-  const filteredRooms = activeTab === "Tất cả" 
-    ? rooms 
-    : rooms.filter(room => room.status === activeTab);
+  // Multi-level filter: type (activeTab) and status (activeStatus)
+  const filteredItems = items.filter((item) => {
+    let matchesType = true;
+    if (activeTab === "Spa") matchesType = item.type === "Spa & Trị liệu";
+    else if (activeTab === "Nhà hàng") matchesType = item.type === "Nhà hàng";
+    else if (activeTab === "Giải trí") matchesType = item.type === "Giải trí";
+    else if (activeTab === "Dịch vụ khác") matchesType = item.type === "Tiện ích";
+
+    const matchesStatus = activeStatus === "Tất cả" || item.statusLabel === activeStatus;
+    
+    return matchesType && matchesStatus;
+  });
+
+  const handleOpenModalWithPreset = () => {
+    let presetType = "Spa & Trị liệu";
+    if (activeTab === "Spa") presetType = "Spa & Trị liệu";
+    if (activeTab === "Nhà hàng") presetType = "Nhà hàng";
+    if (activeTab === "Giải trí") presetType = "Giải trí";
+    if (activeTab === "Dịch vụ khác") presetType = "Tiện ích";
+    setServiceType(presetType);
+    setIsModalOpen(true);
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setRoomImage(reader.result as string);
+        setServiceImage(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleAddRoom = (e: React.FormEvent) => {
+  const handleAddService = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomName || !roomPrice) return;
+    if (!serviceName || !serviceHours || !servicePrice) return;
 
-    const newRoom = {
+    const newService = {
       id: Date.now().toString(),
-      name: roomName,
-      type: roomType,
-      status: roomStatus,
-      statusClass: roomStatus === "Hoạt động" ? styles.badgeVacant : styles.badgeOccupied,
-      price: parseInt(roomPrice.replace(/\D/g, "")).toLocaleString("vi-VN") + " VND",
-      image: roomImage || "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=500&auto=format"
+      type: serviceType,
+      name: serviceName,
+      statusClass: serviceStatus === "Hoạt động" ? styles.badgeVacant : styles.badgeOccupied,
+      statusLabel: serviceStatus,
+      hours: serviceHours,
+      price: isNaN(Number(servicePrice)) ? servicePrice : parseInt(servicePrice.replace(/\D/g, "")).toLocaleString("vi-VN") + "₫",
+      image: serviceImage || (serviceType === "Spa & Trị liệu" 
+        ? "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=500&auto=format"
+        : "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?q=80&w=500&auto=format")
     };
 
-    setRooms([newRoom, ...rooms]);
+    setItems([newService, ...items]);
     setIsModalOpen(false);
 
     // Reset form
-    setRoomName("");
-    setRoomType("Deluxe Ocean View");
-    setRoomPrice("");
-    setRoomStatus("Hoạt động");
-    setRoomImage("");
+    setServiceName("");
+    setServiceHours("");
+    setServicePrice("");
+    setServiceImage("");
+    setServiceStatus("Hoạt động");
   };
 
-  const handleDeleteRoom = (id: string) => {
-    setRooms(rooms.filter(room => room.id !== id));
+  const handleDeleteService = (id: string) => {
+    setItems(items.filter(item => item.id !== id));
+  };
+
+  const getAddButtonText = () => {
+    switch (activeTab) {
+      case "Spa": return "Thêm liệu trình Spa";
+      case "Nhà hàng": return "Thêm nhà hàng / menu";
+      case "Giải trí": return "Thêm hoạt động giải trí";
+      case "Dịch vụ khác": return "Thêm tiện ích khác";
+      default: return "Thêm dịch vụ mới";
+    }
   };
 
   return (
@@ -102,14 +140,14 @@ export default function AdminRooms() {
       {/* Header Section */}
       <header className={styles.header}>
         <div className={styles.titleWrapper}>
-          <p className={`mono-text ${styles.preTitle}`}>Tổng quan</p>
-          <h1 className={styles.title}>Danh sách phòng</h1>
+          <p className={`mono-text ${styles.preTitle}`}>Quản lý</p>
+          <h1 className={styles.title}>Tiện ích & Dịch vụ</h1>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <div className={styles.statsText}>
-            <p className="mono-text">{rooms.filter(r => r.status === "Hoạt động").length}/{rooms.length} Hoạt động</p>
+            <p className="mono-text">{filteredItems.length} Dịch vụ hiển thị</p>
           </div>
-          <button className="mono-text" onClick={() => setIsModalOpen(true)} style={{
+          <button className="mono-text" onClick={handleOpenModalWithPreset} style={{
             backgroundColor: "var(--color-primary)",
             color: "var(--color-on-primary)",
             padding: "0.5rem 1rem",
@@ -123,7 +161,7 @@ export default function AdminRooms() {
             gap: "0.25rem"
           }}>
             <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>add</span>
-            Thêm phòng mới
+            {getAddButtonText()}
           </button>
         </div>
       </header>
@@ -131,7 +169,7 @@ export default function AdminRooms() {
       {/* Filters Section */}
       <section className={styles.filtersSection}>
         <div className={styles.filterTabs}>
-          {["Tất cả", "Hoạt động", "Tạm ngưng"].map((tab) => (
+          {["Tất cả", "Spa", "Nhà hàng", "Giải trí", "Dịch vụ khác"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -144,7 +182,7 @@ export default function AdminRooms() {
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
           <span className="material-symbols-outlined" style={{ color: "var(--color-steel-secondary)" }}>filter_list</span>
           <div className={styles.selectWrapper}>
-            <select className={styles.select} onChange={(e) => setActiveTab(e.target.value)} value={activeTab}>
+            <select className={styles.select} onChange={(e) => setActiveStatus(e.target.value)} value={activeStatus}>
               <option value="Tất cả">Trạng thái: Tất cả</option>
               <option value="Hoạt động">Hoạt động</option>
               <option value="Tạm ngưng">Tạm ngưng</option>
@@ -154,37 +192,37 @@ export default function AdminRooms() {
         </div>
       </section>
 
-      {/* Room Grid (Bento Layout) */}
+      {/* Grid of items */}
       <section className={styles.grid}>
-        {filteredRooms.map((room) => (
-          <article key={room.id} className={styles.card}>
+        {filteredItems.map((item) => (
+          <article key={item.id} className={styles.card}>
             <div className={styles.imageWrapper}>
               <img
                 className={styles.image}
-                alt={room.name}
-                src={room.image}
+                alt={item.name}
+                src={item.image}
               />
-              <div className={`${styles.badge} ${room.statusClass}`}>
-                <span className="mono-text">{room.status}</span>
+              <div className={`${styles.badge} ${item.statusClass}`}>
+                <span className="mono-text">{item.statusLabel}</span>
               </div>
             </div>
             <div className={styles.cardDetails}>
               <div>
-                <h3 className={styles.roomName}>{room.name}</h3>
-                <p className={styles.roomType}>{room.type}</p>
+                <h3 className={styles.roomName}>{item.name}</h3>
+                <p className={styles.roomType}>{item.type}</p>
               </div>
               <div className={styles.actions}>
                 <button className={styles.iconButton}>
                   <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>edit</span>
                 </button>
-                <button className={`${styles.iconButton} ${styles.deleteBtn}`} onClick={() => handleDeleteRoom(room.id)}>
+                <button className={`${styles.iconButton} ${styles.deleteBtn}`} onClick={() => handleDeleteService(item.id)}>
                   <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>delete</span>
                 </button>
               </div>
             </div>
             <div className={styles.cardFooter}>
-              <p className={`mono-text ${styles.priceLabel}`}>Giá mỗi đêm</p>
-              <p className={`mono-text ${styles.priceValue}`}>{room.price}</p>
+              <p className={`mono-text ${styles.priceLabel}`}>{item.hours}</p>
+              <p className={`mono-text ${styles.priceValue}`}>{item.price}</p>
             </div>
           </article>
         ))}
@@ -195,52 +233,64 @@ export default function AdminRooms() {
         <div className={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>Thêm phòng mới</h2>
+              <h2 className={styles.modalTitle}>Thêm dịch vụ mới</h2>
               <button className={styles.modalCloseBtn} onClick={() => setIsModalOpen(false)}>
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
-            <form onSubmit={handleAddRoom}>
+            <form onSubmit={handleAddService}>
               <div className={styles.modalBody}>
                 <div className={styles.formGroup}>
-                  <label className={`mono-text ${styles.label}`}>Tên / Số phòng</label>
+                  <label className={`mono-text ${styles.label}`}>Tên dịch vụ / tiện ích</label>
                   <input
                     className={styles.input}
-                    placeholder="VD: P.105, Villa Biển A..."
-                    value={roomName}
-                    onChange={(e) => setRoomName(e.target.value)}
+                    placeholder="VD: Massage Đá Nóng, Buffet Sáng hải sản..."
+                    value={serviceName}
+                    onChange={(e) => setServiceName(e.target.value)}
                     required
                     type="text"
                   />
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label className={`mono-text ${styles.label}`}>Loại phòng</label>
+                  <label className={`mono-text ${styles.label}`}>Nhóm dịch vụ</label>
                   <div className={styles.selectWrapper}>
                     <select
                       className={styles.select}
-                      value={roomType}
-                      onChange={(e) => setRoomType(e.target.value)}
+                      value={serviceType}
+                      onChange={(e) => setServiceType(e.target.value)}
                       required
                     >
-                      <option value="Deluxe Ocean View">Deluxe Ocean View</option>
-                      <option value="Standard Garden">Standard Garden</option>
-                      <option value="Penthouse Suite">Penthouse Suite</option>
-                      <option value="Family Connecting">Family Connecting</option>
+                      <option value="Spa & Trị liệu">Spa & Trị liệu</option>
+                      <option value="Nhà hàng">Nhà hàng & Quán ăn</option>
+                      <option value="Giải trí">Giải trí & Hoạt động</option>
+                      <option value="Tiện ích">Tiện ích khác</option>
                     </select>
                     <span className={`material-symbols-outlined ${styles.selectArrow}`}>expand_more</span>
                   </div>
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label className={`mono-text ${styles.label}`}>Giá mỗi đêm (VND)</label>
+                  <label className={`mono-text ${styles.label}`}>Mức giá / Chi phí</label>
                   <input
                     className={styles.input}
-                    placeholder="VD: 2500000"
-                    value={roomPrice}
-                    onChange={(e) => setRoomPrice(e.target.value)}
+                    placeholder="VD: 500000 hoặc Theo thực đơn"
+                    value={servicePrice}
+                    onChange={(e) => setServicePrice(e.target.value)}
                     required
-                    type="number"
+                    type="text"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={`mono-text ${styles.label}`}>Giờ phục vụ</label>
+                  <input
+                    className={styles.input}
+                    placeholder="VD: 09:00 - 21:00 hoặc 24/7"
+                    value={serviceHours}
+                    onChange={(e) => setServiceHours(e.target.value)}
+                    required
+                    type="text"
                   />
                 </div>
 
@@ -249,8 +299,8 @@ export default function AdminRooms() {
                   <div className={styles.selectWrapper}>
                     <select
                       className={styles.select}
-                      value={roomStatus}
-                      onChange={(e) => setRoomStatus(e.target.value)}
+                      value={serviceStatus}
+                      onChange={(e) => setServiceStatus(e.target.value)}
                       required
                     >
                       <option value="Hoạt động">Hoạt động (Active)</option>
@@ -261,7 +311,7 @@ export default function AdminRooms() {
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label className={`mono-text ${styles.label}`}>Hình ảnh phòng</label>
+                  <label className={`mono-text ${styles.label}`}>Hình ảnh hiển thị</label>
                   <label className={styles.uploadArea}>
                     <input
                       type="file"
@@ -269,9 +319,9 @@ export default function AdminRooms() {
                       onChange={handleImageUpload}
                       style={{ display: "none" }}
                     />
-                    {roomImage ? (
+                    {serviceImage ? (
                       <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <img src={roomImage} alt="Uploaded preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={serviceImage} alt="Uploaded preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         <div style={{
                           position: "absolute",
                           inset: 0,
@@ -311,7 +361,7 @@ export default function AdminRooms() {
                   Hủy
                 </button>
                 <button type="submit" className={`mono-text ${styles.btnSubmit}`}>
-                  Lưu phòng
+                  Lưu dịch vụ
                 </button>
               </div>
             </form>
