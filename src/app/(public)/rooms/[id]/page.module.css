@@ -180,6 +180,7 @@
   padding: 2rem;
   display: flex;
   gap: 1rem;
+  box-shadow: 0 4px 20px var(--color-diffused-shadow);
 }
 
 .amenityIcon {
@@ -261,7 +262,7 @@
   background-color: var(--color-pure-surface);
   border-radius: var(--rounded-2xl);
   border: 1px solid var(--color-whisper-border);
-  box-shadow: 0 -15px 40px var(--color-diffused-shadow);
+  box-shadow: 0 10px 30px var(--color-diffused-shadow);
   padding: 2rem;
 }
 @media (min-width: 768px) {

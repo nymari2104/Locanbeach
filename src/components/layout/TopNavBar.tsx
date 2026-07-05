@@ -11,14 +11,17 @@ export default function TopNavBar() {
     <nav className={styles.navbar}>
       <div className={styles.container}>
         {/* Brand Logo */}
-        <div className={styles.brand}>
+        <Link href="/" className={styles.brand}>
           <img 
             alt="The House Logo" 
             className={styles.logo} 
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuC63fPEZhWhvU55JIkbViURS55j5q5kDcPbpZR_bwqR71tLJFxzIyWh9r4Q5vHFgGK_GOZteySv_qliX84iBS-yYz2dPlDP612DCrUiqnY85dv1SlVIgsZWHUbRpDlwVinqjxU5It6KoNcqZqbk3tjUd6MdRoc3Mdv56xmvr6DcYL4OIzDoJB7Ttk4yuoVPsmLkVO428zazuLQpng8HCorpThOwHyaDAtM8qiCjabmHTynCP7iX_5J7TC0f7O8AlrBigg" 
           />
-          <span className={`headline-lg ${styles.brandName}`}>The House</span>
-        </div>
+          <div className={styles.logoTextWrapper}>
+            <span className={styles.brandName}>The House</span>
+            <span className={styles.brandSubname}>Lộc An Beach</span>
+          </div>
+        </Link>
 
         {/* Desktop Navigation */}
         <ul className={`mono-text ${styles.navLinks}`}>

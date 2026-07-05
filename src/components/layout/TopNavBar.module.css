@@ -25,19 +25,45 @@
 }
 
 .logo {
-  height: 2.5rem;
+  height: 2.75rem;
   width: auto;
 }
 
-.brandName {
-  color: var(--color-on-surface);
-  letter-spacing: -0.05em;
+.logoTextWrapper {
   display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 @media (min-width: 640px) {
-  .brandName {
-    display: block;
+  .logoTextWrapper {
+    display: flex;
   }
+}
+
+.brandName {
+  font-family: var(--font-lora), serif;
+  font-size: 1.35rem;
+  font-weight: bold;
+  color: #0b2545;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.brandSubname {
+  font-family: var(--font-be-vietnam-pro), sans-serif;
+  font-size: 0.65rem;
+  background: linear-gradient(90deg, #0058be 0%, #00d4ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 0.15rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 .navLinks {
