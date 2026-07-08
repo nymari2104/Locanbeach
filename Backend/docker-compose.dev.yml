@@ -4,9 +4,9 @@ services:
     image: postgres:15-alpine
     container_name: locanbeach-postgres
     environment:
-      POSTGRES_USER: hotel_admin
+      POSTGRES_USER: ${POSTGRES_USER:-hotel_admin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: hotel_chatbot
+      POSTGRES_DB: ${POSTGRES_DB:-hotel_chatbot}
     ports:
       - "5433:5432"
     volumes:
@@ -17,8 +17,8 @@ services:
     image: dpage/pgadmin4
     container_name: locanbeach-pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@locanbeach.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@locanbeach.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
     ports:
       - "5050:80"
     depends_on:
