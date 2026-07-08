@@ -1,0 +1,99 @@
+.stack-container {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  height: 580px;
+  margin: 0 auto;
+  perspective: 1000px;
+}
+
+@media (max-width: 767px) {
+  .stack-container {
+    height: 380px;
+  }
+}
+
+.cards-deck {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 3.5rem;
+}
+
+.card-rotate {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.card-rotate-disabled {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.card {
+  border-radius: var(--rounded-2xl, 1rem);
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.08);
+  border: 6px solid var(--color-pure-surface, #ffffff);
+  background-color: var(--color-pure-surface, #ffffff);
+}
+
+.card img {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.stack-dots {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2rem;
+  z-index: 10;
+}
+
+.stack-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-steel-secondary, #71717A);
+  border: none;
+  opacity: 0.4;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.stack-dot:hover {
+  opacity: 0.8;
+  transform: scale(1.2);
+}
+
+.stack-dot-active {
+  background-color: var(--color-primary, #0058be);
+  opacity: 1;
+  width: 24px;
+  border-radius: 4px;
+}

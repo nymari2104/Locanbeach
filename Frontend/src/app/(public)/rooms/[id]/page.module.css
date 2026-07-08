@@ -1,0 +1,352 @@
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-gutter);
+}
+
+.heroSection {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--color-whisper-border);
+  position: relative;
+  min-height: 500px;
+}
+@media (min-width: 768px) {
+  .heroSection {
+    flex-direction: row;
+    align-items: stretch;
+    min-height: 600px;
+  }
+}
+
+.heroText {
+  width: 100%;
+  padding: var(--spacing-container-padding);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 10;
+  background-color: var(--color-canvas-white);
+}
+@media (min-width: 768px) {
+  .heroText {
+    width: 50%;
+    background-color: transparent;
+  }
+}
+
+.title {
+  font-size: var(--text-display-hero-size);
+  font-weight: var(--text-display-hero-weight);
+  line-height: var(--text-display-hero-leading);
+  letter-spacing: var(--text-display-hero-tracking);
+}
+
+.inlineImage {
+  display: inline-block;
+  width: 4rem;
+  height: 2rem;
+  margin: 0 0.5rem;
+  border-radius: var(--rounded-full);
+  overflow: hidden;
+  vertical-align: middle;
+}
+.inlineImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.heroDesc {
+  margin-top: 2rem;
+  color: var(--color-on-surface-variant);
+  max-width: 38rem;
+}
+
+.heroImageWrapper {
+  width: 100%;
+  position: relative;
+  min-height: 350px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+@media (min-width: 768px) {
+  .heroImageWrapper {
+    width: 50%;
+    min-height: auto;
+    justify-content: center;
+    padding-right: 4rem;
+  }
+}
+
+.heroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  box-shadow: 0 0 40px var(--color-diffused-shadow);
+}
+@media (min-width: 768px) {
+  .heroImage {
+    border-top-left-radius: 3rem;
+    border-bottom-left-radius: 3rem;
+    margin-left: -2rem;
+  }
+}
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  padding-top: var(--spacing-section-gap);
+  padding-bottom: var(--spacing-section-gap);
+}
+@media (min-width: 768px) {
+  .contentWrapper {
+    flex-direction: row;
+  }
+}
+
+.leftColumn {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-section-gap);
+}
+@media (min-width: 768px) {
+  .leftColumn {
+    width: 65%;
+  }
+}
+
+.roomTitle {
+  font-size: var(--text-headline-lg-size);
+  font-family: var(--font-playfair), serif;
+  margin-bottom: 2rem;
+}
+
+.specsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  border-top: 1px solid var(--color-whisper-border);
+  border-bottom: 1px solid var(--color-whisper-border);
+  padding: 1.5rem 0;
+}
+@media (min-width: 768px) {
+  .specsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.specLabel {
+  color: var(--color-steel-secondary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.specValue {
+  color: var(--color-on-surface);
+  font-weight: bold;
+}
+
+.description {
+  color: var(--color-on-surface-variant);
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+
+.amenitiesGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .amenitiesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.amenityCard {
+  background-color: var(--color-pure-surface);
+  border: 1px solid var(--color-whisper-border);
+  border-radius: var(--rounded-2xl);
+  padding: 2rem;
+  display: flex;
+  gap: 1rem;
+  box-shadow: 0 4px 20px var(--color-diffused-shadow);
+}
+
+.amenityIcon {
+  color: var(--color-primary);
+  font-size: 2rem;
+}
+
+.amenityName {
+  font-weight: bold;
+  margin: 0 0 0.25rem 0;
+}
+
+.amenityDesc {
+  font-size: 0.875rem;
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+.galleryLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bentoRow1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  height: auto;
+}
+@media (min-width: 768px) {
+  .bentoRow1 {
+    grid-template-columns: 1fr 2fr;
+    height: 16rem;
+  }
+}
+
+.bentoRow2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  height: auto;
+}
+@media (min-width: 768px) {
+  .bentoRow2 {
+    grid-template-columns: 2fr 1fr;
+    height: 20rem;
+  }
+}
+
+.galleryImgWrapper {
+  border-radius: 1.5rem;
+  overflow: hidden;
+  height: 200px;
+}
+@media (min-width: 768px) {
+  .galleryImgWrapper {
+    height: 100%;
+  }
+}
+
+.galleryImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rightColumn {
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .rightColumn {
+    width: 35%;
+  }
+}
+
+.stickyCard {
+  position: static;
+  background-color: var(--color-pure-surface);
+  border-radius: var(--rounded-2xl);
+  border: 1px solid var(--color-whisper-border);
+  box-shadow: 0 10px 30px var(--color-diffused-shadow);
+  padding: 2rem;
+}
+@media (min-width: 768px) {
+  .stickyCard {
+    position: sticky;
+    top: 8rem;
+  }
+}
+
+.priceWrapper {
+  margin-bottom: 1.5rem;
+}
+
+.price {
+  font-size: 1.875rem;
+  font-family: var(--font-playfair), serif;
+  font-weight: bold;
+  color: var(--color-on-surface);
+}
+
+.priceLabelNight {
+  color: var(--color-on-surface-variant);
+  font-size: 1rem;
+}
+
+.formFields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.field {
+  border: 1px solid var(--color-whisper-border);
+  border-radius: var(--rounded-xl);
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-canvas-white);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.field:hover {
+  border-color: var(--color-primary);
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-steel-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.fieldValue {
+  font-weight: bold;
+}
+
+.fieldIcon {
+  color: var(--color-steel-secondary);
+}
+
+.bookButton {
+  width: 100%;
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  padding: 1rem;
+  border-radius: var(--rounded-md);
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0, 88, 190, 0.15);
+  transition: background-color 0.3s, transform 0.2s;
+}
+.bookButton:hover {
+  background-color: #004395;
+  transform: scale(1.01);
+}
+
+.cancelPolicy {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--color-on-surface-variant);
+  margin-top: 1rem;
+}

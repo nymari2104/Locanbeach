@@ -1,0 +1,140 @@
+:root {
+  /* Colors - Base Palette */
+  --color-canvas-white: #F2F3F4;
+  --color-pure-surface: #FFFFFF;
+  --color-charcoal-ink: #18181B;
+  --color-steel-secondary: #71717A;
+  --color-muted-slate: #94A3B8;
+  --color-whisper-border: rgba(11, 37, 69, 0.12);
+  --color-diffused-shadow: rgba(0, 0, 0, 0.05);
+
+  /* Colors - Accent */
+  --color-electric-blue: #3B82F6;
+
+  /* Colors - Expanded (from config) */
+  --color-surface: #f9f9ff;
+  --color-on-surface: #191b23;
+  --color-primary: #0058be;
+  --color-on-primary: #ffffff;
+  --color-error: #ba1a1a;
+
+  /* Typography - Display Hero */
+  --text-display-hero-size: clamp(2.25rem, 5vw, 3.75rem);
+  --text-display-hero-weight: 900;
+  --text-display-hero-tracking: -0.025em;
+  --text-display-hero-leading: 1.1;
+
+  /* Typography - Headline LG */
+  --text-headline-lg-size: 2.5rem;
+  --text-headline-lg-weight: 700;
+  --text-headline-lg-tracking: -0.025em;
+  --text-headline-lg-leading: 1.2;
+
+  /* Typography - Body MD */
+  --text-body-md-size: 1.125rem;
+  --text-body-md-weight: 400;
+  --text-body-md-leading: 1.65;
+
+  /* Typography - Mono Metadata */
+  --text-mono-metadata-size: 0.9rem;
+  --text-mono-metadata-weight: 400;
+  --text-mono-metadata-leading: 1.5;
+
+  /* Border Radius */
+  --rounded-sm: 0.25rem;
+  --rounded-DEFAULT: 0.5rem;
+  --rounded-md: 0.75rem;
+  --rounded-lg: 1rem;
+  --rounded-xl: 1.5rem;
+  --rounded-2xl: 1.25rem;
+  /* For Cards/Containers */
+  --rounded-full: 9999px;
+
+  /* Spacing & Layout Bounds */
+  --max-width: 90rem;
+  /* Increased container width from 80rem (1280px) to 90rem (1440px) */
+  --spacing-container-padding: 2.5rem;
+  --spacing-gutter: 1.5rem;
+  --spacing-section-gap: 8rem;
+  --spacing-bento-gap: 1rem;
+}
+
+/* Reset and Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-canvas-white);
+  color: var(--color-charcoal-ink);
+  font-family: var(--font-be-vietnam-pro), sans-serif;
+  font-size: var(--text-body-md-size);
+  font-weight: var(--text-body-md-weight);
+  line-height: var(--text-body-md-leading);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-lora), serif;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Utilities based on DESIGN.md */
+.display-hero {
+  font-family: var(--font-lora), serif;
+  font-size: var(--text-display-hero-size);
+  font-weight: var(--text-display-hero-weight);
+  letter-spacing: var(--text-display-hero-tracking);
+  line-height: var(--text-display-hero-leading);
+}
+
+.headline-lg {
+  font-family: var(--font-lora), serif;
+  font-size: var(--text-headline-lg-size);
+  font-weight: var(--text-headline-lg-weight);
+  letter-spacing: var(--text-headline-lg-tracking);
+  line-height: var(--text-headline-lg-leading);
+}
+
+.mono-text {
+  font-family: var(--font-be-vietnam-pro), sans-serif;
+  font-size: var(--text-mono-metadata-size);
+  line-height: var(--text-mono-metadata-leading);
+}
+
+.card-container {
+  background-color: var(--color-pure-surface);
+  border: 1px solid var(--color-whisper-border);
+  border-radius: var(--rounded-2xl);
+  box-shadow: 0 -15px 40px var(--color-diffused-shadow);
+  padding: var(--spacing-container-padding);
+}
+
+.app-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding-top: 8rem;
+  padding-bottom: var(--spacing-section-gap);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}

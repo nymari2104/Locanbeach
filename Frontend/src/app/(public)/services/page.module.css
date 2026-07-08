@@ -1,0 +1,124 @@
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-gutter);
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: var(--spacing-section-gap);
+  padding-top: 2rem;
+}
+
+.title {
+  font-size: var(--text-display-hero-size);
+  font-weight: var(--text-display-hero-weight);
+  line-height: var(--text-display-hero-leading);
+  letter-spacing: var(--text-display-hero-tracking);
+  margin-bottom: 1.5rem;
+}
+
+.subtitle {
+  color: var(--color-steel-secondary);
+  font-size: 1.25rem;
+  max-width: 36rem;
+  margin: 0 auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  margin-bottom: var(--spacing-section-gap);
+}
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.card {
+  background-color: var(--color-pure-surface);
+  border-radius: var(--rounded-2xl);
+  border: 1px solid var(--color-whisper-border);
+  overflow: hidden;
+  box-shadow: 0 4px 20px var(--color-diffused-shadow);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15), box-shadow 0.4s ease;
+}
+.card:hover {
+  transform: scale(1.02) translateY(-4px);
+  box-shadow: 0 10px 20px rgba(11, 37, 69, 0.28);
+}
+
+.imageWrapper {
+  height: 250px;
+  position: relative;
+  overflow: hidden;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+
+.content {
+  padding: 2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+  color: var(--color-on-surface);
+}
+
+.cardDesc {
+  color: var(--color-steel-secondary);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.detailsList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+  color: var(--color-steel-secondary);
+  font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icon {
+  color: var(--color-primary);
+  font-size: 1.125rem;
+}
+
+.button {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--rounded-md);
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  text-align: center;
+  transition: background-color 0.3s, transform 0.2s;
+}
+.button:hover {
+  background-color: #004395;
+}

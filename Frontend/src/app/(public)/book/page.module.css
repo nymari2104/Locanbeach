@@ -1,0 +1,333 @@
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-gutter);
+}
+
+.heroFilterSection {
+  margin-bottom: var(--spacing-section-gap);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+@media (min-width: 1024px) {
+  .heroFilterSection {
+    grid-template-columns: repeat(12, 1fr);
+  }
+}
+
+.heroText {
+  grid-column: span 1;
+  padding-top: 2rem;
+}
+@media (min-width: 1024px) {
+  .heroText {
+    grid-column: span 5;
+  }
+}
+
+.title {
+  font-size: var(--text-display-hero-size);
+  font-weight: var(--text-display-hero-weight);
+  line-height: var(--text-display-hero-leading);
+  letter-spacing: var(--text-display-hero-tracking);
+  margin-bottom: 1.5rem;
+}
+
+.italic {
+  color: var(--color-primary);
+  font-style: italic;
+}
+
+.description {
+  color: var(--color-steel-secondary);
+  margin-bottom: 2.5rem;
+  max-width: 28rem;
+}
+
+.filterCard {
+  grid-column: span 1;
+  background-color: var(--color-pure-surface);
+  border-radius: var(--rounded-2xl);
+  border: 1px solid var(--color-whisper-border);
+  padding: 2rem;
+  box-shadow: 0 -15px 40px var(--color-diffused-shadow);
+}
+@media (min-width: 1024px) {
+  .filterCard {
+    grid-column: span 7;
+  }
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+@media (min-width: 768px) {
+  .formGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  color: var(--color-steel-secondary);
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-muted-slate);
+}
+
+.input {
+  width: 100%;
+  background-color: var(--color-canvas-white);
+  border: 1px solid var(--color-whisper-border);
+  border-radius: var(--rounded-md);
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  color: var(--color-charcoal-ink);
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.select {
+  width: 100%;
+  background-color: var(--color-canvas-white);
+  border: 1px solid var(--color-whisper-border);
+  border-radius: var(--rounded-md);
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  color: var(--color-charcoal-ink);
+  font-size: 1rem;
+  appearance: none;
+  transition: border-color 0.3s;
+}
+.select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.selectWrapper {
+  position: relative;
+}
+
+.selectArrow {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-muted-slate);
+  pointer-events: none;
+}
+
+.searchButton {
+  grid-column: span 1;
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  width: 100%;
+  padding: 1rem;
+  border-radius: var(--rounded-md);
+  border: none;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  transition: opacity 0.3s, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@media (min-width: 768px) {
+  .searchButton {
+    grid-column: span 2;
+  }
+}
+.searchButton:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.resultsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 3rem;
+  border-b: 1px solid var(--color-whisper-border);
+  padding-bottom: 1rem;
+}
+
+.resultsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-bento-gap);
+  grid-auto-rows: 450px;
+}
+@media (min-width: 1024px) {
+  .resultsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.roomCard {
+  background-color: var(--color-pure-surface);
+  border-radius: var(--rounded-2xl);
+  border: 1px solid var(--color-whisper-border);
+  overflow: hidden;
+  box-shadow: 0 4px 20px var(--color-diffused-shadow);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15), box-shadow 0.4s ease;
+}
+.roomCard:hover {
+  transform: scale(1.02) translateY(-4px);
+  box-shadow: 0 10px 20px rgba(11, 37, 69, 0.28);
+}
+
+.featuredCard {
+  grid-column: span 1;
+}
+@media (min-width: 1024px) {
+  .featuredCard {
+    grid-column: span 2;
+  }
+}
+
+.imageWrapper {
+  position: relative;
+  height: 50%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.roomImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+
+.featuredBadge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  color: var(--color-primary);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--rounded-full);
+  border: 1px solid var(--color-whisper-border);
+}
+
+.roomDetails {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.roomHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.roomName {
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+.featuredCard .roomName {
+  font-size: 1.5rem;
+}
+
+.priceInfo {
+  text-align: right;
+}
+
+.price {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: var(--color-primary);
+}
+.featuredCard .price {
+  font-size: 1.25rem;
+}
+
+.roomSpecs {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--color-steel-secondary);
+  margin-top: 1rem;
+}
+
+.specItem {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.specIcon {
+  font-size: 1rem;
+}
+
+.roomActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.amenities {
+  display: flex;
+  gap: 0.5rem;
+  color: var(--color-primary);
+  margin-top: 1rem;
+}
+
+.selectButton {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--rounded-md);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s, transform 0.2s;
+}
+.selectButton:hover {
+  background-color: #004395; /* Slightly darker blue */
+}
+
+.arrow {
+  transition: transform 0.2s ease-in-out;
+  display: inline-block;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.selectButton:hover .arrow {
+  transform: translateX(4px);
+}
