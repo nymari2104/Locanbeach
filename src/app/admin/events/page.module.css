@@ -239,17 +239,22 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .priceLabel {
   color: var(--color-steel-secondary);
   font-size: 0.8125rem;
+  flex-shrink: 0;
 }
 
 .priceValue {
   color: var(--color-on-surface);
   font-weight: bold;
   font-size: 1.125rem;
+  word-break: break-word;
+  text-align: right;
 }
 
 /* Modal Dialog Styles */

@@ -1,68 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./page.module.css";
+import { apiGet, apiPost, apiDelete, apiUploadImage } from "@/lib/api";
+import { ComboEventDTO, ComboEventType, ServiceStatus } from "@/types/api";
 
 export default function AdminEvents() {
   const [activeTab, setActiveTab] = useState("Tất cả");
   const [activeStatus, setActiveStatus] = useState("Tất cả");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [combos, setCombos] = useState<ComboEventDTO[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Form states
   const [itemName, setItemName] = useState("");
   const [itemType, setItemType] = useState("Sự kiện");
   const [itemStatus, setItemStatus] = useState("Hoạt động");
-  const [itemDate, setItemDate] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [itemPrice, setItemPrice] = useState("");
-  const [itemImage, setItemImage] = useState("");
+  const [itemImage, setItemImage] = useState(""); // Preview
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // Upload
 
-  const [items, setItems] = useState([
-    {
-      id: "ev-1",
-      type: "Sự kiện",
-      name: "Pool Party - Welcome Summer",
-      statusClass: styles.badgeVacant,
-      statusLabel: "Hoạt động",
-      date: "15 Thg 7, 2026",
-      price: "250,000₫",
-      image: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=500&auto=format"
-    },
-    {
-      id: "cb-1",
-      type: "Combo",
-      name: "Combo Nghỉ dưỡng 3N2Đ",
-      statusClass: styles.badgeVacant,
-      statusLabel: "Hoạt động",
-      date: "Hạn đến 31 Thg 12, 2026",
-      price: "4,500,000₫",
-      image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=500&auto=format"
-    },
-    {
-      id: "ev-2",
-      type: "Sự kiện",
-      name: "Lễ hội Âm nhạc Hoàng hôn",
-      statusClass: styles.badgeVacant,
-      statusLabel: "Hoạt động",
-      date: "30 Thg 8, 2026",
-      price: "500,000₫",
-      image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format"
-    },
-    {
-      id: "cb-2",
-      type: "Combo",
-      name: "Combo Trọn gói Lộc An Hè",
-      statusClass: styles.badgeOccupied,
-      statusLabel: "Tạm ngưng",
-      date: "Hết hạn 30 Thg 6, 2026",
-      price: "3,200,000₫",
-      image: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?q=80&w=500&auto=format"
+  const fetchCombos = async () => {
+    try {
+      setLoading(true);
+      const data = await apiGet<ComboEventDTO[]>("/combos");
+      setCombos(data);
+    } catch (error) {
+      console.error("Failed to fetch combos:", error);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
+
+  useEffect(() => {
+    fetchCombos();
+  }, []);
+
+  const getTypeFromLabel = (label: string): ComboEventType => {
+    return label === "Sự kiện" ? "EVENT" : "COMBO";
+  };
+
+  const getLabelFromType = (type: ComboEventType): string => {
+    return type === "EVENT" ? "Sự kiện" : "Combo";
+  };
 
   // Multi-level filter: activeTab (Type) and activeStatus (Status)
-  const filteredItems = items.filter((item) => {
-    const matchesType = activeTab === "Tất cả" || item.type === activeTab;
-    const matchesStatus = activeStatus === "Tất cả" || item.statusLabel === activeStatus;
+  const filteredItems = combos.filter((item) => {
+    const matchesType = activeTab === "Tất cả" 
+      ? true 
+      : (activeTab === "Sự kiện" ? item.type === "EVENT" : item.type === "COMBO");
+
+    const matchesStatus = activeStatus === "Tất cả" 
+      ? true 
+      : (activeStatus === "Hoạt động" ? item.status === "ACTIVE" : item.status === "INACTIVE");
+    
     return matchesType && matchesStatus;
   });
 
@@ -75,6 +68,7 @@ export default function AdminEvents() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setItemImage(reader.result as string);
@@ -83,38 +77,65 @@ export default function AdminEvents() {
     }
   };
 
-  const handleAddItem = (e: React.FormEvent) => {
+  const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!itemName || !itemPrice || !itemDate) return;
+    if (!itemName || !itemPrice || !startDate || !endDate) return;
 
-    const newItem = {
-      id: Date.now().toString(),
-      type: itemType,
-      name: itemName,
-      statusClass: itemStatus === "Hoạt động" ? styles.badgeVacant : styles.badgeOccupied,
-      statusLabel: itemStatus,
-      date: itemDate,
-      price: parseInt(itemPrice.replace(/\D/g, "")).toLocaleString("vi-VN") + "₫",
-      image: itemImage || (itemType === "Sự kiện" 
-        ? "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format"
-        : "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=500&auto=format")
-    };
+    try {
+      const typeValue = getTypeFromLabel(itemType);
+      const statusValue: ServiceStatus = itemStatus === "Hoạt động" ? "ACTIVE" : "INACTIVE";
+      const numericPrice = parseFloat(itemPrice.replace(/\D/g, "")) || 0;
 
-    setItems([newItem, ...items]);
-    setIsModalOpen(false);
+      // 1. Create combo/event entity
+      const newCombo = await apiPost<ComboEventDTO>("/combos", {
+        name: itemName,
+        type: typeValue,
+        description: itemName,
+        price: numericPrice,
+        startDate: startDate,
+        endDate: endDate,
+        status: statusValue
+      });
 
-    // Reset form
-    setItemName("");
-    setItemDate("");
-    setItemPrice("");
-    setItemImage("");
+      // 2. Upload image if selected
+      if (selectedFile && newCombo.id) {
+        await apiUploadImage(selectedFile, "COMBO", newCombo.id, true);
+      }
+
+      await fetchCombos();
+      setIsModalOpen(false);
+
+      // Reset form
+      setItemName("");
+      setStartDate("");
+      setEndDate("");
+      setItemPrice("");
+      setItemImage("");
+      setSelectedFile(null);
+    } catch (error: any) {
+      alert("Lỗi khi thêm sự kiện/combo: " + error.message);
+    }
   };
 
-  const handleDeleteItem = (id: string) => {
-    setItems(items.filter(item => item.id !== id));
+  const handleDeleteItem = async (id: string) => {
+    if (confirm("Bạn có chắc chắn muốn xóa mục này không?")) {
+      try {
+        await apiDelete(`/combos/${id}`);
+        setCombos(combos.filter(item => item.id !== id));
+      } catch (error: any) {
+        alert("Lỗi khi xóa: " + error.message);
+      }
+    }
   };
 
-  const activeCount = items.filter(item => item.statusLabel === "Hoạt động").length;
+  const activeCount = combos.filter(item => item.status === "ACTIVE").length;
+
+  const formatDateLabel = (item: ComboEventDTO) => {
+    if (item.type === "EVENT") {
+      return `Ngày: ${new Date(item.startDate).toLocaleDateString("vi-VN")}`;
+    }
+    return `Hạn: ${new Date(item.endDate).toLocaleDateString("vi-VN")}`;
+  };
 
   return (
     <div>
@@ -197,38 +218,57 @@ export default function AdminEvents() {
 
       {/* Grid of items */}
       <section className={styles.grid}>
-        {filteredItems.map((item) => (
-          <article key={item.id} className={styles.card}>
-            <div className={styles.imageWrapper}>
-              <img
-                className={styles.image}
-                alt={item.name}
-                src={item.image}
-              />
-              <div className={`${styles.badge} ${item.statusClass}`}>
-                <span className="mono-text">{item.statusLabel}</span>
-              </div>
-            </div>
-            <div className={styles.cardDetails}>
-              <div>
-                <h3 className={styles.roomName}>{item.name}</h3>
-                <p className={styles.roomType}>{item.type}</p>
-              </div>
-              <div className={styles.actions}>
-                <button className={styles.iconButton}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>edit</span>
-                </button>
-                <button className={`${styles.iconButton} ${styles.deleteBtn}`} onClick={() => handleDeleteItem(item.id)}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>delete</span>
-                </button>
-              </div>
-            </div>
-            <div className={styles.cardFooter}>
-              <p className={`mono-text ${styles.priceLabel}`}>{item.date}</p>
-              <p className={`mono-text ${styles.priceValue}`}>{item.price}</p>
-            </div>
-          </article>
-        ))}
+        {loading ? (
+          <div style={{ gridColumn: "1/-1", display: "flex", justifyContent: "center", padding: "4rem 0" }}>
+            <div className="spinner" style={{
+              border: "4px solid rgba(0,0,0,0.1)",
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              borderLeftColor: "var(--color-primary)",
+              animation: "spin 1s linear infinite"
+            }} />
+          </div>
+        ) : (
+          filteredItems.map((item) => {
+            const coverImage = item.images && item.images.length > 0
+              ? item.images[0].url
+              : "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=500&auto=format";
+
+            return (
+              <article key={item.id} className={styles.card}>
+                <div className={styles.imageWrapper}>
+                  <img
+                    className={styles.image}
+                    alt={item.name}
+                    src={coverImage}
+                  />
+                  <div className={`${styles.badge} ${item.status === "ACTIVE" ? styles.badgeVacant : styles.badgeOccupied}`}>
+                    <span className="mono-text">{item.status === "ACTIVE" ? "Hoạt động" : "Tạm ngưng"}</span>
+                  </div>
+                </div>
+                <div className={styles.cardDetails}>
+                  <div>
+                    <h3 className={styles.roomName}>{item.name}</h3>
+                    <p className={styles.roomType}>{getLabelFromType(item.type)}</p>
+                  </div>
+                  <div className={styles.actions}>
+                    <button className={styles.iconButton}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>edit</span>
+                    </button>
+                    <button className={`${styles.iconButton} ${styles.deleteBtn}`} onClick={() => handleDeleteItem(item.id!)}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>delete</span>
+                    </button>
+                  </div>
+                </div>
+                <div className={styles.cardFooter}>
+                  <p className={`mono-text ${styles.priceLabel}`}>{formatDateLabel(item)}</p>
+                  <p className={`mono-text ${styles.priceValue}`}>{item.price > 0 ? `${item.price.toLocaleString("vi-VN")}₫` : "Liên hệ"}</p>
+                </div>
+              </article>
+            );
+          })
+        )}
       </section>
 
       {/* Popup Form Modal */}
@@ -283,16 +323,27 @@ export default function AdminEvents() {
                   />
                 </div>
 
-                <div className={styles.formGroup}>
-                  <label className={`mono-text ${styles.label}`}>Thời gian / Hạn áp dụng</label>
-                  <input
-                    className={styles.input}
-                    placeholder="VD: 15 Thg 8, 2026 hoặc Hạn đến 31/12/2026"
-                    value={itemDate}
-                    onChange={(e) => setItemDate(e.target.value)}
-                    required
-                    type="text"
-                  />
+                <div className={styles.formGroup} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                  <div>
+                    <label className={`mono-text ${styles.label}`}>Ngày bắt đầu</label>
+                    <input
+                      className={styles.input}
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      required
+                      type="date"
+                    />
+                  </div>
+                  <div>
+                    <label className={`mono-text ${styles.label}`}>Ngày kết thúc</label>
+                    <input
+                      className={styles.input}
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      required
+                      type="date"
+                    />
+                  </div>
                 </div>
 
                 <div className={styles.formGroup}>

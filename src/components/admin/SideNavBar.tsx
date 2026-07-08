@@ -45,6 +45,15 @@ export default function SideNavBar() {
         </Link>
 
         <Link
+          href="/admin/categories"
+          className={`${styles.navLink} ${pathname.startsWith("/admin/categories") ? styles.active : ""}`}
+        >
+          <span className="material-symbols-outlined">meeting_room</span>
+          <span>Quản lý hạng phòng</span>
+        </Link>
+
+
+        <Link
           href="/admin/rooms"
           className={`${styles.navLink} ${pathname.startsWith("/admin/rooms") ? styles.active : ""}`}
         >

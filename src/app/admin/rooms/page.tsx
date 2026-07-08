@@ -1,65 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./page.module.css";
+import { apiGet, apiPost, apiDelete, apiUploadImage } from "@/lib/api";
+import { AccommodationDTO, AccommodationCategoryDTO, AccommodationType, AccommodationStatus } from "@/types/api";
 
 export default function AdminRooms() {
   const [activeTab, setActiveTab] = useState("Tất cả");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [accommodations, setAccommodations] = useState<AccommodationDTO[]>([]);
+  const [categories, setCategories] = useState<AccommodationCategoryDTO[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Form states
-  const [roomName, setRoomName] = useState("");
-  const [roomType, setRoomType] = useState("Deluxe Ocean View");
-  const [roomPrice, setRoomPrice] = useState("");
+  const [roomCode, setRoomCode] = useState(""); // Physical room code, e.g. "101"
+  const [selectedCategoryId, setSelectedCategoryId] = useState(""); // Selected Category ID
   const [roomStatus, setRoomStatus] = useState("Hoạt động");
-  const [roomImage, setRoomImage] = useState("");
 
-  const [rooms, setRooms] = useState([
-    {
-      id: "101",
-      name: "P.101",
-      type: "Deluxe Ocean View",
-      status: "Hoạt động",
-      statusClass: styles.badgeVacant,
-      price: "2,500,000 VND",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBzWvpCsujE0gUdYCAMms926CDG6fi2vNOn06xIBtxSmWZDdQ9oOeYm3sHs0M_3INXeGLZTdPLfaa8rG1zPmqZrmSO-k9Npu3H77Y98xJPMPQBq6JN6EeeTgceGCcrdV711q-OjCJRec0FLDh4CE1M4L3FSppdewyoRFORhsJSPpWC-kYdx7HGrrZ74rmPcM58idM-j6amNsPBIkwdSgH1j682rSmP_j2onCkkjBfdVRiv_9S3Uf2rm"
-    },
-    {
-      id: "102",
-      name: "P.102",
-      type: "Standard Garden",
-      status: "Tạm ngưng",
-      statusClass: styles.badgeOccupied,
-      price: "1,800,000 VND",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDVrfEMm_64wjGSfcJ89wbsphQ2QBo9RIo3zl2bqqMMtBl3SiVNVqGaeuxsmloTiRSY7iVCxcAh10Ou3ZUbirEctbW7Pw9pH3gZy69V6b1l1bdfVoXOEE32w8Gi04GwrQM6PitilCL9mp9VoY248HLTz4TpbY0zB18fXrbNXnb1eKOYP1ZotJLgOSRWqTXHjgOjbvazyvbTtWLK7ShQzOw07h7RYplzud_X0__sZtQ1Nx1QBD_rkV6r"
-    },
-    {
-      id: "301",
-      name: "P.301",
-      type: "Penthouse Suite",
-      status: "Hoạt động",
-      statusClass: styles.badgeVacant,
-      price: "8,500,000 VND",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDyR9mfIQ7tfteUMNYUvph10Uk-2Uq1mf1WkBJGTynaOB2uX5nQfLUb3TGQr046-vQegB7OOC9xlKvvJYSNhY2D7kdhT92MsAKyf_nsXVOVG5JO_JqJpqDXoRVjnDpnzJfd2DQ0NVjZCvcgdKQ5HgDo6ZB3q_bJxBzZgSpQ1mzA6jA9WlpP896GwPFgvKfrTgUm0DSAs1CU6Gfy-vGAMPWlVsDsa4fYR0H0UeIg3mYs8RhZIYN_s0_4"
-    },
-    {
-      id: "103",
-      name: "P.103",
-      type: "Standard Garden",
-      status: "Hoạt động",
-      statusClass: styles.badgeVacant,
-      price: "1,800,000 VND",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBMH66fcmIRATTUTI_cuX14cCJ9H4e74W8OObldV7_UMRHo8dgIhX_FVX8yuKV4AkSLx7XlPGhXOn6PCOaQsFql2J64EbxaUqPrNePz3MnT_B7vskvTejLX24ti37rnfWgSpDUbSISnlz43V7aAE7rVds1bEd91FMxVmK4MYJs_fGgb14EuztcEPUUvaUyj47ZK0VmD6a4foTPsSpkJ7f1jX6Yb4wUUVcHKcvYGmN1a9Nq9iUfFcZbg"
+  // New Category Form States (shown if selectedCategoryId === "NEW")
+  const [newCatName, setNewCatName] = useState("");
+  const [newCatCode, setNewCatCode] = useState("");
+  const [newCatType, setNewCatType] = useState<AccommodationType>("ROOM");
+  const [newCatPrice, setNewCatPrice] = useState("");
+  const [newCatGuests, setNewCatGuests] = useState("2");
+  const [newCatArea, setNewCatArea] = useState("30");
+  const [newCatDesc, setNewCatDesc] = useState("");
+  const [roomImage, setRoomImage] = useState(""); // Preview
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // File to upload
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const cats = await apiGet<AccommodationCategoryDTO[]>("/categories");
+      const accs = await apiGet<AccommodationDTO[]>("/accommodations");
+      setCategories(cats);
+      setAccommodations(accs);
+
+      // Pre-select first category if available
+      if (cats.length > 0) {
+        setSelectedCategoryId(cats[0].id || "");
+      } else {
+        setSelectedCategoryId("NEW"); // default to new category form if none exist
+      }
+    } catch (error) {
+      console.error("Failed to load rooms data:", error);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
-  const filteredRooms = activeTab === "Tất cả" 
-    ? rooms 
-    : rooms.filter(room => room.status === activeTab);
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // Filtered rooms
+  const filteredRooms = activeTab === "Tất cả"
+    ? accommodations
+    : accommodations.filter(room => {
+        const isStatusActive = room.status === "ACTIVE";
+        return activeTab === "Hoạt động" ? isStatusActive : !isStatusActive;
+      });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setRoomImage(reader.result as string);
@@ -68,34 +73,68 @@ export default function AdminRooms() {
     }
   };
 
-  const handleAddRoom = (e: React.FormEvent) => {
+  const handleAddRoom = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomName || !roomPrice) return;
+    if (!roomCode) return;
 
-    const newRoom = {
-      id: Date.now().toString(),
-      name: roomName,
-      type: roomType,
-      status: roomStatus,
-      statusClass: roomStatus === "Hoạt động" ? styles.badgeVacant : styles.badgeOccupied,
-      price: parseInt(roomPrice.replace(/\D/g, "")).toLocaleString("vi-VN") + " VND",
-      image: roomImage || "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=500&auto=format"
-    };
+    try {
+      let finalCategoryId = selectedCategoryId;
 
-    setRooms([newRoom, ...rooms]);
-    setIsModalOpen(false);
+      // 1. If user chose to create a new category first
+      if (selectedCategoryId === "NEW") {
+        if (!newCatName || !newCatCode || !newCatPrice) {
+          alert("Vui lòng nhập đầy đủ thông tin loại phòng mới!");
+          return;
+        }
 
-    // Reset form
-    setRoomName("");
-    setRoomType("Deluxe Ocean View");
-    setRoomPrice("");
-    setRoomStatus("Hoạt động");
-    setRoomImage("");
+        const createdCategory = await apiPost<AccommodationCategoryDTO>("/categories", {
+          name: newCatName,
+          code: newCatCode,
+          type: newCatType,
+          description: newCatDesc || newCatName,
+          basePrice: parseFloat(newCatPrice) || 0,
+          maxGuests: parseInt(newCatGuests) || 2,
+          areaSqm: parseFloat(newCatArea) || 30
+        });
+
+        finalCategoryId = createdCategory.id || "";
+
+        // Upload category image if selected
+        if (selectedFile && createdCategory.id) {
+          await apiUploadImage(selectedFile, "CATEGORY", createdCategory.id, true);
+        }
+      }
+
+      // 2. Create the physical room (Accommodation)
+      const statusValue: AccommodationStatus = roomStatus === "Hoạt động" ? "ACTIVE" : "INACTIVE";
+      await apiPost<AccommodationDTO>("/accommodations", {
+        categoryId: finalCategoryId,
+        code: roomCode,
+        status: statusValue,
+        operationalStatus: "VACANT"
+      });
+
+      await loadData();
+      setIsModalOpen(false);
+
+      // Reset form fields
+      setRoomCode("");
+      setNewCatName("");
+      setNewCatCode("");
+      setNewCatPrice("");
+      setNewCatDesc("");
+      setRoomImage("");
+      setSelectedFile(null);
+    } catch (error: any) {
+      alert("Lỗi khi thêm phòng: " + error.message);
+    }
   };
 
-  const handleDeleteRoom = (id: string) => {
-    setRooms(rooms.filter(room => room.id !== id));
+  const getCategoryDetails = (catId: string) => {
+    return categories.find(c => c.id === catId);
   };
+
+  const activeCount = accommodations.filter(r => r.status === "ACTIVE").length;
 
   return (
     <div>
@@ -107,7 +146,7 @@ export default function AdminRooms() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <div className={styles.statsText}>
-            <p className="mono-text">{rooms.filter(r => r.status === "Hoạt động").length}/{rooms.length} Hoạt động</p>
+            <p className="mono-text">{activeCount}/{accommodations.length} Hoạt động</p>
           </div>
           <button className="mono-text" onClick={() => setIsModalOpen(true)} style={{
             backgroundColor: "var(--color-primary)",
@@ -141,53 +180,61 @@ export default function AdminRooms() {
             </button>
           ))}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span className="material-symbols-outlined" style={{ color: "var(--color-steel-secondary)" }}>filter_list</span>
-          <div className={styles.selectWrapper}>
-            <select className={styles.select} onChange={(e) => setActiveTab(e.target.value)} value={activeTab}>
-              <option value="Tất cả">Trạng thái: Tất cả</option>
-              <option value="Hoạt động">Hoạt động</option>
-              <option value="Tạm ngưng">Tạm ngưng</option>
-            </select>
-            <span className={`material-symbols-outlined ${styles.selectArrow}`}>expand_more</span>
-          </div>
-        </div>
       </section>
 
       {/* Room Grid (Bento Layout) */}
       <section className={styles.grid}>
-        {filteredRooms.map((room) => (
-          <article key={room.id} className={styles.card}>
-            <div className={styles.imageWrapper}>
-              <img
-                className={styles.image}
-                alt={room.name}
-                src={room.image}
-              />
-              <div className={`${styles.badge} ${room.statusClass}`}>
-                <span className="mono-text">{room.status}</span>
-              </div>
-            </div>
-            <div className={styles.cardDetails}>
-              <div>
-                <h3 className={styles.roomName}>{room.name}</h3>
-                <p className={styles.roomType}>{room.type}</p>
-              </div>
-              <div className={styles.actions}>
-                <button className={styles.iconButton}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>edit</span>
-                </button>
-                <button className={`${styles.iconButton} ${styles.deleteBtn}`} onClick={() => handleDeleteRoom(room.id)}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>delete</span>
-                </button>
-              </div>
-            </div>
-            <div className={styles.cardFooter}>
-              <p className={`mono-text ${styles.priceLabel}`}>Giá mỗi đêm</p>
-              <p className={`mono-text ${styles.priceValue}`}>{room.price}</p>
-            </div>
-          </article>
-        ))}
+        {loading ? (
+          <div style={{ gridColumn: "1/-1", display: "flex", justifyContent: "center", padding: "4rem 0" }}>
+            <div className="spinner" style={{
+              border: "4px solid rgba(0,0,0,0.1)",
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              borderLeftColor: "var(--color-primary)",
+              animation: "spin 1s linear infinite"
+            }} />
+          </div>
+        ) : (
+          filteredRooms.map((room) => {
+            const cat = getCategoryDetails(room.categoryId);
+            const coverImage = cat && cat.images && cat.images.length > 0
+              ? cat.images[0].url
+              : "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=500&auto=format";
+
+            return (
+              <article key={room.id} className={styles.card}>
+                <div className={styles.imageWrapper}>
+                  <img
+                    className={styles.image}
+                    alt={`Phòng ${room.code}`}
+                    src={coverImage}
+                  />
+                  <div className={`${styles.badge} ${room.status === "ACTIVE" ? styles.badgeVacant : styles.badgeOccupied}`}>
+                    <span className="mono-text">{room.status === "ACTIVE" ? "Hoạt động" : "Tạm ngưng"}</span>
+                  </div>
+                </div>
+                <div className={styles.cardDetails}>
+                  <div>
+                    <h3 className={styles.roomName}>Phòng {room.code}</h3>
+                    <p className={styles.roomType}>{room.categoryName || cat?.name || "Loại phòng"}</p>
+                  </div>
+                  <div className={styles.actions}>
+                    <button className={styles.iconButton}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>edit</span>
+                    </button>
+                  </div>
+                </div>
+                <div className={styles.cardFooter}>
+                  <p className={`mono-text ${styles.priceLabel}`}>Giá mỗi đêm</p>
+                  <p className={`mono-text ${styles.priceValue}`}>
+                    {cat?.basePrice ? `${cat.basePrice.toLocaleString("vi-VN")} VND` : "Chưa cập nhật"}
+                  </p>
+                </div>
+              </article>
+            );
+          })
+        )}
       </section>
 
       {/* Popup Form Modal */}
@@ -203,49 +250,176 @@ export default function AdminRooms() {
             <form onSubmit={handleAddRoom}>
               <div className={styles.modalBody}>
                 <div className={styles.formGroup}>
-                  <label className={`mono-text ${styles.label}`}>Tên / Số phòng</label>
+                  <label className={`mono-text ${styles.label}`}>Số phòng / Mã phòng</label>
                   <input
                     className={styles.input}
-                    placeholder="VD: P.105, Villa Biển A..."
-                    value={roomName}
-                    onChange={(e) => setRoomName(e.target.value)}
+                    placeholder="VD: 105, 302, VILLA-A..."
+                    value={roomCode}
+                    onChange={(e) => setRoomCode(e.target.value)}
                     required
                     type="text"
                   />
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label className={`mono-text ${styles.label}`}>Loại phòng</label>
+                  <label className={`mono-text ${styles.label}`}>Loại phòng / Hạng mục</label>
                   <div className={styles.selectWrapper}>
                     <select
                       className={styles.select}
-                      value={roomType}
-                      onChange={(e) => setRoomType(e.target.value)}
+                      value={selectedCategoryId}
+                      onChange={(e) => setSelectedCategoryId(e.target.value)}
                       required
                     >
-                      <option value="Deluxe Ocean View">Deluxe Ocean View</option>
-                      <option value="Standard Garden">Standard Garden</option>
-                      <option value="Penthouse Suite">Penthouse Suite</option>
-                      <option value="Family Connecting">Family Connecting</option>
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name} ({c.code})</option>
+                      ))}
+                      <option value="NEW">+ Tạo loại phòng mới...</option>
                     </select>
                     <span className={`material-symbols-outlined ${styles.selectArrow}`}>expand_more</span>
                   </div>
                 </div>
 
-                <div className={styles.formGroup}>
-                  <label className={`mono-text ${styles.label}`}>Giá mỗi đêm (VND)</label>
-                  <input
-                    className={styles.input}
-                    placeholder="VD: 2500000"
-                    value={roomPrice}
-                    onChange={(e) => setRoomPrice(e.target.value)}
-                    required
-                    type="number"
-                  />
-                </div>
+                {/* Additional form fields if creating a new category */}
+                {selectedCategoryId === "NEW" ? (
+                  <div style={{ border: "1px solid var(--color-whisper-border)", padding: "1rem", borderRadius: "var(--rounded-lg)", backgroundColor: "var(--color-surface)", display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "1rem" }}>
+                    <p className="mono-text" style={{ fontSize: "0.8rem", fontWeight: "bold", color: "var(--color-primary)" }}>
+                      THIẾT LẬP LOẠI PHÒNG MỚI
+                    </p>
+                    <div className={styles.formGroup}>
+                      <label className={`mono-text ${styles.label}`}>Tên loại phòng</label>
+                      <input
+                        className={styles.input}
+                        placeholder="VD: Deluxe Ocean View, Standard Garden..."
+                        value={newCatName}
+                        onChange={(e) => setNewCatName(e.target.value)}
+                        required={selectedCategoryId === "NEW"}
+                      />
+                    </div>
+                    <div className={styles.formGroup} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                      <div>
+                        <label className={`mono-text ${styles.label}`}>Mã loại phòng (Code)</label>
+                        <input
+                          className={styles.input}
+                          placeholder="VD: DLX-SEA"
+                          value={newCatCode}
+                          onChange={(e) => setNewCatCode(e.target.value)}
+                          required={selectedCategoryId === "NEW"}
+                        />
+                      </div>
+                      <div>
+                        <label className={`mono-text ${styles.label}`}>Loại hình lưu trú</label>
+                        <select
+                          className={styles.select}
+                          value={newCatType}
+                          onChange={(e) => setNewCatType(e.target.value as AccommodationType)}
+                          required={selectedCategoryId === "NEW"}
+                        >
+                          <option value="ROOM">ROOM (Khách sạn / Villa)</option>
+                          <option value="CAMPING">CAMPING (Cắm trại)</option>
+                          <option value="GLAMPING">GLAMPING (Nghỉ dưỡng lều cao cấp)</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={`mono-text ${styles.label}`}>Giá mỗi đêm (VND)</label>
+                      <input
+                        className={styles.input}
+                        type="number"
+                        min="0"
+                        placeholder="VD: 2500000"
+                        value={newCatPrice}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          setNewCatPrice(val >= 0 ? e.target.value : "0");
+                        }}
+                        required={selectedCategoryId === "NEW"}
+                      />
+                    </div>
+                    <div className={styles.formGroup} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                      <div>
+                        <label className={`mono-text ${styles.label}`}>Khách tối đa</label>
+                        <input
+                          className={styles.input}
+                          type="number"
+                          min="1"
+                          value={newCatGuests}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value, 10);
+                            setNewCatGuests(val >= 1 ? e.target.value : "1");
+                          }}
+                          required={selectedCategoryId === "NEW"}
+                        />
+                      </div>
+                      <div>
+                        <label className={`mono-text ${styles.label}`}>Diện tích (m²)</label>
+                        <input
+                          className={styles.input}
+                          type="number"
+                          min="1"
+                          value={newCatArea}
+                          onChange={(e) => {
+                            const val = parseFloat(e.target.value);
+                            setNewCatArea(val >= 1 ? e.target.value : "1");
+                          }}
+                          required={selectedCategoryId === "NEW"}
+                        />
+                      </div>
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={`mono-text ${styles.label}`}>Mô tả phòng</label>
+                      <textarea
+                        className={styles.input}
+                        style={{ height: "60px", resize: "none" }}
+                        placeholder="Mô tả các tiện nghi, hướng nhìn..."
+                        value={newCatDesc}
+                        onChange={(e) => setNewCatDesc(e.target.value)}
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={`mono-text ${styles.label}`}>Hình ảnh loại phòng</label>
+                      <label className={styles.uploadArea} style={{ height: "100px" }}>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          style={{ display: "none" }}
+                        />
+                        {roomImage ? (
+                          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <img src={roomImage} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          </div>
+                        ) : (
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>cloud_upload</span>
+                            <span style={{ fontSize: "0.75rem" }}>Tải ảnh loại phòng</span>
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  // Read-only category details if existing category is selected
+                  selectedCategoryId && (
+                    <div style={{ border: "1px solid var(--color-whisper-border)", padding: "0.75rem 1rem", borderRadius: "var(--rounded-lg)", backgroundColor: "var(--color-surface-dim, #f9fafb)", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                      <div>
+                        <p style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", textTransform: "uppercase" }}>Thông tin Loại phòng</p>
+                        <p style={{ fontWeight: "bold", fontSize: "0.95rem" }}>
+                          Giá: {getCategoryDetails(selectedCategoryId)?.basePrice?.toLocaleString("vi-VN")} VND / đêm
+                        </p>
+                      </div>
+                      {getCategoryDetails(selectedCategoryId)?.images?.[0]?.url && (
+                        <img 
+                          src={getCategoryDetails(selectedCategoryId)?.images?.[0]?.url} 
+                          alt="Category preview" 
+                          style={{ width: "60px", height: "45px", borderRadius: "4px", objectFit: "cover" }} 
+                        />
+                      )}
+                    </div>
+                  )
+                )}
 
                 <div className={styles.formGroup}>
-                  <label className={`mono-text ${styles.label}`}>Trạng thái</label>
+                  <label className={`mono-text ${styles.label}`}>Trạng thái phòng</label>
                   <div className={styles.selectWrapper}>
                     <select
                       className={styles.select}
@@ -258,52 +432,6 @@ export default function AdminRooms() {
                     </select>
                     <span className={`material-symbols-outlined ${styles.selectArrow}`}>expand_more</span>
                   </div>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label className={`mono-text ${styles.label}`}>Hình ảnh phòng</label>
-                  <label className={styles.uploadArea}>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      style={{ display: "none" }}
-                    />
-                    {roomImage ? (
-                      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <img src={roomImage} alt="Uploaded preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        <div style={{
-                          position: "absolute",
-                          inset: 0,
-                          backgroundColor: "rgba(0, 0, 0, 0.4)",
-                          color: "#fff",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          opacity: 0,
-                          transition: "opacity 0.2s"
-                        }}
-                        className="hoverOverlay"
-                        >
-                          <span className="material-symbols-outlined" style={{ marginRight: "0.25rem" }}>photo_camera</span>
-                          Thay đổi ảnh
-                        </div>
-                        <style jsx>{`
-                          .hoverOverlay:hover {
-                            opacity: 1 !important;
-                          }
-                        `}</style>
-                      </div>
-                    ) : (
-                      <>
-                        <div className={styles.uploadIconWrapper}>
-                          <span className={`material-symbols-outlined ${styles.uploadIcon}`}>cloud_upload</span>
-                        </div>
-                        <p className={styles.uploadTitle}>Chọn ảnh tải lên</p>
-                        <p className={styles.uploadLimit}>Hỗ trợ JPG, PNG (Tối đa 5MB)</p>
-                      </>
-                    )}
-                  </label>
                 </div>
               </div>
               <div className={styles.modalFooter}>
