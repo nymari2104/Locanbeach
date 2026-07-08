@@ -20,6 +20,24 @@ Table users {
 }
 
 // ─────────────────────────────────────────
+// GUESTS (Guest Profiles)
+// ─────────────────────────────────────────
+Table guests {
+  id uuid [pk, default: `gen_random_uuid()`]
+  full_name varchar(100) [not null]
+  dob date
+  gender varchar(20)
+  nationality varchar(50)
+  id_type guest_id_type
+  id_number varchar(50)
+  phone varchar(20)
+  email varchar(100)
+  preferences text
+  created_at timestamptz [default: `now()`]
+  updated_at timestamptz [default: `now()`]
+}
+
+// ─────────────────────────────────────────
 // ACCOMMODATION CATEGORIES (Shared data)
 // ─────────────────────────────────────────
 Table accommodation_categories {
@@ -106,21 +124,41 @@ Table combo_images {
 Table bookings {
   id uuid [pk, default: `gen_random_uuid()`]
   accommodation_id uuid [not null, ref: > accommodations.id]
+  primary_guest_id uuid [ref: > guests.id]
   confirmed_by uuid [ref: > users.id]
   guest_name varchar(100) [not null]
   guest_phone varchar(20) [not null]
   guest_email varchar(100)
   checkin_date timestamptz [not null]
   checkout_date timestamptz [not null]
+  actual_checkin_at timestamptz
+  actual_checkout_at timestamptz
+  late_checkout_requested timestamptz
   guests_count int [not null, default: 1]
   total_amount decimal(12,2) [not null]
   deposit_amount decimal(12,2)
+  incidentals_amount decimal(12,2) [default: 0]
   status booking_status [not null, default: 'PENDING_DEPOSIT']
   notes text
+  registration_form_url text
+  invoice_url text
   cancelled_at timestamptz
   cancelled_reason text
   created_at timestamptz [default: `now()`]
   updated_at timestamptz [default: `now()`]
+}
+
+// ─────────────────────────────────────────
+// BOOKING GUESTS (Check-in details for each guest)
+// ─────────────────────────────────────────
+Table booking_guests {
+  id uuid [pk, default: `gen_random_uuid()`]
+  booking_id uuid [not null, ref: > bookings.id]
+  guest_id uuid [not null, ref: > guests.id]
+  is_primary boolean [default: false]
+  face_image_url text
+  id_card_image_url text
+  created_at timestamptz [default: `now()`]
 }
 
 // ─────────────────────────────────────────
@@ -209,6 +247,12 @@ Table booking_combos {
 // =========================================
 // ENUMS
 // =========================================
+Enum guest_id_type {
+  CCCD
+  PASSPORT
+  BIRTH_CERTIFICATE
+}
+
 Enum accommodation_type {
   ROOM
   CAMPING
