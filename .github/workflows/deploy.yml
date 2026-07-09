@@ -27,6 +27,6 @@ jobs:
             git pull origin main
             
             # Chạy Docker Compose tại thư mục gốc (đã gộp chung Backend & Chatbot)
-            docker-compose -f docker-compose.aws.yml up -d --build
+            docker compose -f docker-compose.aws.yml up -d --build
             
             echo "Deployment finished successfully!"
