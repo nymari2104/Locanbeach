@@ -21,13 +21,12 @@ jobs:
             echo "Starting deployment process..."
             
             # Di chuyển vào thư mục dự án trên AWS
-            cd ~/chatbot
+            cd ~/Locanbeach
             
             # Kéo code mới nhất từ GitHub về
             git pull origin main
             
-            # Di chuyển vào thư mục Chatbot và chạy lại Docker Compose
-            cd Chatbot
-            docker-compose -f docker-compose.aws.yml up -d
+            # Chạy Docker Compose tại thư mục gốc (đã gộp chung Backend & Chatbot)
+            docker-compose -f docker-compose.aws.yml up -d --build
             
             echo "Deployment finished successfully!"

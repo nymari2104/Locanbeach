@@ -15,7 +15,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-hotel_chatbot}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-db:/docker-entrypoint-initdb.d
+      - ./Chatbot/init-db:/docker-entrypoint-initdb.d
     ports:
       - "127.0.0.1:5432:5432"
     healthcheck:
@@ -23,6 +23,28 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - hotel-chatbot-net
+
+  # ── Spring Boot Backend ──
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: hotel-chatbot-backend
+    restart: always
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-hotel_chatbot}
+      POSTGRES_USER: ${POSTGRES_USER:-hotel_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-your_secure_password_here}
+      # Có thể truyền thêm các env khác của Spring Boot nếu cần
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - hotel-chatbot-net
 
@@ -68,7 +90,7 @@ services:
       - 1.1.1.1
     volumes:
       - n8n_data:/home/node/.n8n
-      - ./knowledge:/home/node/knowledge
+      - ./Chatbot/knowledge:/home/node/knowledge
     depends_on:
       postgres:
         condition: service_healthy
@@ -85,7 +107,7 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./Chatbot/Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
