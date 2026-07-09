@@ -27,6 +27,10 @@ public class SearchService {
 
     @Transactional(readOnly = true)
     public List<SearchCategoryResultResponse> searchAvailableCategories(SearchAvailableRequest request) {
+        if (request.getCheckinDate().toLocalDate().isBefore(java.time.LocalDate.now())) {
+            throw new AppException(GeneralErrorCode.INVALID_INPUT, "Check-in date must be today or in the future");
+        }
+
         if (!request.getCheckoutDate().isAfter(request.getCheckinDate())) {
             throw new AppException(GeneralErrorCode.INVALID_INPUT, "Check-out date must be after check-in date");
         }
