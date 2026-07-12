@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import SideNavBar from "@/components/admin/SideNavBar";
 import styles from "./layout.module.css";
 
@@ -6,10 +9,15 @@ export default function AdminLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
   return (
     <div className={styles.adminWrapper}>
-      <SideNavBar />
-      <main className={styles.adminMain}>
+      <SideNavBar 
+        isCollapsed={isSidebarCollapsed} 
+        onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+      />
+      <main className={`${styles.adminMain} ${isSidebarCollapsed ? styles.adminMainCollapsed : ''}`}>
         {/* Mobile Header */}
         <header className={styles.mobileHeader}>
           <div className={styles.mobileBrand}>

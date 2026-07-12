@@ -6,7 +6,8 @@ import Link from "next/link";
 import { apiGet } from "@/lib/api";
 import { 
   AccommodationCategoryDTO, 
-  SearchCategoryResultResponse
+  SearchCategoryResultResponse,
+  AmenityDTO
 } from "@/types/api";
 
 export default function Book() {
@@ -21,6 +22,13 @@ export default function Book() {
   const [guests, setGuests] = useState("2");
   const [selectedCatId, setSelectedCatId] = useState("ALL");
 
+  // Advanced Filters
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [allAmenities, setAllAmenities] = useState<AmenityDTO[]>([]);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(5000000);
+
   useEffect(() => {
     // Set default checkin/checkout dates (today and tomorrow)
     const today = new Date();
@@ -32,8 +40,22 @@ export default function Book() {
 
     async function initData() {
       try {
-        const cats = await apiGet<AccommodationCategoryDTO[]>("/categories");
-        setCategories(cats);
+        let cats: AccommodationCategoryDTO[] = [];
+        try {
+          cats = await apiGet<AccommodationCategoryDTO[]>("/categories");
+          console.log("Categories fetched:", cats);
+          setCategories(cats);
+        } catch (catErr) {
+          console.error("Failed to fetch categories:", catErr);
+        }
+
+        try {
+          const amenitiesData = await apiGet<AmenityDTO[]>("/amenities");
+          console.log("Amenities fetched:", amenitiesData);
+          setAllAmenities(amenitiesData);
+        } catch (amErr) {
+          console.error("Failed to fetch amenities:", amErr);
+        }
         
         // Read URL query parameters safely on mount
         const params = new URLSearchParams(window.location.search);
@@ -52,7 +74,8 @@ export default function Book() {
           maxGuests: c.maxGuests,
           areaSqm: c.areaSqm,
           availableRoomsCount: 5, // fallback count
-          images: c.images
+          images: c.images,
+          amenities: c.amenities
         }));
         setSearchResults(mappedResults);
       } catch (error) {
@@ -63,6 +86,23 @@ export default function Book() {
     }
     initData();
   }, []);
+
+  const resetFilters = () => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    setCheckin(today.toISOString().split("T")[0]);
+    setCheckout(tomorrow.toISOString().split("T")[0]);
+    setGuests("2");
+    setSelectedCatId("ALL");
+    setMinPrice(0);
+    setMaxPrice(5000000);
+    setSelectedAmenities([]);
+    
+    // Optionally auto-submit search after resetting, or just let user click search again.
+    // For now, just resetting the form fields is enough.
+  };
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +118,15 @@ export default function Book() {
       if (selectedCatId !== "ALL") {
         url += `&categoryId=${selectedCatId}`;
       }
+      if (minPrice > 0) {
+        url += `&minPrice=${minPrice}`;
+      }
+      if (maxPrice > 0 && maxPrice < 10000000) {
+        url += `&maxPrice=${maxPrice}`;
+      }
+      selectedAmenities.forEach(amId => {
+        url += `&amenityIds=${amId}`;
+      });
 
       const results = await apiGet<SearchCategoryResultResponse[]>(url);
       setSearchResults(results);
@@ -89,7 +138,7 @@ export default function Book() {
   };
 
   return (
-    <div className={styles.container} style={{ paddingTop: "2rem", paddingBottom: "var(--spacing-section-gap)" }}>
+    <div className={styles.container}>
       {/* Hero / Filter Section */}
       <section className={styles.heroFilterSection}>
         <div className={styles.heroText}>
@@ -171,6 +220,121 @@ export default function Book() {
               <span>{searching ? "Đang tìm..." : "Tìm kiếm phòng"}</span>
             </button>
           </form>
+
+          {/* Advanced Filters Toggle & Reset */}
+          <div className={styles.advancedToggleWrapper}>
+            <button 
+              type="button" 
+              className={`mono-text ${styles.advancedToggleBtn}`}
+              onClick={() => setShowAdvanced(!showAdvanced)}
+            >
+              <span className="material-symbols-outlined">tune</span>
+              {showAdvanced ? "Ẩn bộ lọc nâng cao" : "Bộ lọc nâng cao"}
+            </button>
+            <button 
+              type="button" 
+              className={`mono-text ${styles.resetFilterBtn}`}
+              onClick={resetFilters}
+            >
+              <span className="material-symbols-outlined">refresh</span>
+              Đặt lại
+            </button>
+          </div>
+
+          {/* Advanced Filters Panel */}
+          {showAdvanced && (
+            <div className={styles.advancedPanel}>
+              <div className={styles.advancedGrid}>
+                {/* Price Range Filter */}
+                <div className={styles.filterSection}>
+                  <label className={`mono-text ${styles.filterTitle}`}>Khoảng giá (VND / đêm)</label>
+                  
+                  <div className={styles.priceInputsRow}>
+                    <div className={styles.inputWrapper}>
+                      <input 
+                        type="number" 
+                        className={styles.input} 
+                        style={{ paddingLeft: "1rem" }}
+                        value={minPrice} 
+                        onChange={(e) => setMinPrice(Number(e.target.value))}
+                        min="0"
+                        step="50000"
+                        placeholder="Từ..."
+                      />
+                    </div>
+                    <span className={styles.priceSeparator}>-</span>
+                    <div className={styles.inputWrapper}>
+                      <input 
+                        type="number" 
+                        className={styles.input} 
+                        style={{ paddingLeft: "1rem" }}
+                        value={maxPrice} 
+                        onChange={(e) => setMaxPrice(Number(e.target.value))}
+                        min="0"
+                        step="50000"
+                        placeholder="Đến..."
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.priceSliders}>
+                    <input 
+                      type="range" 
+                      className={styles.slider} 
+                      min="0" 
+                      max="10000000" 
+                      step="100000" 
+                      value={minPrice} 
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        if (val <= maxPrice) setMinPrice(val);
+                      }}
+                    />
+                    <input 
+                      type="range" 
+                      className={styles.slider} 
+                      min="0" 
+                      max="10000000" 
+                      step="100000" 
+                      value={maxPrice} 
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        if (val >= minPrice) setMaxPrice(val);
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Amenities Filter */}
+                <div className={styles.filterSection}>
+                  <label className={`mono-text ${styles.filterTitle}`}>Tiện ích phòng</label>
+                  <div className={styles.amenitiesGrid}>
+                    {allAmenities.map(amenity => (
+                      <label key={amenity.id} className={styles.amenityCheckbox}>
+                        <input 
+                          type="checkbox"
+                          checked={selectedAmenities.includes(amenity.id!)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedAmenities([...selectedAmenities, amenity.id!]);
+                            } else {
+                              setSelectedAmenities(selectedAmenities.filter(id => id !== amenity.id));
+                            }
+                          }}
+                        />
+                        <span className={styles.checkmark}></span>
+                        <span className={`material-symbols-outlined ${styles.amenityIcon}`}>{amenity.icon || 'check_circle'}</span>
+                        <span className={styles.amenityName}>{amenity.name}</span>
+                      </label>
+                    ))}
+                    {allAmenities.length === 0 && (
+                      <span className="mono-text" style={{ fontSize: "0.85rem", color: "var(--color-muted-slate)" }}>Không có tiện ích nào.</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -226,9 +390,19 @@ export default function Book() {
                           <span className={`material-symbols-outlined ${styles.specIcon}`}>bed</span> Trống: {room.availableRoomsCount} phòng
                         </span>
                       </div>
-                      <p style={{ fontSize: "0.875rem", color: "var(--color-on-surface-variant)", marginTop: "0.5rem" }}>
+                      <p className={styles.roomDescription} title={room.description}>
                         {room.description}
                       </p>
+                      
+                      {room.amenities && room.amenities.length > 0 && (
+                        <div className={styles.amenities} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '1rem' }}>
+                          {room.amenities.map(a => (
+                            <div key={a.id} title={a.name} style={{ display: 'flex', alignItems: 'center', color: 'var(--color-steel-secondary)' }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>{a.icon}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className={styles.roomActions}>
                       <div className={styles.priceWrapper}>

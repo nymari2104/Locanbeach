@@ -1,0 +1,245 @@
+.container {
+  display: flex;
+  margin: -1rem;
+  /* Mobile padding negation */
+  height: calc(100vh - 64px);
+  background-color: #f8f9fa;
+}
+
+@media (min-width: 768px) {
+  .container {
+    margin: calc(var(--spacing-container-padding) * -1);
+    height: 100vh;
+  }
+}
+
+.sidebar {
+  width: 250px;
+  background-color: white;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarHeader {
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  border-bottom: 1px solid #e0e0e0;
+  color: var(--color-on-surface);
+  padding: 1.4rem;
+}
+
+.tabList {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0;
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-on-surface-variant);
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  border-left: 3px solid transparent;
+}
+
+.tab:hover {
+  background-color: #f0f4f8;
+}
+
+.activeTab {
+  background-color: #e3f2fd;
+  color: var(--color-primary);
+  border-left: 3px solid var(--color-primary);
+  font-weight: 500;
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topBar {
+  padding: 1.5rem;
+  background-color: white;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filterRow {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.actionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.searchInput {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  width: 250px;
+  outline: none;
+  font-size: 0.875rem;
+}
+
+.searchInput:focus {
+  border-color: var(--color-primary);
+}
+
+.dateInput {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  outline: none;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.selectInput {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  outline: none;
+  font-size: 0.875rem;
+  background-color: white;
+  color: #374151;
+  min-width: 150px;
+}
+
+.selectInput:focus {
+  border-color: var(--color-primary);
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btnPrimary {
+  background-color: var(--color-primary);
+  color: white;
+}
+.btnPrimary:hover {
+  background-color: #1565c0;
+}
+
+.btnOutline {
+  background-color: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+.btnOutline:hover {
+  background-color: #f3f4f6;
+}
+
+.btnDanger {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+.btnDanger:hover {
+  background-color: #fecaca;
+}
+
+.contentBody {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.tableWrapper {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: collapse;
+}
+
+.table th {
+  background-color: #f3f4f6;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+  color: #1f2937;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover {
+  background-color: #f9fafb;
+}
+
+.statusBadge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status_CONFIRMED {
+  background-color: #e0f2f1;
+  color: #00796b;
+}
+
+.status_CHECKED_IN {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status_CHECKED_OUT {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.status_PENDING_DEPOSIT {
+  background-color: #fff8e1;
+  color: #f57f17;
+}
+
+.status_CANCELLED {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.status_COMPLETED {
+  background-color: #ede7f6;
+  color: #4527a0;
+}

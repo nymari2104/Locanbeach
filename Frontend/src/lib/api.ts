@@ -1,9 +1,15 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
-
 export interface ApiResponse<T> {
   code: string;
   data: T;
   message: string;
+}
+
+export function getBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    const savedUrl = localStorage.getItem('API_BASE_URL');
+    if (savedUrl) return savedUrl;
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -32,7 +38,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(`${getBaseUrl()}${path}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -42,7 +48,7 @@ export async function apiGet<T>(path: string): Promise<T> {
 }
 
 export async function apiPost<T>(path: string, body: any): Promise<T> {
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(`${getBaseUrl()}${path}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -53,7 +59,7 @@ export async function apiPost<T>(path: string, body: any): Promise<T> {
 }
 
 export async function apiPut<T>(path: string, body: any): Promise<T> {
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(`${getBaseUrl()}${path}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -64,7 +70,7 @@ export async function apiPut<T>(path: string, body: any): Promise<T> {
 }
 
 export async function apiPatch<T>(path: string, body: any): Promise<T> {
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(`${getBaseUrl()}${path}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -75,7 +81,7 @@ export async function apiPatch<T>(path: string, body: any): Promise<T> {
 }
 
 export async function apiDelete<T>(path: string): Promise<T> {
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(`${getBaseUrl()}${path}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -98,7 +104,7 @@ export async function apiUploadImage<T>(
   formData.append('isCover', String(isCover));
   formData.append('sortOrder', String(sortOrder));
 
-  const response = await fetch(`${BASE_URL}/images/upload`, {
+  const response = await fetch(`${getBaseUrl()}/images/upload`, {
     method: 'POST',
     body: formData,
   });

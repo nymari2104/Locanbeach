@@ -11,6 +11,10 @@
 @media (min-width: 768px) {
   .adminMain {
     margin-left: 18rem; /* Match sidebar width */
+    transition: margin-left 0.3s ease;
+  }
+  .adminMainCollapsed {
+    margin-left: 5rem; /* Match collapsed sidebar width */
   }
 }
 

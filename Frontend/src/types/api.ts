@@ -116,3 +116,18 @@ export interface ConfirmBookingResponse {
   depositAmount: number;
   status: string;
 }
+
+export type BookingStatus = 'PENDING_DEPOSIT' | 'CONFIRMED' | 'CHECKED_IN' | 'CHECKED_OUT' | 'COMPLETED' | 'CANCELLED';
+
+export interface PageResponse<T> {
+  content: T[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+  };
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
+  size: number;
+  number: number;
+}

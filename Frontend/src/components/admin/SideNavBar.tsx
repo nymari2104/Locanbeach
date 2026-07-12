@@ -4,11 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./SideNavBar.module.css";
 
-export default function SideNavBar() {
+export default function SideNavBar({ isCollapsed = false, onToggle }: { isCollapsed?: boolean, onToggle?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <nav className={styles.sidebar}>
+    <nav className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
+      {/* Toggle Button */}
+      <button className={styles.toggleBtn} onClick={onToggle}>
+        <span className="material-symbols-outlined">
+          {isCollapsed ? 'chevron_right' : 'chevron_left'}
+        </span>
+      </button>
+
       {/* Header Profile */}
       <div className={styles.header}>
         <div className={styles.avatarWrapper}>
@@ -28,9 +35,9 @@ export default function SideNavBar() {
 
       {/* CTA Button */}
       <Link href="/admin/rooms/new" style={{ width: "100%" }}>
-        <button className={styles.ctaButton}>
+        <button className={styles.ctaButton} title="Thêm phòng mới">
           <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>add</span>
-          Thêm phòng mới
+          {!isCollapsed && <span>Thêm phòng mới</span>}
         </button>
       </Link>
 
@@ -38,63 +45,78 @@ export default function SideNavBar() {
       <div className={styles.navLinks}>
         <Link
           href="/admin"
+          title="Bảng điều khiển"
           className={`${styles.navLink} ${pathname === "/admin" ? styles.active : ""}`}
         >
           <span className="material-symbols-outlined">dashboard</span>
-          <span>Bảng điều khiển</span>
+          {!isCollapsed && <span>Bảng điều khiển</span>}
+        </Link>
+
+        <Link
+          href="/admin/bookings"
+          title="Quản lý đặt phòng"
+          className={`${styles.navLink} ${pathname.startsWith("/admin/bookings") ? styles.active : ""}`}
+        >
+          <span className="material-symbols-outlined">book_online</span>
+          {!isCollapsed && <span>Quản lý đặt phòng</span>}
         </Link>
 
         <Link
           href="/admin/categories"
+          title="Quản lý hạng phòng"
           className={`${styles.navLink} ${pathname.startsWith("/admin/categories") ? styles.active : ""}`}
         >
           <span className="material-symbols-outlined">meeting_room</span>
-          <span>Quản lý hạng phòng</span>
+          {!isCollapsed && <span>Quản lý hạng phòng</span>}
         </Link>
 
 
         <Link
           href="/admin/rooms"
+          title="Quản lý phòng"
           className={`${styles.navLink} ${pathname.startsWith("/admin/rooms") ? styles.active : ""}`}
         >
           <span className="material-symbols-outlined">bed</span>
-          <span>Quản lý phòng</span>
+          {!isCollapsed && <span>Quản lý phòng</span>}
         </Link>
 
         <Link
           href="/admin/events"
+          title="Sự kiện & Combo"
           className={`${styles.navLink} ${pathname.startsWith("/admin/events") ? styles.active : ""}`}
         >
           <span className="material-symbols-outlined">event</span>
-          <span>Sự kiện & Combo</span>
+          {!isCollapsed && <span>Sự kiện & Combo</span>}
         </Link>
 
         <Link
           href="/admin/services"
+          title="Tiện ích & Dịch vụ"
           className={`${styles.navLink} ${pathname.startsWith("/admin/services") ? styles.active : ""}`}
         >
           <span className="material-symbols-outlined">room_service</span>
-          <span>Tiện ích & Dịch vụ</span>
+          {!isCollapsed && <span>Tiện ích & Dịch vụ</span>}
         </Link>
 
         <Link
           href="/admin/reports"
+          title="Báo cáo"
           className={`${styles.navLink} ${pathname.startsWith("/admin/reports") ? styles.active : ""}`}
         >
           <span className="material-symbols-outlined">analytics</span>
-          <span>Báo cáo</span>
+          {!isCollapsed && <span>Báo cáo</span>}
         </Link>
       </div>
 
       {/* Footer Navigation */}
       <div className={styles.footerNav}>
-        <Link href="/admin/settings" className={styles.navLinkFooter}>
+        <Link href="/admin/settings" title="Cài đặt" className={styles.navLinkFooter}>
           <span className="material-symbols-outlined">settings</span>
-          <span>Cài đặt</span>
+          {!isCollapsed && <span>Cài đặt</span>}
         </Link>
-        <Link href="/" className={`${styles.navLinkFooter} ${styles.logout}`}>
+        <Link href="/" title="Thoát Admin" className={`${styles.navLinkFooter} ${styles.logout}`}>
           <span className="material-symbols-outlined">logout</span>
-          <span>Thoát Admin</span>
+          {!isCollapsed && <span>Thoát Admin</span>}
         </Link>
       </div>
     </nav>
