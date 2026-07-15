@@ -1,918 +1,2880 @@
 {
-	"info": {
-		"_postman_id": "d9b28f89-8d63-4b6d-a365-27a3c7b39678",
-		"name": "The House Resort API (Full Tests)",
-		"description": "Full Postman collection for The House Resort with automated tests and variable chaining.",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"auth": {
-		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{jwtToken}}",
-				"type": "string"
-			}
-		]
-	},
-	"item": [
-		{
-			"name": "0. Authentication",
-			"item": [
-				{
-					"name": "Login Admin",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Login successful', function () {",
-									"    pm.response.to.have.status(200);",
-									"    const res = pm.response.json();",
-									"    pm.expect(res.data).to.have.property('accessToken');",
-									"    pm.collectionVariables.set('jwtToken', res.data.accessToken);",
-									"    console.log('🔑 JWT Token saved successfully!');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin123\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/login",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"login"
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Profile (Me)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/me",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"me"
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "1. Categories",
-			"item": [
-				{
-					"name": "Get All Categories",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/categories",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"categories"
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Category By ID",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"categories",
-								"{{categoryId}}"
-							]
-						}
-					}
-				},
-				{
-					"name": "Create Category",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 201 or 200', function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-									"});",
-									"",
-									"pm.test('Category created and ID saved', function () {",
-									"    const res = pm.response.json();",
-									"    pm.expect(res.data).to.have.property('id');",
-									"    pm.collectionVariables.set('categoryId', res.data.id);",
-									"    console.log('✅ Saved categoryId: ' + res.data.id);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Phòng Deluxe Hướng Biển\",\n    \"code\": \"DLX-SEA-{{$randomInt}}\",\n    \"type\": \"ROOM\",\n    \"description\": \"Phòng tiêu chuẩn có ban công nhìn ra biển.\",\n    \"basePrice\": 1500000,\n    \"maxGuests\": 2,\n    \"areaSqm\": 35.5\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/categories",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"categories"
-							]
-						}
-					}
-				},
-				{
-					"name": "Update Category",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Phòng Deluxe Hướng Biển (Updated)\",\n    \"code\": \"DLX-SEA-UPD\",\n    \"type\": \"ROOM\",\n    \"description\": \"Phòng Deluxe hướng biển cực đẹp.\",\n    \"basePrice\": 1800000,\n    \"maxGuests\": 2,\n    \"areaSqm\": 38.0\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"categories",
-								"{{categoryId}}"
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "2. Accommodations",
-			"item": [
-				{
-					"name": "Get All Accommodations",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/accommodations",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"accommodations"
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Accommodation By ID",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/accommodations/{{accommodationId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"accommodations",
-								"{{accommodationId}}"
-							]
-						}
-					}
-				},
-				{
-					"name": "Create Accommodation",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Accommodation created', function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-									"    const res = pm.response.json();",
-									"    pm.collectionVariables.set('accommodationId', res.data.id);",
-									"    console.log('✅ Saved accommodationId: ' + res.data.id);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"categoryId\": \"{{categoryId}}\",\n    \"code\": \"ROOM-{{$randomInt}}\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/accommodations",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"accommodations"
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "3. Search & Booking",
-			"item": [
-				{
-					"name": "Search Available Rooms",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"const today = new Date();",
-									"let tomorrow = new Date(today);",
-									"tomorrow.setDate(tomorrow.getDate() + 1);",
-									"let nextWeek = new Date(today);",
-									"nextWeek.setDate(nextWeek.getDate() + 3);",
-									"",
-									"pm.collectionVariables.set('checkinDate', tomorrow.toISOString().split('T')[0] + 'T14:00:00');",
-									"pm.collectionVariables.set('checkoutDate', nextWeek.toISOString().split('T')[0] + 'T12:00:00');"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Search successful', function () {",
-									"    pm.response.to.have.status(200);",
-									"    const res = pm.response.json();",
-									"    pm.expect(res.data).to.be.an('array');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/search/accommodations?checkinDate={{checkinDate}}&checkoutDate={{checkoutDate}}&guestsCount=2&minPrice=0&maxPrice=5000000&type=ROOM",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"search",
-								"accommodations"
-							],
-							"query": [
-								{
-									"key": "checkinDate",
-									"value": "{{checkinDate}}"
-								},
-								{
-									"key": "checkoutDate",
-									"value": "{{checkoutDate}}"
-								},
-								{
-									"key": "guestsCount",
-									"value": "2"
-								},
-								{
-									"key": "minPrice",
-									"value": "0"
-								},
-								{
-									"key": "maxPrice",
-									"value": "5000000"
-								},
-								{
-									"key": "type",
-									"value": "ROOM"
-								},
-								{
-									"key": "amenityIds",
-									"value": "",
-									"description": "Optional: danh sách UUID tiện ích, phân tách bằng dấu phẩy",
-									"disabled": true
-								}
-							]
-						}
-					}
-				},
-				{
-					"name": "Hold Room (10 mins)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Hold created successfully', function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-									"    const res = pm.response.json();",
-									"    pm.expect(res.data).to.have.property('holdId');",
-									"    pm.collectionVariables.set('holdId', res.data.holdId);",
-									"    console.log('✅ Saved holdId: ' + res.data.holdId);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"categoryId\": \"{{categoryId}}\",\n    \"checkinDate\": \"{{checkinDate}}\",\n    \"checkoutDate\": \"{{checkoutDate}}\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/bookings/hold",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"bookings",
-								"hold"
-							]
-						}
-					}
-				},
-				{
-					"name": "Confirm Booking",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Booking confirmed successfully', function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-									"    const res = pm.response.json();",
-									"    pm.expect(res.data).to.have.property('bookingId');",
-									"    pm.expect(res.data.status).to.eql('PENDING_DEPOSIT');",
-									"    pm.collectionVariables.set('bookingId', res.data.bookingId);",
-									"    console.log('✅ Booking successfully confirmed! Booking ID: ' + res.data.bookingId);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"holdId\": \"{{holdId}}\",\n    \"guestName\": \"Nguyen Van A\",\n    \"guestPhone\": \"0987654321\",\n    \"guestEmail\": \"a@example.com\",\n    \"guestsCount\": 2,\n    \"notes\": \"Khách đến trễ\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/bookings/confirm",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"bookings",
-								"confirm"
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "4. Services",
-			"item": [
-				{
-					"name": "Get All Services",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/services",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"services"
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Service By ID",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/services/{{serviceId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"services",
-								"{{serviceId}}"
-							]
-						}
-					}
-				},
-				{
-					"name": "Create Service",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Service created', function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-									"    const res = pm.response.json();",
-									"    pm.collectionVariables.set('serviceId', res.data.id);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Spa Body Massage\",\n    \"group\": \"SPA\",\n    \"description\": \"Massage toàn thân 60 phút\",\n    \"price\": 500000,\n    \"operatingHours\": \"09:00 - 22:00\",\n    \"status\": \"ACTIVE\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/services",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"services"
-							]
-						}
-					}
-				},
-				{
-					"name": "Update Service",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Spa Body Massage (Updated)\",\n    \"group\": \"SPA\",\n    \"description\": \"Massage toàn thân 90 phút\",\n    \"price\": 700000,\n    \"operatingHours\": \"08:00 - 22:00\",\n    \"status\": \"ACTIVE\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/services/{{serviceId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"services",
-								"{{serviceId}}"
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "5. Combos",
-			"item": [
-				{
-					"name": "Get All Combos",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/combos",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"combos"
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Combo By ID",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/combos/{{comboId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"combos",
-								"{{comboId}}"
-							]
-						}
-					}
-				},
-				{
-					"name": "Create Combo",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Combo created', function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-									"    const res = pm.response.json();",
-									"    pm.collectionVariables.set('comboId', res.data.id);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Combo Trăng Mật\",\n    \"type\": \"COMBO\",\n    \"description\": \"Combo đặc biệt cho cặp đôi gồm phòng nghỉ và spa\",\n    \"price\": 2000000,\n    \"startDate\": \"2026-08-01\",\n    \"endDate\": \"2026-08-31\",\n    \"status\": \"ACTIVE\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/combos",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"combos"
-							]
-						}
-					}
-				},
-				{
-					"name": "Update Combo",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Combo Trăng Mật (Updated)\",\n    \"type\": \"COMBO\",\n    \"description\": \"Combo đặc biệt nâng cấp phòng Deluxe\",\n    \"price\": 2500000,\n    \"startDate\": \"2026-08-01\",\n    \"endDate\": \"2026-08-31\",\n    \"status\": \"ACTIVE\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/combos/{{comboId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"combos",
-								"{{comboId}}"
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "6. Amenities",
-			"item": [
-				{
-					"name": "Get All Amenities",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/amenities",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"amenities"
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Amenity By ID",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/amenities/{{amenityId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"amenities",
-								"{{amenityId}}"
-							]
-						}
-					}
-				},
-				{
-					"name": "Create Amenity",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Amenity created', function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-									"    const res = pm.response.json();",
-									"    pm.collectionVariables.set('amenityId', res.data.id);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Wifi Tốc độ cao\",\n    \"icon\": \"wifi-icon\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/amenities",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"amenities"
-							]
-						}
-					}
-				},
-				{
-					"name": "Update Amenity",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Wifi Tốc độ cao (Updated)\",\n    \"icon\": \"wifi-fast-icon\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/amenities/{{amenityId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"amenities",
-								"{{amenityId}}"
-							]
-						}
-					}
-				},
-				{
-					"name": "Delete Amenity",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/amenities/{{amenityId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"amenities",
-								"{{amenityId}}"
-							]
-						}
-					}
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "http://localhost:8080",
-			"type": "string"
-		},
-		{
-			"key": "jwtToken",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "categoryId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "accommodationId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "checkinDate",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "checkoutDate",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "holdId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "bookingId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "serviceId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "comboId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "amenityId",
-			"value": "",
-			"type": "string"
-		}
-	]
+    "info": {
+        "_postman_id": "d9b28f89-8d63-4b6d-a365-27a3c7b39678",
+        "name": "The House Resort API (Full Tests)",
+        "description": "Full Postman collection for The House Resort with automated tests and variable chaining.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{jwtToken}}",
+                "type": "string"
+            }
+        ]
+    },
+    "item": [
+        {
+            "name": "0. Authentication",
+            "item": [
+                {
+                    "name": "Login Admin",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Login Admin successful', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "    pm.expect(res.data).to.have.property('accessToken');",
+                                    "    pm.expect(res.data.role).to.eql('ADMIN');",
+                                    "    pm.collectionVariables.set('jwtToken', res.data.accessToken);",
+                                    "    console.log('🔑 ADMIN JWT Token saved successfully!');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Login Staff",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Login Staff successful', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "    pm.expect(res.data).to.have.property('accessToken');",
+                                    "    pm.expect(res.data.role).to.eql('STAFF');",
+                                    "    pm.collectionVariables.set('staffToken', res.data.accessToken);",
+                                    "    console.log('🔑 STAFF JWT Token saved successfully!');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"staff01\",\n    \"password\": \"staff123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Profile (Me)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Get profile successful and matches structure', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "    pm.expect(res.data).to.have.property('username');",
+                                    "    pm.expect(res.data).to.have.property('role');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "me"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Test Unauthenticated Request (401 Error)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Returns 401 Unauthorized', function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('UNAUTHORIZED');",
+                                    "    pm.expect(res.message).to.contain('Full authentication');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "me"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "1. Categories",
+            "item": [
+                {
+                    "name": "Create Category",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 201 or 200', function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test('Category created and ID saved', function () {",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.data).to.have.property('id');",
+                                    "    pm.collectionVariables.set('categoryId', res.data.id);",
+                                    "    console.log('✅ Saved categoryId: ' + res.data.id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Phòng Deluxe Hướng Biển\",\n    \"code\": \"DLX-SEA-{{$randomInt}}\",\n    \"type\": \"ROOM\",\n    \"description\": \"Phòng tiêu chuẩn có ban công nhìn ra biển.\",\n    \"basePrice\": 1500000,\n    \"maxGuests\": 2,\n    \"areaSqm\": 35.5\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/categories",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "categories"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get All Categories",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/categories",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "categories"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Category By ID",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "categories",
+                                "{{categoryId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Category",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Phòng Deluxe Hướng Biển (Updated)\",\n    \"code\": \"DLX-SEA-UPD-{{$randomInt}}\",\n    \"type\": \"ROOM\",\n    \"description\": \"Phòng Deluxe hướng biển cực đẹp.\",\n    \"basePrice\": 1800000,\n    \"maxGuests\": 2,\n    \"areaSqm\": 38.0\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "categories",
+                                "{{categoryId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Accommodations",
+            "item": [
+                {
+                    "name": "Create Accommodation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Accommodation created', function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.collectionVariables.set('accommodationId', res.data.id);",
+                                    "    console.log('✅ Saved accommodationId: ' + res.data.id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"categoryId\": \"{{categoryId}}\",\n    \"code\": \"ROOM-{{$randomInt}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/accommodations",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "accommodations"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get All Accommodations",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/accommodations",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "accommodations"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Accommodation By ID",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/accommodations/{{accommodationId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "accommodations",
+                                "{{accommodationId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Search & Booking",
+            "item": [
+                {
+                    "name": "Search Available Rooms",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const today = new Date();",
+                                    "let tomorrow = new Date(today);",
+                                    "tomorrow.setDate(tomorrow.getDate() + 1);",
+                                    "let nextWeek = new Date(today);",
+                                    "nextWeek.setDate(nextWeek.getDate() + 3);",
+                                    "",
+                                    "pm.collectionVariables.set('checkinDate', tomorrow.toISOString().split('T')[0] + 'T14:00:00');",
+                                    "pm.collectionVariables.set('checkoutDate', nextWeek.toISOString().split('T')[0] + 'T12:00:00');"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Search successful', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.data).to.be.an('array');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/search/accommodations?checkinDate={{checkinDate}}&checkoutDate={{checkoutDate}}&guestsCount=2&minPrice=0&maxPrice=5000000&type=ROOM",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "search",
+                                "accommodations"
+                            ],
+                            "query": [
+                                {
+                                    "key": "checkinDate",
+                                    "value": "{{checkinDate}}"
+                                },
+                                {
+                                    "key": "checkoutDate",
+                                    "value": "{{checkoutDate}}"
+                                },
+                                {
+                                    "key": "guestsCount",
+                                    "value": "2"
+                                },
+                                {
+                                    "key": "minPrice",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "maxPrice",
+                                    "value": "5000000"
+                                },
+                                {
+                                    "key": "type",
+                                    "value": "ROOM"
+                                },
+                                {
+                                    "key": "amenityIds",
+                                    "value": "",
+                                    "description": "Optional: danh sách UUID tiện ích, phân tách bằng dấu phẩy",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Hold Room (10 mins)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Hold created successfully', function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.data).to.have.property('holdId');",
+                                    "    pm.collectionVariables.set('holdId', res.data.holdId);",
+                                    "    console.log('✅ Saved holdId: ' + res.data.holdId);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"categoryId\": \"{{categoryId}}\",\n    \"checkinDate\": \"{{checkinDate}}\",\n    \"checkoutDate\": \"{{checkoutDate}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/bookings/hold",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "bookings",
+                                "hold"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Confirm Booking",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Booking confirmed successfully', function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.data).to.have.property('bookingId');",
+                                    "    pm.expect(res.data.status).to.eql('PENDING_DEPOSIT');",
+                                    "    pm.collectionVariables.set('bookingId', res.data.bookingId);",
+                                    "    console.log('✅ Booking successfully confirmed! Booking ID: ' + res.data.bookingId);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"holdId\": \"{{holdId}}\",\n    \"guestName\": \"Nguyen Van A\",\n    \"guestPhone\": \"0987654321\",\n    \"guestEmail\": \"a@example.com\",\n    \"guestsCount\": 2,\n    \"notes\": \"Khách đến trễ\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/bookings/confirm",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "bookings",
+                                "confirm"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4. Services",
+            "item": [
+                {
+                    "name": "Create Service",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Service created', function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.collectionVariables.set('serviceId', res.data.id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Spa Body Massage\",\n    \"group\": \"SPA\",\n    \"description\": \"Massage toàn thân 60 phút\",\n    \"price\": 500000,\n    \"operatingHours\": \"09:00 - 22:00\",\n    \"status\": \"ACTIVE\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/services",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "services"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get All Services",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/services",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "services"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Service By ID",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/services/{{serviceId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "services",
+                                "{{serviceId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Service",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Spa Body Massage (Updated)\",\n    \"group\": \"SPA\",\n    \"description\": \"Massage toàn thân 90 phút\",\n    \"price\": 700000,\n    \"operatingHours\": \"08:00 - 22:00\",\n    \"status\": \"ACTIVE\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/services/{{serviceId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "services",
+                                "{{serviceId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "5. Combos",
+            "item": [
+                {
+                    "name": "Create Combo",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Combo created', function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.collectionVariables.set('comboId', res.data.id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Combo Trăng Mật\",\n    \"type\": \"COMBO\",\n    \"description\": \"Combo đặc biệt cho cặp đôi gồm phòng nghỉ và spa\",\n    \"price\": 2000000,\n    \"startDate\": \"2026-08-01\",\n    \"endDate\": \"2026-08-31\",\n    \"status\": \"ACTIVE\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/combos",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "combos"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get All Combos",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/combos",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "combos"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Combo By ID",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/combos/{{comboId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "combos",
+                                "{{comboId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Combo",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Combo Trăng Mật (Updated)\",\n    \"type\": \"COMBO\",\n    \"description\": \"Combo đặc biệt nâng cấp phòng Deluxe\",\n    \"price\": 2500000,\n    \"startDate\": \"2026-08-01\",\n    \"endDate\": \"2026-08-31\",\n    \"status\": \"ACTIVE\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/combos/{{comboId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "combos",
+                                "{{comboId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "6. Amenities",
+            "item": [
+                {
+                    "name": "Create Amenity",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Amenity created', function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.collectionVariables.set('amenityId', res.data.id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Wifi Tốc độ cao\",\n    \"icon\": \"wifi-icon\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/amenities",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "amenities"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get All Amenities",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/amenities",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "amenities"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Amenity By ID",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/amenities/{{amenityId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "amenities",
+                                "{{amenityId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Amenity",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Wifi Tốc độ cao (Updated)\",\n    \"icon\": \"wifi-fast-icon\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/amenities/{{amenityId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "amenities",
+                                "{{amenityId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "7. Staff APIs (Protected)",
+            "item": [
+                {
+                    "name": "Get Bookings List",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Fetched bookings successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/staff/bookings?page=0&size=10&sortBy=createdAt&direction=desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "bookings"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt"
+                                },
+                                {
+                                    "key": "direction",
+                                    "value": "desc"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Booking Details",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Fetched booking details successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "bookings",
+                                "{{bookingId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Change Booking Status",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status changed successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"CONFIRMED\",\n    \"note\": \"Xác nhận cọc thành công\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "bookings",
+                                "{{bookingId}}",
+                                "status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Staff Check-In Room",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Checked in successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/check-in",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "bookings",
+                                "{{bookingId}}",
+                                "check-in"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Staff Check-Out Room",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Checked out successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/check-out",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "bookings",
+                                "{{bookingId}}",
+                                "check-out"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Guest to Booking",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Added guest successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"fullName\": \"Nguyen Van B\",\n    \"phone\": \"0912345678\",\n    \"email\": \"vanb@example.com\",\n    \"idType\": \"CCCD\",\n    \"idNumber\": \"123456789012\",\n    \"isPrimary\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/guests",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "bookings",
+                                "{{bookingId}}",
+                                "guests"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Service to Booking",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Added service successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"serviceId\": \"{{serviceId}}\",\n    \"quantity\": 2,\n    \"note\": \"Sử dụng lúc tối\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/services",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "bookings",
+                                "{{bookingId}}",
+                                "services"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Combo to Booking",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Added combo successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"comboId\": \"{{comboId}}\",\n    \"quantity\": 1,\n    \"note\": \"Combo honeymoon quà tặng kèm\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/combos",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "bookings",
+                                "{{bookingId}}",
+                                "combos"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Accommodations (Staff View)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Fetched staff accommodations successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/staff/accommodations",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "accommodations"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Change Room Operational Status",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Operational status changed successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"CLEANING\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/staff/accommodations/{{accommodationId}}/operational-status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "accommodations",
+                                "{{accommodationId}}",
+                                "operational-status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Services (Staff Lookup)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Fetched staff lookup services successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/staff/services",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "services"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Combos (Staff Lookup)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Fetched staff lookup combos successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/staff/combos",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "combos"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Check Room Availability (Staff Lookup)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Fetched available accommodations successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/staff/accommodations/availability?startDate={{checkinDate}}&endDate={{checkoutDate}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "accommodations",
+                                "availability"
+                            ],
+                            "query": [
+                                {
+                                    "key": "startDate",
+                                    "value": "{{checkinDate}}"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "{{checkoutDate}}"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "9. Unhappy Cases",
+            "item": [
+                {
+                    "name": "Auth",
+                    "item": [
+                        {
+                            "name": "Login - Wrong Password -> 401 INVALID_CREDENTIALS",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[401] Wrong password returns INVALID_CREDENTIALS\", function () {",
+                                            "    pm.response.to.have.status(401);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"INVALID_CREDENTIALS\");",
+                                            "    console.log(\"ok code=INVALID_CREDENTIALS\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/auth/login",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "login"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"username\": \"admin\", \"password\": \"wrongpassword\"}"
+                                },
+                                "auth": {
+                                    "type": "noauth"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Login - Non-existent User -> 401 INVALID_CREDENTIALS",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[401] Non-existent user returns INVALID_CREDENTIALS\", function () {",
+                                            "    pm.response.to.have.status(401);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"INVALID_CREDENTIALS\");",
+                                            "    console.log(\"ok code=INVALID_CREDENTIALS\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/auth/login",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "login"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"username\": \"ghost_xyz_999\", \"password\": \"abc123\"}"
+                                },
+                                "auth": {
+                                    "type": "noauth"
+                                }
+                            }
+                        },
+                        {
+                            "name": "No Token - Access Protected -> 401",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[401] No token blocked\", function () {",
+                                            "    pm.response.to.have.status(401);",
+                                            "    console.log(\"ok 401 UNAUTHORIZED\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/auth/me",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "me"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Categories",
+                    "item": [
+                        {
+                            "name": "Create Category - Duplicate Code -> 409 CATEGORY_CODE_ALREADY_EXISTS",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[409] Duplicate code returns 409 CATEGORY_CODE_ALREADY_EXISTS\", function () {",
+                                            "    pm.response.to.have.status(409);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"CATEGORY_CODE_ALREADY_EXISTS\");",
+                                            "    console.log(\"ok code=CATEGORY_CODE_ALREADY_EXISTS\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/categories",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "categories"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"name\": \"Trung Code Test\", \"code\": \"DLX-SEA-TEST\", \"type\": \"ROOM\", \"basePrice\": 1000000, \"maxGuests\": 2, \"areaSqm\": 30}"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Category - Not Found -> 404 CATEGORY_NOT_FOUND",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Random UUID returns 404 CATEGORY_NOT_FOUND\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"CATEGORY_NOT_FOUND\");",
+                                            "    console.log(\"ok code=CATEGORY_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/categories/00000000-0000-0000-0000-000000000000",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "categories",
+                                        "00000000-0000-0000-0000-000000000000"
+                                    ]
+                                },
+                                "auth": {
+                                    "type": "noauth"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Update Category - Not Found -> 404 CATEGORY_NOT_FOUND",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Update with fake UUID returns 404 CATEGORY_NOT_FOUND\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"CATEGORY_NOT_FOUND\");",
+                                            "    console.log(\"ok code=CATEGORY_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/categories/00000000-0000-0000-0000-000000000000",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "categories",
+                                        "00000000-0000-0000-0000-000000000000"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"name\": \"Ghost\", \"code\": \"GHOST\", \"type\": \"ROOM\", \"basePrice\": 100000, \"maxGuests\": 1, \"areaSqm\": 20}"
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Accommodations",
+                    "item": [
+                        {
+                            "name": "Create Accommodation - Duplicate Code -> 409",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[409] Duplicate code returns 409 ACCOMMODATION_CODE_ALREADY_EXISTS\", function () {",
+                                            "    pm.response.to.have.status(409);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"ACCOMMODATION_CODE_ALREADY_EXISTS\");",
+                                            "    console.log(\"ok code=ACCOMMODATION_CODE_ALREADY_EXISTS\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/accommodations",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "accommodations"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"categoryId\": \"{{categoryId}}\", \"code\": \"ROOM-DUPE-TEST\"}"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Create Accommodation - Category Not Found -> 404",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Invalid categoryId returns 404 CATEGORY_NOT_FOUND\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"CATEGORY_NOT_FOUND\");",
+                                            "    console.log(\"ok code=CATEGORY_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/accommodations",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "accommodations"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"categoryId\": \"00000000-0000-0000-0000-000000000000\", \"code\": \"ROOM-GHOST-999\"}"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Accommodation - Not Found -> 404",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Non-existent accommodation returns 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"ACCOMMODATION_NOT_FOUND\");",
+                                            "    console.log(\"ok code=ACCOMMODATION_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/accommodations/00000000-0000-0000-0000-000000000000",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "accommodations",
+                                        "00000000-0000-0000-0000-000000000000"
+                                    ]
+                                },
+                                "auth": {
+                                    "type": "noauth"
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Services",
+                    "item": [
+                        {
+                            "name": "Create Service - Duplicate Name -> 409 SERVICE_NAME_ALREADY_EXISTS",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[409] Duplicate name returns 409 SERVICE_NAME_ALREADY_EXISTS\", function () {",
+                                            "    pm.response.to.have.status(409);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"SERVICE_NAME_ALREADY_EXISTS\");",
+                                            "    console.log(\"ok code=SERVICE_NAME_ALREADY_EXISTS\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/services",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "services"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"name\": \"Spa Body Massage\", \"group\": \"SPA\", \"description\": \"Dupe\", \"price\": 100000, \"status\": \"ACTIVE\"}"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Service - Not Found -> 404 SERVICE_NOT_FOUND",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Non-existent service returns 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"SERVICE_NOT_FOUND\");",
+                                            "    console.log(\"ok code=SERVICE_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/services/00000000-0000-0000-0000-000000000000",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "services",
+                                        "00000000-0000-0000-0000-000000000000"
+                                    ]
+                                },
+                                "auth": {
+                                    "type": "noauth"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Update Service - Not Found -> 404 SERVICE_NOT_FOUND",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Update non-existent service returns 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"SERVICE_NOT_FOUND\");",
+                                            "    console.log(\"ok code=SERVICE_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/services/00000000-0000-0000-0000-000000000000",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "services",
+                                        "00000000-0000-0000-0000-000000000000"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"name\": \"Ghost Service\", \"group\": \"SPA\", \"price\": 100000, \"status\": \"ACTIVE\"}"
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Combos",
+                    "item": [
+                        {
+                            "name": "Get Combo - Not Found -> 404 COMBO_NOT_FOUND",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Non-existent combo returns 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"COMBO_NOT_FOUND\");",
+                                            "    console.log(\"ok code=COMBO_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/combos/00000000-0000-0000-0000-000000000000",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "combos",
+                                        "00000000-0000-0000-0000-000000000000"
+                                    ]
+                                },
+                                "auth": {
+                                    "type": "noauth"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Update Combo - Not Found -> 404 COMBO_NOT_FOUND",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Update non-existent combo returns 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"COMBO_NOT_FOUND\");",
+                                            "    console.log(\"ok code=COMBO_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/combos/00000000-0000-0000-0000-000000000000",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "combos",
+                                        "00000000-0000-0000-0000-000000000000"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"name\": \"Ghost Combo\", \"type\": \"COMBO\", \"price\": 100000, \"status\": \"ACTIVE\"}"
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Amenities",
+                    "item": [
+                        {
+                            "name": "Get Amenity - Not Found -> 404 AMENITY_NOT_FOUND",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Non-existent amenity returns 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"AMENITY_NOT_FOUND\");",
+                                            "    console.log(\"ok code=AMENITY_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/amenities/00000000-0000-0000-0000-000000000000",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "amenities",
+                                        "00000000-0000-0000-0000-000000000000"
+                                    ]
+                                },
+                                "auth": {
+                                    "type": "noauth"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Update Amenity - Not Found -> 404 AMENITY_NOT_FOUND",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Update non-existent amenity returns 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"AMENITY_NOT_FOUND\");",
+                                            "    console.log(\"ok code=AMENITY_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/amenities/00000000-0000-0000-0000-000000000000",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "amenities",
+                                        "00000000-0000-0000-0000-000000000000"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"name\": \"Ghost\", \"icon\": \"ghost\"}"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Delete Amenity - Not Found -> 404 AMENITY_NOT_FOUND",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Delete non-existent amenity returns 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"AMENITY_NOT_FOUND\");",
+                                            "    console.log(\"ok code=AMENITY_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/amenities/00000000-0000-0000-0000-000000000000",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "amenities",
+                                        "00000000-0000-0000-0000-000000000000"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Booking Flow",
+                    "item": [
+                        {
+                            "name": "Hold Room - Checkout before Checkin -> 400 INVALID_CHECKIN_STATUS",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[400] checkout before checkin returns INVALID_CHECKIN_STATUS\", function () {",
+                                            "    pm.response.to.have.status(400);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"INVALID_CHECKIN_STATUS\");",
+                                            "    console.log(\"ok INVALID_CHECKIN_STATUS\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"categoryId\": \"{{categoryId}}\", \"checkinDate\": \"2027-01-10T14:00:00\", \"checkoutDate\": \"2027-01-05T12:00:00\"}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/bookings/hold",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "bookings",
+                                        "hold"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Hold Room - No Available Room -> 409 NO_AVAILABLE_ROOM",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[409] no room returns NO_AVAILABLE_ROOM\", function () {",
+                                            "    pm.response.to.have.status(409);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"NO_AVAILABLE_ROOM\");",
+                                            "    console.log(\"ok NO_AVAILABLE_ROOM\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"categoryId\": \"00000000-0000-0000-0000-000000000000\", \"checkinDate\": \"2030-01-01T14:00:00\", \"checkoutDate\": \"2030-01-05T12:00:00\"}"
+                                },
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/bookings/hold",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "bookings",
+                                        "hold"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Confirm Booking - Hold Not Found -> 404 HOLD_NOT_FOUND",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Confirm with invalid holdId returns 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"HOLD_NOT_FOUND\");",
+                                            "    console.log(\"ok code=HOLD_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/v1/bookings/confirm",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "bookings",
+                                        "confirm"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"holdId\": \"00000000-0000-0000-0000-000000000000\", \"guestName\": \"Test\", \"guestPhone\": \"0900000000\", \"guestsCount\": 1}"
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Staff Booking Operations",
+                    "item": [
+                        {
+                            "name": "Get Booking - Not Found -> 404 BOOKING_NOT_FOUND",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Non-existent booking returns 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"BOOKING_NOT_FOUND\");",
+                                            "    console.log(\"ok code=BOOKING_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/staff/bookings/00000000-0000-0000-0000-000000000000",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "staff",
+                                        "bookings",
+                                        "00000000-0000-0000-0000-000000000000"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Check-In - Booking Not Found -> 404 BOOKING_NOT_FOUND",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Check-in on non-existent booking returns 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"BOOKING_NOT_FOUND\");",
+                                            "    console.log(\"ok code=BOOKING_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/staff/bookings/00000000-0000-0000-0000-000000000000/check-in",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "staff",
+                                        "bookings",
+                                        "00000000-0000-0000-0000-000000000000",
+                                        "check-in"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Check-Out - Status Not CHECKED_IN -> 400 INVALID_CHECKOUT_STATUS",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[400] checkout when not checked-in returns INVALID_CHECKOUT_STATUS\", function () {",
+                                            "    pm.response.to.have.status(400);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"INVALID_CHECKOUT_STATUS\");",
+                                            "    console.log(\"ok INVALID_CHECKOUT_STATUS\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/check-out",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "staff",
+                                        "bookings",
+                                        "{{bookingId}}",
+                                        "check-out"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Add Service to Booking - Service Not Found -> 404",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Add non-existent service to booking returns 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"SERVICE_NOT_FOUND\");",
+                                            "    console.log(\"ok code=SERVICE_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/services",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "staff",
+                                        "bookings",
+                                        "{{bookingId}}",
+                                        "services"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"serviceId\": \"00000000-0000-0000-0000-000000000000\", \"quantity\": 1}"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Add Combo to Booking - Combo Not Found -> 404",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Add non-existent combo to booking returns 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"COMBO_NOT_FOUND\");",
+                                            "    console.log(\"ok code=COMBO_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/combos",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "staff",
+                                        "bookings",
+                                        "{{bookingId}}",
+                                        "combos"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"comboId\": \"00000000-0000-0000-0000-000000000000\", \"quantity\": 1}"
+                                }
+                            }
+                        },
+                        {
+                            "name": "Change Operational Status - Room Not Found -> 404",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"[404] Change operational status of non-existent room returns 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "    const res = pm.response.json();",
+                                            "    pm.expect(res.code).to.eql(\"ACCOMMODATION_NOT_FOUND\");",
+                                            "    console.log(\"ok code=ACCOMMODATION_NOT_FOUND\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/api/staff/accommodations/00000000-0000-0000-0000-000000000000/operational-status",
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "staff",
+                                        "accommodations",
+                                        "00000000-0000-0000-0000-000000000000",
+                                        "operational-status"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"status\": \"CLEANING\"}"
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "8. Cleanup (DELETE)",
+            "item": [
+                {
+                    "name": "Delete Booking",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Booking deleted successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "bookings",
+                                "{{bookingId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Accommodation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Accommodation deleted successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/accommodations/{{accommodationId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "accommodations",
+                                "{{accommodationId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Category",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Category deleted successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "categories",
+                                "{{categoryId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Service",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Service deleted successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/services/{{serviceId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "services",
+                                "{{serviceId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Combo",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Combo deleted successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/combos/{{comboId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "combos",
+                                "{{comboId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Amenity",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Amenity deleted successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/amenities/{{amenityId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "amenities",
+                                "{{amenityId}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "jwtToken",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "staffToken",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "categoryId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "accommodationId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "checkinDate",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "checkoutDate",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "holdId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "bookingId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "serviceId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "comboId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "amenityId",
+            "value": "",
+            "type": "string"
+        }
+    ]
 }
-

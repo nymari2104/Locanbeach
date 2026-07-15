@@ -4,16 +4,15 @@ import com.locanbeach.backend.common.exception.errorcode.ErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
-public enum AccommodationErrorCode implements ErrorCode {
+public enum ComboErrorCode implements ErrorCode {
 
-    ACCOMMODATION_NOT_FOUND("ACCOMMODATION_NOT_FOUND", "Accommodation not found", HttpStatus.NOT_FOUND),
-    ACCOMMODATION_CODE_ALREADY_EXISTS("ACCOMMODATION_CODE_ALREADY_EXISTS", "Accommodation code already exists", HttpStatus.CONFLICT);
+    COMBO_NOT_FOUND("COMBO_NOT_FOUND", "Combo or Event not found", HttpStatus.NOT_FOUND);
 
     private final String code;
     private final String message;
     private final HttpStatusCode statusCode;
 
-    AccommodationErrorCode(String code, String message, HttpStatusCode statusCode) {
+    ComboErrorCode(String code, String message, HttpStatusCode statusCode) {
         this.code = code;
         this.message = message;
         this.statusCode = statusCode;

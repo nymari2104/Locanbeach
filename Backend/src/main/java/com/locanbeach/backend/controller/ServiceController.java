@@ -43,4 +43,11 @@ public class ServiceController {
         return ResponseEntity.ok(
                 ApiResponse.success("Service updated successfully", service.updateService(id, dto)));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteService(@PathVariable UUID id) {
+        service.deleteService(id);
+        return ResponseEntity.ok(
+                ApiResponse.success("Service deleted successfully", null));
+    }
 }

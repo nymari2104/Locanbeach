@@ -1,7 +1,7 @@
 package com.locanbeach.backend.service;
 
 import com.locanbeach.backend.common.exception.AppException;
-import com.locanbeach.backend.common.exception.errorcode.GeneralErrorCode;
+import com.locanbeach.backend.exception.errorcode.AmenityErrorCode;
 import com.locanbeach.backend.dto.AmenityDTO;
 import com.locanbeach.backend.entity.Amenity;
 import com.locanbeach.backend.repository.AmenityRepository;
@@ -29,7 +29,7 @@ public class AmenityService {
     public AmenityDTO getAmenityById(UUID id) {
         return repository.findById(id).map(this::convertToDto)
                 .orElseThrow(() -> new AppException(
-                        GeneralErrorCode.RESOURCE_NOT_FOUND,
+                        AmenityErrorCode.AMENITY_NOT_FOUND,
                         "Amenity not found with id: " + id));
     }
 
@@ -44,7 +44,7 @@ public class AmenityService {
     public AmenityDTO updateAmenity(UUID id, AmenityDTO dto) {
         Amenity entity = repository.findById(id)
                 .orElseThrow(() -> new AppException(
-                        GeneralErrorCode.RESOURCE_NOT_FOUND,
+                        AmenityErrorCode.AMENITY_NOT_FOUND,
                         "Amenity not found with id: " + id));
         BeanUtils.copyProperties(dto, entity, "id");
         return convertToDto(repository.save(entity));
@@ -54,7 +54,7 @@ public class AmenityService {
     public void deleteAmenity(UUID id) {
         if (!repository.existsById(id)) {
             throw new AppException(
-                    GeneralErrorCode.RESOURCE_NOT_FOUND,
+                    AmenityErrorCode.AMENITY_NOT_FOUND,
                     "Amenity not found with id: " + id);
         }
         repository.deleteById(id);

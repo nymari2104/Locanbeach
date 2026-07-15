@@ -1,7 +1,9 @@
 package com.locanbeach.backend.service;
 
 import com.locanbeach.backend.common.exception.AppException;
-import com.locanbeach.backend.common.exception.errorcode.GeneralErrorCode;
+import com.locanbeach.backend.exception.errorcode.BookingErrorCode;
+import com.locanbeach.backend.exception.errorcode.ServiceErrorCode;
+import com.locanbeach.backend.exception.errorcode.ComboErrorCode;
 import com.locanbeach.backend.dto.request.staff.AddBookingComboRequest;
 import com.locanbeach.backend.dto.request.staff.AddBookingGuestRequest;
 import com.locanbeach.backend.dto.request.staff.AddBookingServiceRequest;
@@ -38,14 +40,14 @@ public class StaffBookingService {
 
     public BookingResponse getBookingDetails(UUID id) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new AppException(GeneralErrorCode.RESOURCE_NOT_FOUND, "Booking not found"));
+                .orElseThrow(() -> new AppException(BookingErrorCode.BOOKING_NOT_FOUND));
         return mapToResponse(booking);
     }
 
     @Transactional
     public BookingResponse changeBookingStatus(UUID id, ChangeBookingStatusRequest request) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new AppException(GeneralErrorCode.RESOURCE_NOT_FOUND, "Booking not found"));
+                .orElseThrow(() -> new AppException(BookingErrorCode.BOOKING_NOT_FOUND));
         
         booking.setStatus(request.getStatus());
         // Depending on status changes, we might record history in booking_status_history here
@@ -56,10 +58,10 @@ public class StaffBookingService {
     @Transactional
     public BookingResponse checkIn(UUID id) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new AppException(GeneralErrorCode.RESOURCE_NOT_FOUND, "Booking not found"));
+                .orElseThrow(() -> new AppException(BookingErrorCode.BOOKING_NOT_FOUND));
         
         if (booking.getStatus() != BookingStatus.CONFIRMED && booking.getStatus() != BookingStatus.PENDING_DEPOSIT) {
-            throw new AppException(GeneralErrorCode.INVALID_INPUT, "Cannot check-in from current status");
+            throw new AppException(BookingErrorCode.INVALID_CHECKIN_STATUS);
         }
         
         booking.setStatus(BookingStatus.CHECKED_IN);
@@ -71,10 +73,10 @@ public class StaffBookingService {
     @Transactional
     public BookingResponse checkOut(UUID id) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new AppException(GeneralErrorCode.RESOURCE_NOT_FOUND, "Booking not found"));
+                .orElseThrow(() -> new AppException(BookingErrorCode.BOOKING_NOT_FOUND));
         
         if (booking.getStatus() != BookingStatus.CHECKED_IN) {
-            throw new AppException(GeneralErrorCode.INVALID_INPUT, "Only checked-in bookings can be checked out");
+            throw new AppException(BookingErrorCode.INVALID_CHECKOUT_STATUS);
         }
         
         booking.setStatus(BookingStatus.CHECKED_OUT);
@@ -86,7 +88,7 @@ public class StaffBookingService {
     @Transactional
     public void addGuest(UUID id, AddBookingGuestRequest request) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new AppException(GeneralErrorCode.RESOURCE_NOT_FOUND, "Booking not found"));
+                .orElseThrow(() -> new AppException(BookingErrorCode.BOOKING_NOT_FOUND));
         
         Guest guest = new Guest();
         guest.setFullName(request.getFullName());
@@ -112,10 +114,10 @@ public class StaffBookingService {
     @Transactional
     public void addService(UUID id, AddBookingServiceRequest request) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new AppException(GeneralErrorCode.RESOURCE_NOT_FOUND, "Booking not found"));
+                .orElseThrow(() -> new AppException(BookingErrorCode.BOOKING_NOT_FOUND));
         
         com.locanbeach.backend.entity.Service service = serviceRepository.findById(request.getServiceId())
-                .orElseThrow(() -> new AppException(GeneralErrorCode.RESOURCE_NOT_FOUND, "Service not found"));
+                .orElseThrow(() -> new AppException(ServiceErrorCode.SERVICE_NOT_FOUND));
                 
         com.locanbeach.backend.entity.BookingService bookingService = new com.locanbeach.backend.entity.BookingService();
         bookingService.setBooking(booking);
@@ -130,10 +132,10 @@ public class StaffBookingService {
     @Transactional
     public void addCombo(UUID id, AddBookingComboRequest request) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new AppException(GeneralErrorCode.RESOURCE_NOT_FOUND, "Booking not found"));
+                .orElseThrow(() -> new AppException(BookingErrorCode.BOOKING_NOT_FOUND));
         
         ComboEvent combo = comboEventRepository.findById(request.getComboId())
-                .orElseThrow(() -> new AppException(GeneralErrorCode.RESOURCE_NOT_FOUND, "Combo not found"));
+                .orElseThrow(() -> new AppException(ComboErrorCode.COMBO_NOT_FOUND));
                 
         BookingCombo bookingCombo = new BookingCombo();
         bookingCombo.setBooking(booking);
@@ -143,6 +145,30 @@ public class StaffBookingService {
         bookingCombo.setNote(request.getNote());
         
         bookingComboRepository.save(bookingCombo);
+    }
+
+    @Transactional
+    public void deleteBooking(UUID id) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new AppException(BookingErrorCode.BOOKING_NOT_FOUND));
+        
+        java.util.List<BookingGuest> bgList = bookingGuestRepository.findByBookingId(booking.getId());
+        bookingGuestRepository.deleteAll(bgList);
+        for (BookingGuest bg : bgList) {
+            try {
+                guestRepository.delete(bg.getGuest());
+            } catch (Exception e) {
+                // Ignore if guest is still referenced somewhere
+            }
+        }
+
+        java.util.List<com.locanbeach.backend.entity.BookingService> bsList = bookingServiceRepository.findByBookingId(booking.getId());
+        bookingServiceRepository.deleteAll(bsList);
+
+        java.util.List<BookingCombo> bcList = bookingComboRepository.findByBookingId(booking.getId());
+        bookingComboRepository.deleteAll(bcList);
+
+        bookingRepository.delete(booking);
     }
 
     private BookingResponse mapToResponse(Booking booking) {

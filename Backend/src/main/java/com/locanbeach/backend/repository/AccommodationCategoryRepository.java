@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface AccommodationCategoryRepository extends JpaRepository<AccommodationCategory, UUID> {
+    boolean existsByCode(String code);
 }

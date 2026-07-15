@@ -30,7 +30,7 @@ public class AccommodationCategoryService {
     public AccommodationCategoryDTO getCategoryById(UUID id) {
         return repository.findById(id).map(this::convertToDto)
                 .orElseThrow(() -> new AppException(
-                        AccommodationErrorCode.CATEGORY_NOT_FOUND,
+                        com.locanbeach.backend.exception.errorcode.CategoryErrorCode.CATEGORY_NOT_FOUND,
                         "Category not found with id: " + id));
     }
 
@@ -38,6 +38,11 @@ public class AccommodationCategoryService {
     public AccommodationCategoryDTO createCategory(AccommodationCategoryDTO dto) {
         AccommodationCategory entity = new AccommodationCategory();
         BeanUtils.copyProperties(dto, entity, "id", "amenities", "images");
+
+        if (repository.existsByCode(dto.getCode())) {
+            throw new AppException(com.locanbeach.backend.exception.errorcode.CategoryErrorCode.CATEGORY_CODE_ALREADY_EXISTS);
+        }
+
         if (dto.getAmenityIds() != null && !dto.getAmenityIds().isEmpty()) {
             List<com.locanbeach.backend.entity.Amenity> amenities = amenityRepository.findAllById(dto.getAmenityIds());
             entity.setAmenities(new java.util.HashSet<>(amenities));
@@ -49,8 +54,13 @@ public class AccommodationCategoryService {
     public AccommodationCategoryDTO updateCategory(UUID id, AccommodationCategoryDTO dto) {
         AccommodationCategory entity = repository.findById(id)
                 .orElseThrow(() -> new AppException(
-                        AccommodationErrorCode.CATEGORY_NOT_FOUND,
+                        com.locanbeach.backend.exception.errorcode.CategoryErrorCode.CATEGORY_NOT_FOUND,
                         "Category not found with id: " + id));
+
+        if (dto.getCode() != null && !dto.getCode().equals(entity.getCode()) && repository.existsByCode(dto.getCode())) {
+            throw new AppException(com.locanbeach.backend.exception.errorcode.CategoryErrorCode.CATEGORY_CODE_ALREADY_EXISTS);
+        }
+
         BeanUtils.copyProperties(dto, entity, "id", "amenities", "images");
         if (dto.getAmenityIds() != null) {
             if (dto.getAmenityIds().isEmpty()) {
@@ -61,6 +71,15 @@ public class AccommodationCategoryService {
             }
         }
         return convertToDto(repository.save(entity));
+    }
+
+    @Transactional
+    public void deleteCategory(UUID id) {
+        AccommodationCategory entity = repository.findById(id)
+                .orElseThrow(() -> new AppException(
+                        com.locanbeach.backend.exception.errorcode.CategoryErrorCode.CATEGORY_NOT_FOUND,
+                        "Category not found with id: " + id));
+        repository.delete(entity);
     }
 
     private AccommodationCategoryDTO convertToDto(AccommodationCategory entity) {

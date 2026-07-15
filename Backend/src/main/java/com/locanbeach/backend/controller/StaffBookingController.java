@@ -99,4 +99,10 @@ public class StaffBookingController {
         staffBookingService.addCombo(id, request);
         return ResponseEntity.ok(ApiResponse.success("Added combo successfully", null));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteBooking(@PathVariable UUID id) {
+        staffBookingService.deleteBooking(id);
+        return ResponseEntity.ok(ApiResponse.success("Booking deleted successfully", null));
+    }
 }

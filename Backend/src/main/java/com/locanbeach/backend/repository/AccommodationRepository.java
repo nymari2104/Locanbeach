@@ -12,6 +12,7 @@ import java.util.UUID;
 
 @Repository
 public interface AccommodationRepository extends JpaRepository<Accommodation, UUID> {
+    boolean existsByCode(String code);
 
     @Query(value = "SELECT * FROM accommodations a " +
             "WHERE a.operational_status = 'VACANT' AND a.status = 'ACTIVE' " +

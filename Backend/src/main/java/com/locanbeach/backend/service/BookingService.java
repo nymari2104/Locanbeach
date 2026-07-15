@@ -1,7 +1,7 @@
 package com.locanbeach.backend.service;
 
 import com.locanbeach.backend.common.exception.AppException;
-import com.locanbeach.backend.common.exception.errorcode.GeneralErrorCode;
+import com.locanbeach.backend.exception.errorcode.BookingErrorCode;
 import com.locanbeach.backend.dto.request.BookingConfirmRequest;
 import com.locanbeach.backend.dto.request.RoomHoldRequest;
 import com.locanbeach.backend.dto.response.BookingResponse;
@@ -33,7 +33,7 @@ public class BookingService {
     @Transactional
     public RoomHoldResponse holdRoom(RoomHoldRequest request) {
         if (!request.getCheckoutDate().isAfter(request.getCheckinDate())) {
-            throw new AppException(GeneralErrorCode.INVALID_INPUT, "Check-out date must be after check-in date");
+            throw new AppException(BookingErrorCode.INVALID_CHECKIN_STATUS, "Check-out date must be after check-in date");
         }
 
         // Lock 1 available accommodation for the requested dates
@@ -41,7 +41,7 @@ public class BookingService {
                 request.getCategoryId(), request.getCheckinDate(), request.getCheckoutDate());
         
         if (accommodation == null) {
-            throw new AppException(GeneralErrorCode.RESOURCE_NOT_FOUND, "No available rooms for the selected category and dates");
+            throw new AppException(BookingErrorCode.NO_AVAILABLE_ROOM);
         }
 
         RoomHold roomHold = new RoomHold();
@@ -61,11 +61,11 @@ public class BookingService {
     @Transactional
     public BookingResponse confirmBooking(BookingConfirmRequest request) {
         RoomHold roomHold = roomHoldRepository.findById(request.getHoldId())
-                .orElseThrow(() -> new AppException(GeneralErrorCode.RESOURCE_NOT_FOUND, "Hold not found or invalid"));
+                .orElseThrow(() -> new AppException(BookingErrorCode.HOLD_NOT_FOUND));
 
         if (roomHold.getExpiresAt().isBefore(LocalDateTime.now())) {
             roomHoldRepository.delete(roomHold);
-            throw new AppException(GeneralErrorCode.INVALID_INPUT, "Hold has expired. Please try booking again.");
+            throw new AppException(BookingErrorCode.HOLD_EXPIRED);
         }
 
         Accommodation accommodation = roomHold.getAccommodation();

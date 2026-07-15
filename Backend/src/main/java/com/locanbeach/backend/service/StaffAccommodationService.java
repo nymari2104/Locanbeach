@@ -1,7 +1,7 @@
 package com.locanbeach.backend.service;
 
 import com.locanbeach.backend.common.exception.AppException;
-import com.locanbeach.backend.common.exception.errorcode.GeneralErrorCode;
+import com.locanbeach.backend.exception.errorcode.AccommodationErrorCode;
 import com.locanbeach.backend.dto.AccommodationDTO;
 import com.locanbeach.backend.dto.request.staff.ChangeOperationalStatusRequest;
 import com.locanbeach.backend.entity.Accommodation;
@@ -29,7 +29,7 @@ public class StaffAccommodationService {
     @Transactional
     public AccommodationDTO changeOperationalStatus(UUID id, ChangeOperationalStatusRequest request) {
         Accommodation accommodation = accommodationRepository.findById(id)
-                .orElseThrow(() -> new AppException(GeneralErrorCode.RESOURCE_NOT_FOUND, "Accommodation not found"));
+                .orElseThrow(() -> new AppException(AccommodationErrorCode.ACCOMMODATION_NOT_FOUND));
         
         accommodation.setOperationalStatus(request.getStatus());
         return mapToDTO(accommodationRepository.save(accommodation));

@@ -28,12 +28,15 @@ public class ServiceService {
     public ServiceDTO getServiceById(UUID id) {
         return repository.findById(id).map(this::convertToDto)
                 .orElseThrow(() -> new AppException(
-                        GeneralErrorCode.RESOURCE_NOT_FOUND,
+                        com.locanbeach.backend.exception.errorcode.ServiceErrorCode.SERVICE_NOT_FOUND,
                         "Service not found with id: " + id));
     }
 
     @Transactional
     public ServiceDTO createService(ServiceDTO dto) {
+        if (repository.existsByName(dto.getName())) {
+            throw new AppException(com.locanbeach.backend.exception.errorcode.ServiceErrorCode.SERVICE_NAME_ALREADY_EXISTS);
+        }
         com.locanbeach.backend.entity.Service entity = new com.locanbeach.backend.entity.Service();
         BeanUtils.copyProperties(dto, entity, "id");
         return convertToDto(repository.save(entity));
@@ -43,10 +46,24 @@ public class ServiceService {
     public ServiceDTO updateService(UUID id, ServiceDTO dto) {
         com.locanbeach.backend.entity.Service entity = repository.findById(id)
                 .orElseThrow(() -> new AppException(
-                        GeneralErrorCode.RESOURCE_NOT_FOUND,
+                        com.locanbeach.backend.exception.errorcode.ServiceErrorCode.SERVICE_NOT_FOUND,
                         "Service not found with id: " + id));
+
+        if (dto.getName() != null && !dto.getName().equals(entity.getName()) && repository.existsByName(dto.getName())) {
+            throw new AppException(com.locanbeach.backend.exception.errorcode.ServiceErrorCode.SERVICE_NAME_ALREADY_EXISTS);
+        }
+
         BeanUtils.copyProperties(dto, entity, "id");
         return convertToDto(repository.save(entity));
+    }
+
+    @Transactional
+    public void deleteService(UUID id) {
+        com.locanbeach.backend.entity.Service entity = repository.findById(id)
+                .orElseThrow(() -> new AppException(
+                        com.locanbeach.backend.exception.errorcode.ServiceErrorCode.SERVICE_NOT_FOUND,
+                        "Service not found with id: " + id));
+        repository.delete(entity);
     }
 
     private ServiceDTO convertToDto(com.locanbeach.backend.entity.Service entity) {

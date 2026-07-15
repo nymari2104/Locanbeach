@@ -43,4 +43,11 @@ public class ComboEventController {
         return ResponseEntity.ok(
                 ApiResponse.success("Combo or event updated successfully", service.updateCombo(id, dto)));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteCombo(@PathVariable UUID id) {
+        service.deleteCombo(id);
+        return ResponseEntity.ok(
+                ApiResponse.success("Combo deleted successfully", null));
+    }
 }

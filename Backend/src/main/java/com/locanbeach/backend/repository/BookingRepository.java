@@ -16,8 +16,8 @@ import java.util.UUID;
 public interface BookingRepository extends JpaRepository<Booking, UUID> {
 
     @Query("SELECT b FROM Booking b WHERE " +
-           "(:search IS NULL OR LOWER(b.guestName) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(CAST(b.id AS string)) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
-           "(:status IS NULL OR b.status = :status) AND " +
+           "(CAST(:search AS string) IS NULL OR LOWER(b.guestName) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) OR LOWER(CAST(b.id AS string)) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%'))) AND " +
+           "(CAST(:status AS string) IS NULL OR b.status = :status) AND " +
            "(cast(:startDate as timestamp) IS NULL OR b.checkinDate >= :startDate) AND " +
            "(cast(:endDate as timestamp) IS NULL OR b.checkinDate <= :endDate)")
     Page<Booking> findBookingsWithFilters(

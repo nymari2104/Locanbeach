@@ -4,6 +4,7 @@ import com.locanbeach.backend.common.exception.AppException;
 import com.locanbeach.backend.dto.AccommodationDTO;
 import com.locanbeach.backend.entity.Accommodation;
 import com.locanbeach.backend.entity.AccommodationCategory;
+import com.locanbeach.backend.entity.enums.OperationalStatus;
 import com.locanbeach.backend.exception.errorcode.AccommodationErrorCode;
 import com.locanbeach.backend.repository.AccommodationCategoryRepository;
 import com.locanbeach.backend.repository.AccommodationRepository;
@@ -38,6 +39,10 @@ public class AccommodationService {
 
     @Transactional
     public AccommodationDTO createAccommodation(AccommodationDTO dto) {
+        if (accommodationRepository.existsByCode(dto.getCode())) {
+            throw new AppException(AccommodationErrorCode.ACCOMMODATION_CODE_ALREADY_EXISTS);
+        }
+
         Accommodation entity = new Accommodation();
         BeanUtils.copyProperties(dto, entity, "id", "categoryId", "categoryName");
 
@@ -45,16 +50,25 @@ public class AccommodationService {
             entity.setStatus(com.locanbeach.backend.entity.enums.AccommodationStatus.ACTIVE);
         }
         if (dto.getOperationalStatus() == null) {
-            entity.setOperationalStatus(com.locanbeach.backend.entity.enums.OperationalStatus.VACANT);
+            entity.setOperationalStatus(OperationalStatus.VACANT);
         }
 
         AccommodationCategory category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new AppException(
-                        AccommodationErrorCode.CATEGORY_NOT_FOUND,
+                        com.locanbeach.backend.exception.errorcode.CategoryErrorCode.CATEGORY_NOT_FOUND,
                         "Category not found with id: " + dto.getCategoryId()));
         entity.setCategory(category);
 
         return convertToDto(accommodationRepository.save(entity));
+    }
+
+    @Transactional
+    public void deleteAccommodation(UUID id) {
+        Accommodation entity = accommodationRepository.findById(id)
+                .orElseThrow(() -> new AppException(
+                        AccommodationErrorCode.ACCOMMODATION_NOT_FOUND,
+                        "Accommodation not found with id: " + id));
+        accommodationRepository.delete(entity);
     }
 
     private AccommodationDTO convertToDto(Accommodation entity) {

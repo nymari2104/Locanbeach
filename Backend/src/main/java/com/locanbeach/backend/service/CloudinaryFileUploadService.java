@@ -2,11 +2,11 @@ package com.locanbeach.backend.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.locanbeach.backend.common.exception.AppException;
+import com.locanbeach.backend.exception.errorcode.CloudinaryErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -17,18 +17,22 @@ public class CloudinaryFileUploadService implements FileUploadService {
     private final Cloudinary cloudinary;
 
     @Override
-    public String uploadFile(MultipartFile file) throws IOException {
-        String publicId = "the-house/" + UUID.randomUUID().toString();
-        Map<?, ?> options = ObjectUtils.asMap(
-                "public_id", publicId,
-                "folder", "locanbeach"
-        );
-        Map<?, ?> result = cloudinary.uploader().upload(file.getBytes(), options);
-        return result.get("secure_url").toString();
+    public String uploadFile(MultipartFile file) {
+        try {
+            String publicId = "the-house/" + UUID.randomUUID().toString();
+            Map<?, ?> options = ObjectUtils.asMap(
+                    "public_id", publicId,
+                    "folder", "locanbeach"
+            );
+            Map<?, ?> result = cloudinary.uploader().upload(file.getBytes(), options);
+            return result.get("secure_url").toString();
+        } catch (Exception e) {
+            throw new AppException(CloudinaryErrorCode.UPLOAD_FAILED);
+        }
     }
 
     @Override
-    public void deleteFile(String url) throws IOException {
+    public void deleteFile(String url) {
         if (url == null || url.isEmpty()) return;
         try {
             int uploadIdx = url.indexOf("/upload/");
@@ -43,9 +47,11 @@ public class CloudinaryFileUploadService implements FileUploadService {
             String publicId = lastDot != -1 ? publicIdWithExt.substring(0, lastDot) : publicIdWithExt;
 
             cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+        } catch (AppException e) {
+            throw e;
         } catch (Exception e) {
-            // Log error but don't crash the main app transaction
-            System.err.println("Failed to delete file from Cloudinary: " + e.getMessage());
+            throw new AppException(CloudinaryErrorCode.DELETE_FAILED);
         }
     }
 }
+

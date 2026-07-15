@@ -1,7 +1,7 @@
 package com.locanbeach.backend.service;
 
 import com.locanbeach.backend.common.exception.AppException;
-import com.locanbeach.backend.common.exception.errorcode.GeneralErrorCode;
+import com.locanbeach.backend.exception.errorcode.ComboErrorCode;
 import com.locanbeach.backend.dto.ComboEventDTO;
 import com.locanbeach.backend.entity.ComboEvent;
 import com.locanbeach.backend.repository.ComboEventRepository;
@@ -29,7 +29,7 @@ public class ComboEventService {
     public ComboEventDTO getComboById(UUID id) {
         return repository.findById(id).map(this::convertToDto)
                 .orElseThrow(() -> new AppException(
-                        GeneralErrorCode.RESOURCE_NOT_FOUND,
+                        ComboErrorCode.COMBO_NOT_FOUND,
                         "Combo or Event not found with id: " + id));
     }
 
@@ -44,10 +44,19 @@ public class ComboEventService {
     public ComboEventDTO updateCombo(UUID id, ComboEventDTO dto) {
         ComboEvent entity = repository.findById(id)
                 .orElseThrow(() -> new AppException(
-                        GeneralErrorCode.RESOURCE_NOT_FOUND,
+                        ComboErrorCode.COMBO_NOT_FOUND,
                         "Combo or Event not found with id: " + id));
         BeanUtils.copyProperties(dto, entity, "id");
         return convertToDto(repository.save(entity));
+    }
+
+    @Transactional
+    public void deleteCombo(UUID id) {
+        ComboEvent entity = repository.findById(id)
+                .orElseThrow(() -> new AppException(
+                        ComboErrorCode.COMBO_NOT_FOUND,
+                        "Combo or Event not found with id: " + id));
+        repository.delete(entity);
     }
 
     private ComboEventDTO convertToDto(ComboEvent entity) {

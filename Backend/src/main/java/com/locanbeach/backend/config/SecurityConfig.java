@@ -1,5 +1,6 @@
 package com.locanbeach.backend.config;
 
+import org.springframework.security.config.Customizer;
 import com.locanbeach.backend.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,8 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
+    private final com.locanbeach.backend.security.CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final com.locanbeach.backend.security.CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -35,11 +38,16 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint(customAuthenticationEntryPoint)
+                .accessDeniedHandler(customAccessDeniedHandler))
             .authorizeHttpRequests(auth -> auth
                 // ── Public endpoints ──
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                 .requestMatchers(HttpMethod.GET,
                     "/api/v1/categories/**",
+                    "/api/v1/accommodations/**",
                     "/api/v1/services/**",
                     "/api/v1/search/**",
                     "/api/v1/combos/**",

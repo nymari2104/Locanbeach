@@ -4,16 +4,15 @@ import com.locanbeach.backend.common.exception.errorcode.ErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
-public enum AccommodationErrorCode implements ErrorCode {
+public enum AmenityErrorCode implements ErrorCode {
 
-    ACCOMMODATION_NOT_FOUND("ACCOMMODATION_NOT_FOUND", "Accommodation not found", HttpStatus.NOT_FOUND),
-    ACCOMMODATION_CODE_ALREADY_EXISTS("ACCOMMODATION_CODE_ALREADY_EXISTS", "Accommodation code already exists", HttpStatus.CONFLICT);
+    AMENITY_NOT_FOUND("AMENITY_NOT_FOUND", "Amenity not found", HttpStatus.NOT_FOUND);
 
     private final String code;
     private final String message;
     private final HttpStatusCode statusCode;
 
-    AccommodationErrorCode(String code, String message, HttpStatusCode statusCode) {
+    AmenityErrorCode(String code, String message, HttpStatusCode statusCode) {
         this.code = code;
         this.message = message;
         this.statusCode = statusCode;

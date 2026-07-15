@@ -42,4 +42,11 @@ public class AccommodationCategoryController {
         return ResponseEntity.ok(
                 ApiResponse.success("Category updated successfully", service.updateCategory(id, dto)));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable UUID id) {
+        service.deleteCategory(id);
+        return ResponseEntity.ok(
+                ApiResponse.success("Category deleted successfully", null));
+    }
 }

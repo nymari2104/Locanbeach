@@ -36,4 +36,11 @@ public class AccommodationController {
                 ApiResponse.success("Accommodation created successfully", service.createAccommodation(dto)),
                 HttpStatus.CREATED);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteAccommodation(@PathVariable UUID id) {
+        service.deleteAccommodation(id);
+        return ResponseEntity.ok(
+                ApiResponse.success("Accommodation deleted successfully", null));
+    }
 }
