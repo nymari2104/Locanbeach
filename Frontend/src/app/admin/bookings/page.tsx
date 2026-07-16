@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPost, apiPut } from "@/lib/api";
 import { BookingStatus, PageResponse, ConfirmBookingResponse } from "@/types/api";
 import styles from "./page.module.css";
 
@@ -21,6 +21,22 @@ export default function BookingsPage() {
   const [page, setPage] = useState(0);
   const [selectedBooking, setSelectedBooking] = useState<BookingResponse | null>(null);
 
+  // Custom confirmation dialog state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    confirmText?: string;
+    cancelText?: string;
+    isDanger?: boolean;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
+
   const tabs = [
     { id: 'ALL' as TabType, label: 'Tất cả đơn đặt' },
     { id: 'COMING' as TabType, label: 'Khách sẽ đến' },
@@ -32,70 +48,6 @@ export default function BookingsPage() {
     { id: 'MY_BOOKINGS' as TabType, label: 'Booking tạo bởi mình' },
   ];
 
-  // DUMMY DATA FOR UI PREVIEW
-  const dummyBookings: BookingResponse[] = [
-    {
-      bookingId: "b1234567-89ab-cdef-0123-456789abcdef",
-      accommodationId: "a1",
-      accommodationCode: "108",
-      categoryId: "c1",
-      categoryName: "Phòng Deluxe",
-      guestName: "Anh Khanh",
-      guestPhone: "0901234567",
-      checkinDate: "2026-07-20T14:00:00",
-      checkoutDate: "2026-07-22T12:00:00",
-      guestsCount: 4,
-      totalAmount: 3000000,
-      depositAmount: 1000000,
-      status: "CONFIRMED"
-    },
-    {
-      bookingId: "b2234567-89ab-cdef-0123-456789abcdef",
-      accommodationId: "a2",
-      accommodationCode: "114",
-      categoryId: "c2",
-      categoryName: "Lữ hành",
-      guestName: "Ngọc Anh",
-      guestPhone: "0901234568",
-      checkinDate: "2026-07-20T09:05:00",
-      checkoutDate: "2026-07-21T08:35:00",
-      guestsCount: 2,
-      totalAmount: 1500000,
-      depositAmount: 500000,
-      status: "CHECKED_IN"
-    },
-    {
-      bookingId: "b3234567-89ab-cdef-0123-456789abcdef",
-      accommodationId: "a3",
-      accommodationCode: "112",
-      categoryId: "c3",
-      categoryName: "Lữ hành",
-      guestName: "Huyền Anh",
-      guestPhone: "0901234569",
-      checkinDate: "2026-07-15T14:00:00",
-      checkoutDate: "2026-07-17T12:00:00",
-      guestsCount: 2,
-      totalAmount: 1500000,
-      depositAmount: 500000,
-      status: "CHECKED_OUT"
-    },
-    {
-      bookingId: "b4234567-89ab-cdef-0123-456789abcdef",
-      accommodationId: "a4",
-      accommodationCode: "109",
-      categoryId: "c4",
-      categoryName: "Trần Châm",
-      guestName: "Trần Châm",
-      guestPhone: "0901234570",
-      checkinDate: "2026-07-25T14:00:00",
-      checkoutDate: "2026-07-26T12:00:00",
-      guestsCount: 2,
-      totalAmount: 1000000,
-      depositAmount: 0,
-      status: "PENDING_DEPOSIT"
-    }
-  ];
-
   const fetchBookings = useCallback(async () => {
     setLoading(true);
     try {
@@ -105,23 +57,6 @@ export default function BookingsPage() {
       else if (activeTab === 'LEFT') statusParam = "CHECKED_OUT";
       else if (activeTab === 'CANCELLED') statusParam = "CANCELLED";
 
-      // Filter dummy data
-      let filtered = dummyBookings;
-      if (statusParam) {
-        filtered = filtered.filter(b => b.status === statusParam);
-      }
-      if (searchQuery) {
-        const lowerQ = searchQuery.toLowerCase();
-        filtered = filtered.filter(b =>
-          b.guestName.toLowerCase().includes(lowerQ) ||
-          b.bookingId.toLowerCase().includes(lowerQ) ||
-          (b.accommodationCode && b.accommodationCode.toLowerCase().includes(lowerQ))
-        );
-      }
-
-      setBookings(filtered);
-
-      /* Comment out real API call since user wants UI only for now
       const queryParams = new URLSearchParams({
         page: page.toString(),
         size: "20"
@@ -131,15 +66,84 @@ export default function BookingsPage() {
       if (startDate) queryParams.append("startDate", startDate);
       if (endDate) queryParams.append("endDate", endDate);
 
-      const res = await apiGet<PageResponse<BookingResponse>>(`/bookings?${queryParams.toString()}`);
+      const res = await apiGet<PageResponse<BookingResponse>>(`/staff/bookings?${queryParams.toString()}`);
       setBookings(res.content || []);
-      */
     } catch (error) {
       console.error("Failed to fetch bookings:", error);
     } finally {
       setLoading(false);
     }
   }, [activeTab, searchQuery, startDate, endDate, page]);
+
+  const handleStatusChange = (id: string, newStatus: string) => {
+    let confirmMsg = "Bạn có chắc chắn muốn thay đổi trạng thái đơn đặt phòng này?";
+    let title = "Xác nhận thay đổi";
+    let isDanger = false;
+    if (newStatus === 'CONFIRMED') {
+      confirmMsg = "Hành động này sẽ xác nhận khách hàng đã hoàn thành đặt cọc.";
+      title = "Xác nhận đặt cọc";
+    }
+    if (newStatus === 'CANCELLED') {
+      confirmMsg = "Hành động này sẽ hủy hoàn toàn đơn đặt phòng. Bạn có chắc chắn?";
+      title = "Hủy đơn đặt phòng";
+      isDanger = true;
+    }
+
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message: confirmMsg,
+      confirmText: newStatus === 'CANCELLED' ? "Hủy đơn" : "Xác nhận",
+      isDanger,
+      onConfirm: async () => {
+        try {
+          const res = await apiPut<BookingResponse>(`/staff/bookings/${id}/status`, { status: newStatus });
+          setSelectedBooking(res);
+          await fetchBookings();
+        } catch (err: any) {
+          alert("Lỗi khi thay đổi trạng thái: " + err.message);
+        }
+      }
+    });
+  };
+
+  const handleCheckIn = (id: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: "Nhận phòng (Check-in)",
+      message: "Xác nhận thực hiện Check-in nhận phòng cho khách hàng này?",
+      confirmText: "Check-in",
+      isDanger: false,
+      onConfirm: async () => {
+        try {
+          const res = await apiPost<BookingResponse>(`/staff/bookings/${id}/check-in`, {});
+          setSelectedBooking(res);
+          await fetchBookings();
+        } catch (err: any) {
+          alert("Lỗi khi nhận phòng: " + err.message);
+        }
+      }
+    });
+  };
+
+  const handleCheckOut = (id: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: "Trả phòng (Check-out)",
+      message: "Xác nhận thực hiện Check-out trả phòng và hoàn tất hóa đơn?",
+      confirmText: "Check-out",
+      isDanger: false,
+      onConfirm: async () => {
+        try {
+          const res = await apiPost<BookingResponse>(`/staff/bookings/${id}/check-out`, {});
+          setSelectedBooking(res);
+          await fetchBookings();
+        } catch (err: any) {
+          alert("Lỗi khi trả phòng: " + err.message);
+        }
+      }
+    });
+  };
 
   useEffect(() => {
     // Debounce search slightly
@@ -310,7 +314,7 @@ export default function BookingsPage() {
                   </tr>
                 ) : (
                   bookings.map(b => (
-                    <tr key={b.bookingId}>
+                    <tr key={b.bookingId} onClick={() => setSelectedBooking(b)} style={{ cursor: "pointer" }}>
                       <td className="mono-text" style={{ fontSize: '0.8rem' }}>{b.bookingId.split('-')[0]}</td>
                       <td className="mono-text">{b.accommodationCode || b.categoryName}</td>
                       <td style={{ fontWeight: 500 }}>{b.guestName}</td>
@@ -435,9 +439,75 @@ export default function BookingsPage() {
                 </span>
               </div>
             </div>
-            <div className={styles.modalFooter}>
+            <div className={styles.modalFooter} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button className={`${styles.btn} ${styles.btnOutline}`} onClick={() => setSelectedBooking(null)}>Đóng</button>
-              <button className={`${styles.btn} ${styles.btnPrimary}`}>Chỉnh sửa</button>
+              
+              {selectedBooking.status === 'PENDING_DEPOSIT' && (
+                <>
+                  <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => handleStatusChange(selectedBooking.bookingId, 'CONFIRMED')}>
+                    Xác nhận cọc
+                  </button>
+                  <button className={`${styles.btn}`} style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none' }} onClick={() => handleStatusChange(selectedBooking.bookingId, 'CANCELLED')}>
+                    Hủy đơn
+                  </button>
+                </>
+              )}
+
+              {selectedBooking.status === 'CONFIRMED' && (
+                <>
+                  <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => handleCheckIn(selectedBooking.bookingId)}>
+                    Check-in
+                  </button>
+                  <button className={`${styles.btn}`} style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none' }} onClick={() => handleStatusChange(selectedBooking.bookingId, 'CANCELLED')}>
+                    Hủy đơn
+                  </button>
+                </>
+              )}
+
+              {selectedBooking.status === 'CHECKED_IN' && (
+                <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => handleCheckOut(selectedBooking.bookingId)}>
+                  Check-out
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Confirmation Modal (Stitch Spec) */}
+      {confirmDialog.isOpen && (
+        <div className={styles.modalOverlay} onClick={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}>
+          <div className={styles.modalContent} style={{ maxWidth: '400px', borderRadius: '16px' }} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader} style={{ padding: '1rem 1.25rem' }}>
+              <h3 className={styles.modalTitle} style={{ fontSize: '1.1rem', fontWeight: 600 }}>{confirmDialog.title}</h3>
+              <button className={styles.modalCloseBtn} onClick={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}>
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className={styles.modalBody} style={{ padding: '1.25rem', fontSize: '0.9rem', color: 'var(--color-steel-secondary)' }}>
+              <p>{confirmDialog.message}</p>
+            </div>
+            <div className={styles.modalFooter} style={{ padding: '1rem 1.25rem', borderTop: '1px solid #e5e7eb' }}>
+              <button 
+                className={`${styles.btn} ${styles.btnOutline}`} 
+                onClick={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+              >
+                {confirmDialog.cancelText || "Hủy"}
+              </button>
+              <button 
+                className={`${styles.btn}`} 
+                style={{ 
+                  backgroundColor: confirmDialog.isDanger ? '#ef4444' : 'var(--color-primary)', 
+                  color: '#fff',
+                  border: 'none'
+                }} 
+                onClick={() => {
+                  confirmDialog.onConfirm();
+                  setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+                }}
+              >
+                {confirmDialog.confirmText || "Xác nhận"}
+              </button>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import styles from "./SideNavBar.module.css";
 
 export default function SideNavBar({ 
@@ -16,6 +16,15 @@ export default function SideNavBar({
   onMobileClose?: () => void
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("username");
+    localStorage.removeItem("fullName");
+    localStorage.removeItem("userRole");
+    router.push("/login");
+  };
 
   return (
     <nav className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''} ${isMobileOpen ? styles.mobileOpen : ''}`}>
@@ -91,6 +100,15 @@ export default function SideNavBar({
         </Link>
 
         <Link
+          href="/admin/housekeeping"
+          title="Dọn phòng & Tạp vụ"
+          className={`${styles.navLink} ${pathname.startsWith("/admin/housekeeping") ? styles.active : ""}`}
+        >
+          <span className="material-symbols-outlined">cleaning_services</span>
+          {!isCollapsed && <span>Dọn phòng & Tạp vụ</span>}
+        </Link>
+
+        <Link
           href="/admin/events"
           title="Sự kiện & Combo"
           className={`${styles.navLink} ${pathname.startsWith("/admin/events") ? styles.active : ""}`}
@@ -124,10 +142,10 @@ export default function SideNavBar({
           <span className="material-symbols-outlined">settings</span>
           {!isCollapsed && <span>Cài đặt</span>}
         </Link>
-        <Link href="/" title="Thoát Admin" className={`${styles.navLinkFooter} ${styles.logout}`}>
+        <button onClick={handleLogout} title="Đăng xuất" className={`${styles.navLinkFooter} ${styles.logout}`} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem' }}>
           <span className="material-symbols-outlined">logout</span>
-          {!isCollapsed && <span>Thoát Admin</span>}
-        </Link>
+          {!isCollapsed && <span>Đăng xuất</span>}
+        </button>
       </div>
     </nav>
   );

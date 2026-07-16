@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
-import { apiGet, apiPost, apiPut, apiUploadImage } from "@/lib/api";
+import { apiGet, apiPost, apiPut, apiUploadImage, getErrorMessage } from "@/lib/api";
 import { AccommodationCategoryDTO, AccommodationType, ImageDTO, AmenityDTO } from "@/types/api";
 
 export default function AdminCategories() {
@@ -24,6 +24,8 @@ export default function AdminCategories() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null); // For upload
   const [selectedAmenityIds, setSelectedAmenityIds] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [errorCode, setErrorCode] = useState("");
 
   const fetchCategories = async () => {
     try {
@@ -63,6 +65,8 @@ export default function AdminCategories() {
     setCatImage("");
     setSelectedFile(null);
     setSelectedAmenityIds([]);
+    setErrorMsg("");
+    setErrorCode("");
     setIsModalOpen(true);
   };
 
@@ -88,6 +92,8 @@ export default function AdminCategories() {
     const coverImage = cat.images && cat.images.length > 0 ? cat.images[0].url : "";
     setCatImage(coverImage);
     setSelectedFile(null);
+    setErrorMsg("");
+    setErrorCode("");
     setIsModalOpen(true);
   };
 
@@ -106,6 +112,9 @@ export default function AdminCategories() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !code || !basePrice) return;
+
+    setErrorMsg("");
+    setErrorCode("");
 
     try {
       setSubmitting(true);
@@ -138,7 +147,9 @@ export default function AdminCategories() {
       await fetchCategories();
       setIsModalOpen(false);
     } catch (error: any) {
-      alert("Lỗi khi lưu loại phòng: " + error.message);
+      console.error(error);
+      setErrorCode(error.code || "");
+      setErrorMsg(getErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
@@ -309,6 +320,11 @@ export default function AdminCategories() {
                       onChange={(e) => setCode(e.target.value)}
                       required
                     />
+                    {errorCode === "CATEGORY_CODE_ALREADY_EXISTS" && (
+                      <span style={{ color: "red", fontSize: "0.75rem", marginTop: "0.25rem", display: "block" }}>
+                        Mã hạng phòng này đã tồn tại trong hệ thống.
+                      </span>
+                    )}
                   </div>
                   <div>
                     <label className={`mono-text ${styles.label}`}>Loại hình lưu trú</label>
@@ -538,6 +554,13 @@ export default function AdminCategories() {
                     )}
                   </label>
                 </div>
+
+                {errorMsg && errorCode !== "CATEGORY_CODE_ALREADY_EXISTS" && (
+                  <div style={{ color: "red", fontSize: "0.85rem", marginTop: "1rem", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>error</span>
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
               </div>
               <div className={styles.modalFooter}>
                 <button 

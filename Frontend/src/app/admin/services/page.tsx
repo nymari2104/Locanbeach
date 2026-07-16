@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
-import { apiGet, apiPost, apiPut, apiDelete, apiUploadImage } from "@/lib/api";
+import { apiGet, apiPost, apiPut, apiDelete, apiUploadImage, getErrorMessage } from "@/lib/api";
 import { ServiceDTO, ServiceGroup, ServiceStatus, AmenityDTO } from "@/types/api";
 
 const POPULAR_ICONS = [
@@ -22,6 +22,8 @@ export default function AdminServices() {
   const [activeTab, setActiveTab] = useState("Tất cả");
   const [activeStatus, setActiveStatus] = useState("Tất cả");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [errorCode, setErrorCode] = useState("");
   
   // Data states
   const [services, setServices] = useState<ServiceDTO[]>([]);
@@ -103,6 +105,8 @@ export default function AdminServices() {
   });
 
   const handleOpenAddModal = () => {
+    setErrorMsg("");
+    setErrorCode("");
     if (activeTab === "Tiện nghi phòng") {
       setEditingAmenity(null);
       setAmenityName("");
@@ -126,6 +130,8 @@ export default function AdminServices() {
   };
 
   const handleOpenEditService = (service: ServiceDTO) => {
+    setErrorMsg("");
+    setErrorCode("");
     setEditingService(service);
     setServiceName(service.name);
     setServiceType(getTypeFromGroup(service.group));
@@ -140,6 +146,8 @@ export default function AdminServices() {
   };
 
   const handleOpenEditAmenity = (amenity: AmenityDTO) => {
+    setErrorMsg("");
+    setErrorCode("");
     setEditingAmenity(amenity);
     setAmenityName(amenity.name);
     setAmenityIcon(amenity.icon);
@@ -160,6 +168,8 @@ export default function AdminServices() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg("");
+    setErrorCode("");
 
     try {
       setSubmitting(true);
@@ -203,7 +213,9 @@ export default function AdminServices() {
         setIsModalOpen(false);
       }
     } catch (error: any) {
-      alert("Lỗi khi lưu: " + error.message);
+      console.error(error);
+      setErrorCode(error.code || "");
+      setErrorMsg(getErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
@@ -215,7 +227,7 @@ export default function AdminServices() {
         await apiDelete(`/services/${id}`);
         setServices(services.filter(item => item.id !== id));
       } catch (error: any) {
-        alert("Lỗi khi xóa dịch vụ: " + error.message);
+        alert("Lỗi khi xóa dịch vụ: " + getErrorMessage(error));
       }
     }
   };
@@ -226,7 +238,7 @@ export default function AdminServices() {
         await apiDelete(`/amenities/${id}`);
         setAmenities(amenities.filter(a => a.id !== id));
       } catch (error: any) {
-        alert("Lỗi khi xóa tiện nghi: " + error.message);
+        alert("Lỗi khi xóa tiện nghi: " + getErrorMessage(error));
       }
     }
   };
@@ -622,6 +634,13 @@ export default function AdminServices() {
                       </label>
                     </div>
                   </>
+                )}
+
+                {errorMsg && (
+                  <div style={{ color: "red", fontSize: "0.85rem", marginTop: "1rem", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>error</span>
+                    <span>{errorMsg}</span>
+                  </div>
                 )}
               </div>
               <div className={styles.modalFooter}>

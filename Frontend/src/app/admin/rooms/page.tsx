@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
-import { apiGet, apiPost, apiDelete, apiUploadImage } from "@/lib/api";
+import { apiGet, apiPost, apiDelete, apiUploadImage, getErrorMessage } from "@/lib/api";
 import { AccommodationDTO, AccommodationCategoryDTO, AccommodationType, AccommodationStatus } from "@/types/api";
 
 export default function AdminRooms() {
@@ -11,6 +11,8 @@ export default function AdminRooms() {
   const [accommodations, setAccommodations] = useState<AccommodationDTO[]>([]);
   const [categories, setCategories] = useState<AccommodationCategoryDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [errorCode, setErrorCode] = useState("");
 
   // Form states
   const [roomCode, setRoomCode] = useState(""); // Physical room code, e.g. "101"
@@ -53,13 +55,23 @@ export default function AdminRooms() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (!isModalOpen) {
+      setErrorMsg("");
+      setErrorCode("");
+    }
+  }, [isModalOpen]);
+
   // Filtered rooms
-  const filteredRooms = activeTab === "Tất cả"
-    ? accommodations
-    : accommodations.filter(room => {
-        const isStatusActive = room.status === "ACTIVE";
-        return activeTab === "Hoạt động" ? isStatusActive : !isStatusActive;
-      });
+  const filteredRooms = accommodations.filter(room => {
+    if (activeTab === "Tất cả") return true;
+    if (activeTab === "Hoạt động") return room.status === "ACTIVE";
+    if (activeTab === "Tạm ngưng") return room.status === "INACTIVE";
+    if (activeTab === "Sẵn sàng") return room.operationalStatus === "VACANT" && room.status === "ACTIVE";
+    if (activeTab === "Khách vừa đi") return room.operationalStatus === "DIRTY";
+    if (activeTab === "Đang dọn") return room.operationalStatus === "CLEANING";
+    return true;
+  });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -77,13 +89,16 @@ export default function AdminRooms() {
     e.preventDefault();
     if (!roomCode) return;
 
+    setErrorMsg("");
+    setErrorCode("");
+
     try {
       let finalCategoryId = selectedCategoryId;
 
       // 1. If user chose to create a new category first
       if (selectedCategoryId === "NEW") {
         if (!newCatName || !newCatCode || !newCatPrice) {
-          alert("Vui lòng nhập đầy đủ thông tin loại phòng mới!");
+          setErrorMsg("Vui lòng nhập đầy đủ thông tin loại phòng mới!");
           return;
         }
 
@@ -126,7 +141,9 @@ export default function AdminRooms() {
       setRoomImage("");
       setSelectedFile(null);
     } catch (error: any) {
-      alert("Lỗi khi thêm phòng: " + error.message);
+      console.error(error);
+      setErrorCode(error.code || "");
+      setErrorMsg(getErrorMessage(error));
     }
   };
 
@@ -169,8 +186,8 @@ export default function AdminRooms() {
 
       {/* Filters Section */}
       <section className={styles.filtersSection}>
-        <div className={styles.filterTabs}>
-          {["Tất cả", "Hoạt động", "Tạm ngưng"].map((tab) => (
+        <div className={styles.filterTabs} style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          {["Tất cả", "Hoạt động", "Sẵn sàng", "Khách vừa đi", "Đang dọn", "Tạm ngưng"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -210,8 +227,25 @@ export default function AdminRooms() {
                     alt={`Phòng ${room.code}`}
                     src={coverImage}
                   />
-                  <div className={`${styles.badge} ${room.status === "ACTIVE" ? styles.badgeVacant : styles.badgeOccupied}`}>
-                    <span className="mono-text">{room.status === "ACTIVE" ? "Hoạt động" : "Tạm ngưng"}</span>
+                   <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", position: "absolute", top: "1rem", right: "1rem", zIndex: 5 }}>
+                    <div className={`${styles.badge} ${room.status === "ACTIVE" ? styles.badgeVacant : styles.badgeOccupied}`} style={{ position: "static" }}>
+                      <span className="mono-text">{room.status === "ACTIVE" ? "Hoạt động" : "Tạm ngưng"}</span>
+                    </div>
+                    {room.status === "ACTIVE" && (
+                      <div className={styles.badge} style={{ 
+                        position: "static",
+                        backgroundColor: room.operationalStatus === "VACANT" ? "#10b981" : 
+                                         room.operationalStatus === "DIRTY" ? "#ef4444" : 
+                                         room.operationalStatus === "CLEANING" ? "#f59e0b" : "#3b82f6",
+                        color: "white"
+                      }}>
+                        <span className="mono-text" style={{ fontSize: "0.7rem", padding: "0.1rem 0.5rem" }}>
+                          {room.operationalStatus === "VACANT" ? "Sẵn sàng" : 
+                           room.operationalStatus === "DIRTY" ? "Khách vừa đi" : 
+                           room.operationalStatus === "CLEANING" ? "Đang dọn" : "Có khách"}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className={styles.cardDetails}>
@@ -259,6 +293,11 @@ export default function AdminRooms() {
                     required
                     type="text"
                   />
+                  {errorCode === "ACCOMMODATION_CODE_ALREADY_EXISTS" && (
+                    <span style={{ color: "red", fontSize: "0.75rem", marginTop: "0.25rem", display: "block" }}>
+                      Số phòng này đã tồn tại trong hệ thống.
+                    </span>
+                  )}
                 </div>
 
                 <div className={styles.formGroup}>
@@ -305,6 +344,11 @@ export default function AdminRooms() {
                           onChange={(e) => setNewCatCode(e.target.value)}
                           required={selectedCategoryId === "NEW"}
                         />
+                        {errorCode === "CATEGORY_CODE_ALREADY_EXISTS" && (
+                          <span style={{ color: "red", fontSize: "0.75rem", marginTop: "0.25rem", display: "block" }}>
+                            Mã loại phòng này đã tồn tại.
+                          </span>
+                        )}
                       </div>
                       <div>
                         <label className={`mono-text ${styles.label}`}>Loại hình lưu trú</label>
@@ -433,6 +477,13 @@ export default function AdminRooms() {
                     <span className={`material-symbols-outlined ${styles.selectArrow}`}>expand_more</span>
                   </div>
                 </div>
+
+                {errorMsg && errorCode !== "ACCOMMODATION_CODE_ALREADY_EXISTS" && errorCode !== "CATEGORY_CODE_ALREADY_EXISTS" && (
+                  <div style={{ color: "red", fontSize: "0.85rem", marginTop: "1rem", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>error</span>
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
               </div>
               <div className={styles.modalFooter}>
                 <button type="button" className={`mono-text ${styles.btnCancel}`} onClick={() => setIsModalOpen(false)}>

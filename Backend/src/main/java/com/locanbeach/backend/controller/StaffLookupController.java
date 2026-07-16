@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/staff")
+@RequestMapping("/api/v1/staff")
 @RequiredArgsConstructor
 public class StaffLookupController {
 

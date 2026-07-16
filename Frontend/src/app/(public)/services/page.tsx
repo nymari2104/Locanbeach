@@ -96,22 +96,23 @@ export default function Services() {
       {/* Services Grid */}
       <section className={styles.grid}>
         {loading ? (
-          <div style={{ gridColumn: "1/-1", display: "flex", justifyContent: "center", padding: "4rem 0" }}>
-            <div className="spinner" style={{
-              border: "4px solid rgba(0,0,0,0.1)",
-              width: "36px",
-              height: "36px",
-              borderRadius: "50%",
-              borderLeftColor: "var(--color-primary)",
-              animation: "spin 1s linear infinite"
-            }} />
-            <style jsx>{`
-              @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-              }
-            `}</style>
-          </div>
+          <>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className={`${styles.card} ${styles.skeletonCard}`}>
+                <div className={`${styles.imageWrapper} ${styles.skeletonShimmer}`} style={{ height: '240px' }}></div>
+                <div className={styles.content} style={{ gap: '1rem' }}>
+                  <div>
+                    <div className={styles.skeletonShimmer} style={{ height: '16px', width: '30%', borderRadius: '4px', marginBottom: '0.5rem' }}></div>
+                    <div className={styles.skeletonShimmer} style={{ height: '24px', width: '70%', borderRadius: '4px', marginBottom: '0.75rem' }}></div>
+                    <div className={styles.skeletonShimmer} style={{ height: '48px', width: '100%', borderRadius: '4px', marginBottom: '1rem' }}></div>
+                    <div className={styles.skeletonShimmer} style={{ height: '16px', width: '50%', borderRadius: '4px', marginBottom: '0.5rem' }}></div>
+                    <div className={styles.skeletonShimmer} style={{ height: '16px', width: '40%', borderRadius: '4px' }}></div>
+                  </div>
+                  <div className={styles.skeletonShimmer} style={{ height: '40px', width: '100%', borderRadius: '8px' }}></div>
+                </div>
+              </div>
+            ))}
+          </>
         ) : (
           services.map((service) => {
             const coverImage = service.images && service.images.length > 0

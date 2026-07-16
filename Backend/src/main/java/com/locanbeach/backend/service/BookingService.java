@@ -32,6 +32,10 @@ public class BookingService {
 
     @Transactional
     public RoomHoldResponse holdRoom(RoomHoldRequest request) {
+        if (request.getCheckinDate().toLocalDate().isBefore(java.time.LocalDate.now())) {
+            throw new AppException(BookingErrorCode.INVALID_CHECKIN_STATUS, "Check-in date must be today or in the future");
+        }
+
         if (!request.getCheckoutDate().isAfter(request.getCheckinDate())) {
             throw new AppException(BookingErrorCode.INVALID_CHECKIN_STATUS, "Check-out date must be after check-in date");
         }

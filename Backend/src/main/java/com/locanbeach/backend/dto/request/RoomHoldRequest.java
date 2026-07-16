@@ -15,7 +15,6 @@ public class RoomHoldRequest {
     private UUID categoryId;
 
     @NotNull(message = "Check-in date is required")
-    @FutureOrPresent(message = "Check-in date must be today or in the future")
     private java.time.LocalDateTime checkinDate;
 
     @NotNull(message = "Check-out date is required")

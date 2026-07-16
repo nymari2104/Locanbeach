@@ -4,7 +4,7 @@ import { use, useState, useEffect, Suspense } from "react";
 import styles from "./page.module.css";
 import Stack from "../../../../components/ui/Stack";
 import Link from "next/link";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiGet, apiPost, getErrorMessage } from "@/lib/api";
 import { 
   AccommodationCategoryDTO,
   HoldRoomResponse, 
@@ -189,22 +189,28 @@ function RoomDetailContent({ id }: { id: string }) {
       setBookingProgress("success");
     } catch (error: any) {
       console.error(error);
-      setErrorMessage(error.message || "Đã xảy ra lỗi khi đặt phòng");
+      setErrorMessage(getErrorMessage(error));
       setBookingProgress("error");
     }
   };
 
   if (loading || !room) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", padding: "10rem 0" }}>
-        <div className="spinner" style={{
-          border: "4px solid rgba(0,0,0,0.1)",
-          width: "48px",
-          height: "48px",
-          borderRadius: "50%",
-          borderLeftColor: "var(--color-primary)",
-          animation: "spin 1s linear infinite"
-        }} />
+      <div className={styles.skeletonWrapper}>
+        {/* Left Side: Category detail skeleton */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div className={styles.skeletonShimmer} style={{ height: '350px', borderRadius: '24px', width: '100%' }}></div>
+          <div className={styles.skeletonShimmer} style={{ height: '36px', width: '50%', borderRadius: '4px' }}></div>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <div className={styles.skeletonShimmer} style={{ height: '20px', width: '80px', borderRadius: '4px' }}></div>
+            <div className={styles.skeletonShimmer} style={{ height: '20px', width: '80px', borderRadius: '4px' }}></div>
+            <div className={styles.skeletonShimmer} style={{ height: '20px', width: '80px', borderRadius: '4px' }}></div>
+          </div>
+          <div className={styles.skeletonShimmer} style={{ height: '100px', width: '100%', borderRadius: '8px' }}></div>
+        </div>
+
+        {/* Right Side: Booking Card skeleton */}
+        <div className={styles.skeletonShimmer} style={{ height: '400px', borderRadius: '24px', width: '100%' }}></div>
       </div>
     );
   }
@@ -451,29 +457,52 @@ function RoomDetailContent({ id }: { id: string }) {
             <form onSubmit={handleConfirmBooking}>
               <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
                 
-                {/* Summary Info */}
-                <div style={{
-                  backgroundColor: "var(--color-surface-dim, #f9fafb)",
-                  padding: "1rem",
-                  borderRadius: "var(--rounded-lg)",
-                  fontSize: "0.9rem",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.25rem",
-                  color: "var(--color-on-surface)"
-                }}>
-                  <p><strong>Hạng phòng:</strong> {room.name}</p>
-                  <p><strong>Thời gian nghỉ:</strong> {checkin} đến {checkout}</p>
-                  <p><strong>Số khách:</strong> {guests} khách</p>
-                  <p><strong>Đơn giá:</strong> {room.price} / đêm</p>
-                </div>
+                 {/* Fixed Booking Info */}
+                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                   <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                     <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Hạng phòng</label>
+                     <input 
+                       style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", fontSize: "1rem", backgroundColor: "#f3f4f6", color: "#6b7280", cursor: "not-allowed" }}
+                       value={room.name}
+                       readOnly
+                     />
+                   </div>
+
+                   <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                     <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Thời gian nghỉ</label>
+                     <input 
+                       style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", fontSize: "1rem", backgroundColor: "#f3f4f6", color: "#6b7280", cursor: "not-allowed" }}
+                       value={`${checkinVisual} đến ${checkoutVisual}`}
+                       readOnly
+                     />
+                   </div>
+
+                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                     <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                       <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Số khách</label>
+                       <input 
+                         style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", fontSize: "1rem", backgroundColor: "#f3f4f6", color: "#6b7280", cursor: "not-allowed" }}
+                         value={`${guests} khách`}
+                         readOnly
+                       />
+                     </div>
+                     <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                       <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Đơn giá / Đêm</label>
+                       <input 
+                         style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", fontSize: "1rem", backgroundColor: "#f3f4f6", color: "#6b7280", cursor: "not-allowed" }}
+                         value={room.price}
+                         readOnly
+                       />
+                     </div>
+                   </div>
+                 </div>
 
                 {bookingProgress === "idle" && (
                   <>
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                       <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Họ và tên khách hàng</label>
                       <input 
-                        style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%" }}
+                        style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", fontSize: "1rem" }}
                         placeholder="Nhập họ tên đầy đủ"
                         value={guestName}
                         onChange={(e) => setGuestName(e.target.value)}
@@ -485,7 +514,7 @@ function RoomDetailContent({ id }: { id: string }) {
                       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                         <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Số điện thoại</label>
                         <input 
-                          style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%" }}
+                          style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", fontSize: "1rem" }}
                           type="tel"
                           placeholder="VD: 0987654321"
                           value={guestPhone}
@@ -496,7 +525,7 @@ function RoomDetailContent({ id }: { id: string }) {
                       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                         <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Địa chỉ Email</label>
                         <input 
-                          style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%" }}
+                          style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", fontSize: "1rem" }}
                           type="email"
                           placeholder="VD: guest@example.com"
                           value={guestEmail}
@@ -508,7 +537,7 @@ function RoomDetailContent({ id }: { id: string }) {
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                       <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Ghi chú đặc biệt</label>
                       <textarea 
-                        style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", height: "60px", resize: "none" }}
+                        style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", height: "60px", resize: "none", fontSize: "1rem" }}
                         placeholder="Yêu cầu đặc biệt (hướng nhìn, tầng thấp, phòng không hút thuốc...)"
                         value={guestNotes}
                         onChange={(e) => setGuestNotes(e.target.value)}

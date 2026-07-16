@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
-import { apiGet, apiPost, apiDelete, apiUploadImage } from "@/lib/api";
+import { apiGet, apiPost, apiDelete, apiUploadImage, getErrorMessage } from "@/lib/api";
 import { ComboEventDTO, ComboEventType, ServiceStatus } from "@/types/api";
 
 export default function AdminEvents() {
@@ -11,6 +11,8 @@ export default function AdminEvents() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [combos, setCombos] = useState<ComboEventDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [errorCode, setErrorCode] = useState("");
 
   // Form states
   const [itemName, setItemName] = useState("");
@@ -38,6 +40,13 @@ export default function AdminEvents() {
     fetchCombos();
   }, []);
 
+  useEffect(() => {
+    if (!isModalOpen) {
+      setErrorMsg("");
+      setErrorCode("");
+    }
+  }, [isModalOpen]);
+
   const getTypeFromLabel = (label: string): ComboEventType => {
     return label === "Sự kiện" ? "EVENT" : "COMBO";
   };
@@ -60,8 +69,16 @@ export default function AdminEvents() {
   });
 
   const handleOpenModalWithPreset = (presetType: string) => {
+    setItemName("");
+    setStartDate("");
+    setEndDate("");
+    setItemPrice("");
+    setItemImage("");
+    setSelectedFile(null);
     setItemType(presetType);
     setItemStatus("Hoạt động");
+    setErrorMsg("");
+    setErrorCode("");
     setIsModalOpen(true);
   };
 
@@ -80,6 +97,9 @@ export default function AdminEvents() {
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!itemName || !itemPrice || !startDate || !endDate) return;
+
+    setErrorMsg("");
+    setErrorCode("");
 
     try {
       const typeValue = getTypeFromLabel(itemType);
@@ -113,7 +133,9 @@ export default function AdminEvents() {
       setItemImage("");
       setSelectedFile(null);
     } catch (error: any) {
-      alert("Lỗi khi thêm sự kiện/combo: " + error.message);
+      console.error(error);
+      setErrorCode(error.code || "");
+      setErrorMsg(getErrorMessage(error));
     }
   };
 
@@ -123,7 +145,7 @@ export default function AdminEvents() {
         await apiDelete(`/combos/${id}`);
         setCombos(combos.filter(item => item.id !== id));
       } catch (error: any) {
-        alert("Lỗi khi xóa: " + error.message);
+        alert("Lỗi khi xóa: " + getErrorMessage(error));
       }
     }
   };
@@ -407,6 +429,12 @@ export default function AdminEvents() {
                     )}
                   </label>
                 </div>
+                {errorMsg && (
+                  <div style={{ color: "red", fontSize: "0.85rem", marginTop: "1rem", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>error</span>
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
               </div>
               <div className={styles.modalFooter}>
                 <button type="button" className={`mono-text ${styles.btnCancel}`} onClick={() => setIsModalOpen(false)}>

@@ -64,7 +64,9 @@ export default function TopNavBar() {
           <div className={styles.actions}>
             <div className={styles.icons}>
               <span className="material-symbols-outlined" style={{cursor: 'pointer'}}>language</span>
-              <span className="material-symbols-outlined" style={{cursor: 'pointer'}}>account_circle</span>
+              <Link href="/login" title="Đăng nhập hệ thống" style={{ color: 'inherit', display: 'flex', alignItems: 'center' }}>
+                <span className="material-symbols-outlined" style={{cursor: 'pointer'}}>account_circle</span>
+              </Link>
             </div>
             {!hideBookButton && (
               <Link href="/book" className={`mono-text ${styles.primaryButton}`}>

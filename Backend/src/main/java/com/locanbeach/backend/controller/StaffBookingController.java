@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/staff/bookings")
+@RequestMapping("/api/v1/staff/bookings")
 @RequiredArgsConstructor
 public class StaffBookingController {
 

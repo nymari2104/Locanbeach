@@ -71,22 +71,23 @@ export default function Combos() {
       {/* Combos Grid */}
       <section className={styles.grid}>
         {loading ? (
-          <div style={{ gridColumn: "1/-1", display: "flex", justifyContent: "center", padding: "4rem 0" }}>
-            <div className="spinner" style={{
-              border: "4px solid rgba(0,0,0,0.1)",
-              width: "36px",
-              height: "36px",
-              borderRadius: "50%",
-              borderLeftColor: "var(--color-primary)",
-              animation: "spin 1s linear infinite"
-            }} />
-            <style jsx>{`
-              @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-              }
-            `}</style>
-          </div>
+          <>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className={`${styles.card} ${styles.skeletonCard}`}>
+                <div className={`${styles.imageWrapper} ${styles.skeletonShimmer}`} style={{ height: '240px' }}></div>
+                <div className={styles.content} style={{ gap: '1rem' }}>
+                  <div>
+                    <div className={styles.skeletonShimmer} style={{ height: '24px', width: '70%', borderRadius: '4px', marginBottom: '0.75rem' }}></div>
+                    <div className={styles.skeletonShimmer} style={{ height: '60px', width: '100%', borderRadius: '4px' }}></div>
+                  </div>
+                  <div className={styles.footer} style={{ borderTop: 'none', paddingTop: 0 }}>
+                    <div className={styles.skeletonShimmer} style={{ height: '24px', width: '100px', borderRadius: '4px' }}></div>
+                    <div className={styles.skeletonShimmer} style={{ height: '36px', width: '90px', borderRadius: '8px' }}></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </>
         ) : (
           combos.map((combo) => {
             const coverImage = combo.images && combo.images.length > 0

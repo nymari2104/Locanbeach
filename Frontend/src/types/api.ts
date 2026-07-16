@@ -131,3 +131,14 @@ export interface PageResponse<T> {
   size: number;
   number: number;
 }
+
+export type UserRole = 'ADMIN' | 'STAFF' | 'GUEST';
+
+export interface LoginResponse {
+  accessToken: string;
+  tokenType: string;
+  userId: string;
+  username: string;
+  fullName: string;
+  role: UserRole;
+}

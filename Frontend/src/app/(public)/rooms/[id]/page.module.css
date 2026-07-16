@@ -327,11 +327,8 @@
   justify-content: space-between;
   align-items: center;
   background-color: var(--color-canvas-white);
-  cursor: pointer;
+  cursor: default;
   transition: border-color 0.2s;
-}
-.field:hover {
-  border-color: var(--color-primary);
 }
 
 .fieldLabel {
@@ -373,4 +370,41 @@
   font-size: 0.75rem;
   color: var(--color-on-surface-variant);
   margin-top: 1rem;
+}
+
+/* Skeleton loader matching Stitch spec */
+.skeletonShimmer {
+  background: #f3f4f6;
+  background-image: linear-gradient(
+    90deg,
+    #f3f4f6 0px,
+    #e5e7eb 40px,
+    #f3f4f6 80px
+  );
+  background-size: 600px 100%;
+  animation: shimmer 1.6s infinite linear;
+}
+
+.skeletonWrapper {
+  padding: 4rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .skeletonWrapper {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
 }

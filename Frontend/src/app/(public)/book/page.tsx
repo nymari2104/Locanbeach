@@ -348,17 +348,29 @@ export default function Book() {
         </div>
 
         <div className={styles.resultsGrid}>
-          {loading ? (
-            <div style={{ gridColumn: "1/-1", display: "flex", justifyContent: "center", padding: "4rem 0" }}>
-              <div className="spinner" style={{
-                border: "4px solid rgba(0,0,0,0.1)",
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                borderLeftColor: "var(--color-primary)",
-                animation: "spin 1s linear infinite"
-              }} />
-            </div>
+          {loading || searching ? (
+            <>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className={`${styles.roomCard} ${styles.skeletonCard}`}>
+                  <div className={`${styles.imageWrapper} ${styles.skeletonShimmer}`} style={{ height: '240px', minHeight: '240px' }}></div>
+                  <div className={styles.roomDetails} style={{ gap: '1rem' }}>
+                    <div>
+                      <div className={`${styles.skeletonShimmer}`} style={{ height: '24px', width: '60%', borderRadius: '4px', marginBottom: '0.75rem' }}></div>
+                      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                        <div className={`${styles.skeletonShimmer}`} style={{ height: '16px', width: '80px', borderRadius: '4px' }}></div>
+                        <div className={`${styles.skeletonShimmer}`} style={{ height: '16px', width: '100px', borderRadius: '4px' }}></div>
+                        <div className={`${styles.skeletonShimmer}`} style={{ height: '16px', width: '70px', borderRadius: '4px' }}></div>
+                      </div>
+                      <div className={`${styles.skeletonShimmer}`} style={{ height: '60px', width: '100%', borderRadius: '4px' }}></div>
+                    </div>
+                    <div className={styles.roomActions} style={{ borderTop: 'none', paddingTop: 0 }}>
+                      <div className={`${styles.skeletonShimmer}`} style={{ height: '24px', width: '120px', borderRadius: '4px' }}></div>
+                      <div className={`${styles.skeletonShimmer}`} style={{ height: '40px', width: '100px', borderRadius: '8px' }}></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
           ) : (
             searchResults.map((room, idx) => {
               const isFeatured = idx === 0;

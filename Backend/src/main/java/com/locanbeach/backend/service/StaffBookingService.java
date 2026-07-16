@@ -66,6 +66,9 @@ public class StaffBookingService {
         
         booking.setStatus(BookingStatus.CHECKED_IN);
         booking.setActualCheckinAt(LocalDateTime.now());
+        if (booking.getAccommodation() != null) {
+            booking.getAccommodation().setOperationalStatus(com.locanbeach.backend.entity.enums.OperationalStatus.OCCUPIED);
+        }
         
         return mapToResponse(bookingRepository.save(booking));
     }
@@ -81,6 +84,9 @@ public class StaffBookingService {
         
         booking.setStatus(BookingStatus.CHECKED_OUT);
         booking.setActualCheckoutAt(LocalDateTime.now());
+        if (booking.getAccommodation() != null) {
+            booking.getAccommodation().setOperationalStatus(com.locanbeach.backend.entity.enums.OperationalStatus.DIRTY);
+        }
         
         return mapToResponse(bookingRepository.save(booking));
     }
