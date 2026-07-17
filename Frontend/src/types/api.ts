@@ -28,7 +28,7 @@ export interface AccommodationCategoryDTO {
 }
 
 export type AccommodationStatus = 'ACTIVE' | 'INACTIVE';
-export type OperationalStatus = 'VACANT' | 'OCCUPIED' | 'CLEANING';
+export type OperationalStatus = 'VACANT' | 'OCCUPIED' | 'CLEANING' | 'MAINTENANCE' | 'DIRTY';
 
 export interface AccommodationDTO {
   id?: string;
