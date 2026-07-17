@@ -37,6 +37,13 @@ public class AccommodationController {
                 HttpStatus.CREATED);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<AccommodationDTO>> updateAccommodation(
+            @PathVariable UUID id, @RequestBody AccommodationDTO dto) {
+        return ResponseEntity.ok(
+                ApiResponse.success("Accommodation updated successfully", service.updateAccommodation(id, dto)));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteAccommodation(@PathVariable UUID id) {
         service.deleteAccommodation(id);

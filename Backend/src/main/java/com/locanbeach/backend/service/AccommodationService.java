@@ -63,6 +63,32 @@ public class AccommodationService {
     }
 
     @Transactional
+    public AccommodationDTO updateAccommodation(UUID id, AccommodationDTO dto) {
+        Accommodation entity = accommodationRepository.findById(id)
+                .orElseThrow(() -> new AppException(
+                        AccommodationErrorCode.ACCOMMODATION_NOT_FOUND,
+                        "Accommodation not found with id: " + id));
+
+        if (!entity.getCode().equals(dto.getCode()) && accommodationRepository.existsByCode(dto.getCode())) {
+            throw new AppException(AccommodationErrorCode.ACCOMMODATION_CODE_ALREADY_EXISTS);
+        }
+
+        entity.setCode(dto.getCode());
+        entity.setStatus(dto.getStatus());
+        if (dto.getOperationalStatus() != null) {
+            entity.setOperationalStatus(dto.getOperationalStatus());
+        }
+
+        AccommodationCategory category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new AppException(
+                        com.locanbeach.backend.exception.errorcode.CategoryErrorCode.CATEGORY_NOT_FOUND,
+                        "Category not found with id: " + dto.getCategoryId()));
+        entity.setCategory(category);
+
+        return convertToDto(accommodationRepository.save(entity));
+    }
+
+    @Transactional
     public void deleteAccommodation(UUID id) {
         Accommodation entity = accommodationRepository.findById(id)
                 .orElseThrow(() -> new AppException(

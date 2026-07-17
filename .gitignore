@@ -10,6 +10,7 @@ Chatbot/workflow/
 
 # Database migrations with sensitive default credentials
 Backend/src/main/resources/db/migration/V4__add_default_users.sql
+Backend/src/main/resources/db/migration/V9__insert_default_housekeepers.sql
 
 # OS files
 .DS_Store

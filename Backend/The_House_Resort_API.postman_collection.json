@@ -968,12 +968,13 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/staff/bookings?page=0&size=10&sortBy=createdAt&direction=desc",
+                            "raw": "{{baseUrl}}/api/v1/staff/bookings?page=0&size=10&sortBy=createdAt&direction=desc",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
+                                "v1",
                                 "staff",
                                 "bookings"
                             ],
@@ -1019,12 +1020,13 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}",
+                            "raw": "{{baseUrl}}/api/v1/staff/bookings/{{bookingId}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
+                                "v1",
                                 "staff",
                                 "bookings",
                                 "{{bookingId}}"
@@ -1062,12 +1064,13 @@
                             "raw": "{\n    \"status\": \"CONFIRMED\",\n    \"note\": \"Xác nhận cọc thành công\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/status",
+                            "raw": "{{baseUrl}}/api/v1/staff/bookings/{{bookingId}}/status",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
+                                "v1",
                                 "staff",
                                 "bookings",
                                 "{{bookingId}}",
@@ -1095,12 +1098,13 @@
                         "method": "POST",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/check-in",
+                            "raw": "{{baseUrl}}/api/v1/staff/bookings/{{bookingId}}/check-in",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
+                                "v1",
                                 "staff",
                                 "bookings",
                                 "{{bookingId}}",
@@ -1128,12 +1132,13 @@
                         "method": "POST",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/check-out",
+                            "raw": "{{baseUrl}}/api/v1/staff/bookings/{{bookingId}}/check-out",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
+                                "v1",
                                 "staff",
                                 "bookings",
                                 "{{bookingId}}",
@@ -1170,12 +1175,13 @@
                             "raw": "{\n    \"fullName\": \"Nguyen Van B\",\n    \"phone\": \"0912345678\",\n    \"email\": \"vanb@example.com\",\n    \"idType\": \"CCCD\",\n    \"idNumber\": \"123456789012\",\n    \"isPrimary\": false\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/guests",
+                            "raw": "{{baseUrl}}/api/v1/staff/bookings/{{bookingId}}/guests",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
+                                "v1",
                                 "staff",
                                 "bookings",
                                 "{{bookingId}}",
@@ -1212,12 +1218,13 @@
                             "raw": "{\n    \"serviceId\": \"{{serviceId}}\",\n    \"quantity\": 2,\n    \"note\": \"Sử dụng lúc tối\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/services",
+                            "raw": "{{baseUrl}}/api/v1/staff/bookings/{{bookingId}}/services",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
+                                "v1",
                                 "staff",
                                 "bookings",
                                 "{{bookingId}}",
@@ -1254,12 +1261,13 @@
                             "raw": "{\n    \"comboId\": \"{{comboId}}\",\n    \"quantity\": 1,\n    \"note\": \"Combo honeymoon quà tặng kèm\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/combos",
+                            "raw": "{{baseUrl}}/api/v1/staff/bookings/{{bookingId}}/combos",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
+                                "v1",
                                 "staff",
                                 "bookings",
                                 "{{bookingId}}",
@@ -1289,12 +1297,13 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/staff/accommodations",
+                            "raw": "{{baseUrl}}/api/v1/staff/accommodations",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
+                                "v1",
                                 "staff",
                                 "accommodations"
                             ]
@@ -1329,12 +1338,13 @@
                             "raw": "{\n    \"status\": \"CLEANING\"\n}"
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/staff/accommodations/{{accommodationId}}/operational-status",
+                            "raw": "{{baseUrl}}/api/v1/staff/accommodations/{{accommodationId}}/operational-status",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
+                                "v1",
                                 "staff",
                                 "accommodations",
                                 "{{accommodationId}}",
@@ -1364,12 +1374,13 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/staff/services",
+                            "raw": "{{baseUrl}}/api/v1/staff/services",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
+                                "v1",
                                 "staff",
                                 "services"
                             ]
@@ -1397,12 +1408,13 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/staff/combos",
+                            "raw": "{{baseUrl}}/api/v1/staff/combos",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
+                                "v1",
                                 "staff",
                                 "combos"
                             ]
@@ -1430,12 +1442,13 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/staff/accommodations/availability?startDate={{checkinDate}}&endDate={{checkoutDate}}",
+                            "raw": "{{baseUrl}}/api/v1/staff/accommodations/availability?startDate={{checkinDate}}&endDate={{checkoutDate}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
+                                "v1",
                                 "staff",
                                 "accommodations",
                                 "availability"
@@ -1449,6 +1462,95 @@
                                     "key": "endDate",
                                     "value": "{{checkoutDate}}"
                                 }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Housekeepers List",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Fetched housekeepers successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "    pm.expect(res.data).to.be.an('array');",
+                                    "    if (res.data.length > 0) {",
+                                    "        pm.collectionVariables.set('housekeeperId', res.data[0].id);",
+                                    "        console.log('🧹 Saved housekeeperId: ' + res.data[0].id);",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/staff/accommodations/users",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "staff",
+                                "accommodations",
+                                "users"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Assign Housekeeper & Change Status",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Housekeeper assigned and status changed successfully', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "    pm.expect(res.data.operationalStatus).to.eql('CLEANING');",
+                                    "    if (pm.collectionVariables.get('housekeeperId')) {",
+                                    "        pm.expect(res.data.lastCleanedById).to.eql(pm.collectionVariables.get('housekeeperId'));",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"CLEANING\",\n    \"lastCleanedById\": \"{{housekeeperId}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/staff/accommodations/{{accommodationId}}/operational-status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "staff",
+                                "accommodations",
+                                "{{accommodationId}}",
+                                "operational-status"
                             ]
                         }
                     }
@@ -2388,12 +2490,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{baseUrl}}/api/staff/bookings/00000000-0000-0000-0000-000000000000",
+                                    "raw": "{{baseUrl}}/api/v1/staff/bookings/00000000-0000-0000-0000-000000000000",
                                     "host": [
                                         "{{baseUrl}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "v1",
                                         "staff",
                                         "bookings",
                                         "00000000-0000-0000-0000-000000000000"
@@ -2428,12 +2531,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{baseUrl}}/api/staff/bookings/00000000-0000-0000-0000-000000000000/check-in",
+                                    "raw": "{{baseUrl}}/api/v1/staff/bookings/00000000-0000-0000-0000-000000000000/check-in",
                                     "host": [
                                         "{{baseUrl}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "v1",
                                         "staff",
                                         "bookings",
                                         "00000000-0000-0000-0000-000000000000",
@@ -2464,12 +2568,13 @@
                                 "method": "POST",
                                 "header": [],
                                 "url": {
-                                    "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/check-out",
+                                    "raw": "{{baseUrl}}/api/v1/staff/bookings/{{bookingId}}/check-out",
                                     "host": [
                                         "{{baseUrl}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "v1",
                                         "staff",
                                         "bookings",
                                         "{{bookingId}}",
@@ -2505,12 +2610,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/services",
+                                    "raw": "{{baseUrl}}/api/v1/staff/bookings/{{bookingId}}/services",
                                     "host": [
                                         "{{baseUrl}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "v1",
                                         "staff",
                                         "bookings",
                                         "{{bookingId}}",
@@ -2550,12 +2656,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}/combos",
+                                    "raw": "{{baseUrl}}/api/v1/staff/bookings/{{bookingId}}/combos",
                                     "host": [
                                         "{{baseUrl}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "v1",
                                         "staff",
                                         "bookings",
                                         "{{bookingId}}",
@@ -2595,12 +2702,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{baseUrl}}/api/staff/accommodations/00000000-0000-0000-0000-000000000000/operational-status",
+                                    "raw": "{{baseUrl}}/api/v1/staff/accommodations/00000000-0000-0000-0000-000000000000/operational-status",
                                     "host": [
                                         "{{baseUrl}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "v1",
                                         "staff",
                                         "accommodations",
                                         "00000000-0000-0000-0000-000000000000",
@@ -2639,12 +2747,13 @@
                         "method": "DELETE",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/staff/bookings/{{bookingId}}",
+                            "raw": "{{baseUrl}}/api/v1/staff/bookings/{{bookingId}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "api",
+                                "v1",
                                 "staff",
                                 "bookings",
                                 "{{bookingId}}"
@@ -2873,6 +2982,11 @@
         },
         {
             "key": "amenityId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "housekeeperId",
             "value": "",
             "type": "string"
         }

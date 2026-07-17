@@ -15,4 +15,6 @@ public class AccommodationDTO {
     private String metadata;
     private AccommodationStatus status;
     private OperationalStatus operationalStatus;
+    private UUID lastCleanedById;
+    private String lastCleanedByName;
 }

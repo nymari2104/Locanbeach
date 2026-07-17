@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
-import { apiGet, apiPost, apiDelete, apiUploadImage, getErrorMessage } from "@/lib/api";
+import { apiGet, apiPost, apiPut, apiDelete, apiUploadImage, getErrorMessage } from "@/lib/api";
 import { AccommodationDTO, AccommodationCategoryDTO, AccommodationType, AccommodationStatus } from "@/types/api";
 
 export default function AdminRooms() {
@@ -13,6 +13,7 @@ export default function AdminRooms() {
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [errorCode, setErrorCode] = useState("");
+  const [editingRoom, setEditingRoom] = useState<AccommodationDTO | null>(null);
 
   // Form states
   const [roomCode, setRoomCode] = useState(""); // Physical room code, e.g. "101"
@@ -85,6 +86,26 @@ export default function AdminRooms() {
     }
   };
 
+  const handleEditClick = (room: AccommodationDTO) => {
+    setEditingRoom(room);
+    setRoomCode(room.code);
+    setSelectedCategoryId(room.categoryId);
+    setRoomStatus(room.status === "ACTIVE" ? "Hoạt động" : "Tạm ngưng");
+    setIsModalOpen(true);
+  };
+
+  const handleAddClick = () => {
+    setEditingRoom(null);
+    setRoomCode("");
+    if (categories.length > 0) {
+      setSelectedCategoryId(categories[0].id || "");
+    } else {
+      setSelectedCategoryId("NEW");
+    }
+    setRoomStatus("Hoạt động");
+    setIsModalOpen(true);
+  };
+
   const handleAddRoom = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!roomCode) return;
@@ -93,44 +114,55 @@ export default function AdminRooms() {
     setErrorCode("");
 
     try {
-      let finalCategoryId = selectedCategoryId;
-
-      // 1. If user chose to create a new category first
-      if (selectedCategoryId === "NEW") {
-        if (!newCatName || !newCatCode || !newCatPrice) {
-          setErrorMsg("Vui lòng nhập đầy đủ thông tin loại phòng mới!");
-          return;
-        }
-
-        const createdCategory = await apiPost<AccommodationCategoryDTO>("/categories", {
-          name: newCatName,
-          code: newCatCode,
-          type: newCatType,
-          description: newCatDesc || newCatName,
-          basePrice: parseFloat(newCatPrice) || 0,
-          maxGuests: parseInt(newCatGuests) || 2,
-          areaSqm: parseFloat(newCatArea) || 30
-        });
-
-        finalCategoryId = createdCategory.id || "";
-
-        // Upload category image if selected
-        if (selectedFile && createdCategory.id) {
-          await apiUploadImage(selectedFile, "CATEGORY", createdCategory.id, true);
-        }
-      }
-
-      // 2. Create the physical room (Accommodation)
       const statusValue: AccommodationStatus = roomStatus === "Hoạt động" ? "ACTIVE" : "INACTIVE";
-      await apiPost<AccommodationDTO>("/accommodations", {
-        categoryId: finalCategoryId,
-        code: roomCode,
-        status: statusValue,
-        operationalStatus: "VACANT"
-      });
+
+      if (editingRoom) {
+        // Update existing room
+        await apiPut<AccommodationDTO>(`/accommodations/${editingRoom.id}`, {
+          categoryId: selectedCategoryId,
+          code: roomCode,
+          status: statusValue,
+          operationalStatus: editingRoom.operationalStatus
+        });
+      } else {
+        // 1. If user chose to create a new category first
+        let finalCategoryId = selectedCategoryId;
+        if (selectedCategoryId === "NEW") {
+          if (!newCatName || !newCatCode || !newCatPrice) {
+            setErrorMsg("Vui lòng nhập đầy đủ thông tin loại phòng mới!");
+            return;
+          }
+
+          const createdCategory = await apiPost<AccommodationCategoryDTO>("/categories", {
+            name: newCatName,
+            code: newCatCode,
+            type: newCatType,
+            description: newCatDesc || newCatName,
+            basePrice: parseFloat(newCatPrice) || 0,
+            maxGuests: parseInt(newCatGuests) || 2,
+            areaSqm: parseFloat(newCatArea) || 30
+          });
+
+          finalCategoryId = createdCategory.id || "";
+
+          // Upload category image if selected
+          if (selectedFile && createdCategory.id) {
+            await apiUploadImage(selectedFile, "CATEGORY", createdCategory.id, true);
+          }
+        }
+
+        // 2. Create the physical room (Accommodation)
+        await apiPost<AccommodationDTO>("/accommodations", {
+          categoryId: finalCategoryId,
+          code: roomCode,
+          status: statusValue,
+          operationalStatus: "VACANT"
+        });
+      }
 
       await loadData();
       setIsModalOpen(false);
+      setEditingRoom(null);
 
       // Reset form fields
       setRoomCode("");
@@ -165,7 +197,7 @@ export default function AdminRooms() {
           <div className={styles.statsText}>
             <p className="mono-text">{activeCount}/{accommodations.length} Hoạt động</p>
           </div>
-          <button className="mono-text" onClick={() => setIsModalOpen(true)} style={{
+          <button className="mono-text" onClick={handleAddClick} style={{
             backgroundColor: "var(--color-primary)",
             color: "var(--color-on-primary)",
             padding: "0.5rem 1rem",
@@ -254,7 +286,7 @@ export default function AdminRooms() {
                     <p className={styles.roomType}>{room.categoryName || cat?.name || "Loại phòng"}</p>
                   </div>
                   <div className={styles.actions}>
-                    <button className={styles.iconButton}>
+                    <button className={styles.iconButton} onClick={() => handleEditClick(room)}>
                       <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>edit</span>
                     </button>
                   </div>
@@ -276,8 +308,8 @@ export default function AdminRooms() {
         <div className={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>Thêm phòng mới</h2>
-              <button className={styles.modalCloseBtn} onClick={() => setIsModalOpen(false)}>
+              <h2 className={styles.modalTitle}>{editingRoom ? `Cập nhật phòng ${editingRoom.code}` : "Thêm phòng mới"}</h2>
+              <button className={styles.modalCloseBtn} onClick={() => { setIsModalOpen(false); setEditingRoom(null); }}>
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
-import { apiGet, apiPost, apiDelete, apiUploadImage, getErrorMessage } from "@/lib/api";
+import { apiGet, apiPost, apiPut, apiDelete, apiUploadImage, getErrorMessage } from "@/lib/api";
 import { ComboEventDTO, ComboEventType, ServiceStatus } from "@/types/api";
 
 export default function AdminEvents() {
@@ -13,6 +13,7 @@ export default function AdminEvents() {
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [errorCode, setErrorCode] = useState("");
+  const [editingItem, setEditingItem] = useState<ComboEventDTO | null>(null);
 
   // Form states
   const [itemName, setItemName] = useState("");
@@ -69,6 +70,7 @@ export default function AdminEvents() {
   });
 
   const handleOpenModalWithPreset = (presetType: string) => {
+    setEditingItem(null);
     setItemName("");
     setStartDate("");
     setEndDate("");
@@ -79,6 +81,19 @@ export default function AdminEvents() {
     setItemStatus("Hoạt động");
     setErrorMsg("");
     setErrorCode("");
+    setIsModalOpen(true);
+  };
+
+  const handleEditClick = (item: ComboEventDTO) => {
+    setEditingItem(item);
+    setItemName(item.name);
+    setItemType(getLabelFromType(item.type));
+    setItemStatus(item.status === "ACTIVE" ? "Hoạt động" : "Tạm ngưng");
+    setStartDate(item.startDate);
+    setEndDate(item.endDate);
+    setItemPrice(String(item.price));
+    setItemImage(item.images?.[0]?.url || "");
+    setSelectedFile(null);
     setIsModalOpen(true);
   };
 
@@ -106,24 +121,43 @@ export default function AdminEvents() {
       const statusValue: ServiceStatus = itemStatus === "Hoạt động" ? "ACTIVE" : "INACTIVE";
       const numericPrice = parseFloat(itemPrice.replace(/\D/g, "")) || 0;
 
-      // 1. Create combo/event entity
-      const newCombo = await apiPost<ComboEventDTO>("/combos", {
-        name: itemName,
-        type: typeValue,
-        description: itemName,
-        price: numericPrice,
-        startDate: startDate,
-        endDate: endDate,
-        status: statusValue
-      });
+      if (editingItem) {
+        // Update combo/event entity
+        await apiPut<ComboEventDTO>(`/combos/${editingItem.id}`, {
+          name: itemName,
+          type: typeValue,
+          description: itemName,
+          price: numericPrice,
+          startDate: startDate,
+          endDate: endDate,
+          status: statusValue
+        });
 
-      // 2. Upload image if selected
-      if (selectedFile && newCombo.id) {
-        await apiUploadImage(selectedFile, "COMBO", newCombo.id, true);
+        // Upload image if selected
+        if (selectedFile && editingItem.id) {
+          await apiUploadImage(selectedFile, "COMBO", editingItem.id, true);
+        }
+      } else {
+        // Create combo/event entity
+        const newCombo = await apiPost<ComboEventDTO>("/combos", {
+          name: itemName,
+          type: typeValue,
+          description: itemName,
+          price: numericPrice,
+          startDate: startDate,
+          endDate: endDate,
+          status: statusValue
+        });
+
+        // Upload image if selected
+        if (selectedFile && newCombo.id) {
+          await apiUploadImage(selectedFile, "COMBO", newCombo.id, true);
+        }
       }
 
       await fetchCombos();
       setIsModalOpen(false);
+      setEditingItem(null);
 
       // Reset form
       setItemName("");
@@ -275,7 +309,7 @@ export default function AdminEvents() {
                     <p className={styles.roomType}>{getLabelFromType(item.type)}</p>
                   </div>
                   <div className={styles.actions}>
-                    <button className={styles.iconButton}>
+                    <button className={styles.iconButton} onClick={() => handleEditClick(item)}>
                       <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>edit</span>
                     </button>
                     <button className={`${styles.iconButton} ${styles.deleteBtn}`} onClick={() => handleDeleteItem(item.id!)}>
@@ -298,8 +332,8 @@ export default function AdminEvents() {
         <div className={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>Thêm {itemType.toLowerCase()} mới</h2>
-              <button className={styles.modalCloseBtn} onClick={() => setIsModalOpen(false)}>
+              <h2 className={styles.modalTitle}>{editingItem ? `Cập nhật ${itemType.toLowerCase()}` : `Thêm ${itemType.toLowerCase()} mới`}</h2>
+              <button className={styles.modalCloseBtn} onClick={() => { setIsModalOpen(false); setEditingItem(null); }}>
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>

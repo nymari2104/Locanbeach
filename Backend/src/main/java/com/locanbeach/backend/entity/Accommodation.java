@@ -49,6 +49,10 @@ public class Accommodation {
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private OperationalStatus operationalStatus = OperationalStatus.VACANT;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "last_cleaned_by")
+    private User lastCleanedBy;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
