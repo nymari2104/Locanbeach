@@ -284,6 +284,12 @@ export default function AdminRooms() {
                   <div>
                     <h3 className={styles.roomName}>Phòng {room.code}</h3>
                     <p className={styles.roomType}>{room.categoryName || cat?.name || "Loại phòng"}</p>
+                    {room.lastCleanedByName && (
+                      <p style={{ margin: "0.25rem 0 0 0", fontSize: "0.75rem", color: "#4f46e5", display: "flex", alignItems: "center", gap: "0.15rem" }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "0.9rem" }}>person</span>
+                        <span>Người dọn: <strong>{room.lastCleanedByName}</strong></span>
+                      </p>
+                    )}
                   </div>
                   <div className={styles.actions}>
                     <button className={styles.iconButton} onClick={() => handleEditClick(room)}>

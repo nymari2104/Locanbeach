@@ -58,6 +58,15 @@ export default function Housekeeping() {
     }
   }, []);
 
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
   const handleStatusChange = async (id: string, newStatus: string, lastCleanedById?: string) => {
     try {
       const payload: any = { status: newStatus };

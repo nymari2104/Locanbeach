@@ -38,6 +38,8 @@ export interface AccommodationDTO {
   status: AccommodationStatus;
   operationalStatus: OperationalStatus;
   metadata?: string;
+  lastCleanedById?: string;
+  lastCleanedByName?: string;
 }
 
 export type ServiceGroup = 'SPA' | 'RESTAURANT' | 'ENTERTAINMENT' | 'UTILITY';

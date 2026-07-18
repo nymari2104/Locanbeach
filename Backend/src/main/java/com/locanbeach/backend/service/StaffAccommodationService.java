@@ -44,12 +44,16 @@ public class StaffAccommodationService {
                 User housekeeper = userRepository.findById(request.getLastCleanedById())
                         .orElseThrow(() -> new AppException(com.locanbeach.backend.exception.errorcode.AuthErrorCode.USER_NOT_FOUND));
                 accommodation.setLastCleanedBy(housekeeper);
-            } else if (request.getStatus() == OperationalStatus.CLEANING) {
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                if (auth != null && auth.getPrincipal() instanceof User currentUser) {
-                    User housekeeper = userRepository.findById(currentUser.getId())
-                            .orElseThrow(() -> new AppException(com.locanbeach.backend.exception.errorcode.AuthErrorCode.USER_NOT_FOUND));
-                    accommodation.setLastCleanedBy(housekeeper);
+            } else {
+                if (request.getStatus() == OperationalStatus.CLEANING) {
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                    if (auth != null && auth.getPrincipal() instanceof User currentUser) {
+                        User housekeeper = userRepository.findById(currentUser.getId())
+                                .orElseThrow(() -> new AppException(com.locanbeach.backend.exception.errorcode.AuthErrorCode.USER_NOT_FOUND));
+                        accommodation.setLastCleanedBy(housekeeper);
+                    }
+                } else {
+                    accommodation.setLastCleanedBy(null);
                 }
             }
         }
