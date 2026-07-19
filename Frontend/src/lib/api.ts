@@ -94,6 +94,14 @@ async function handleResponse<T>(response: Response): Promise<T> {
   }
 
   if (!response.ok) {
+    if (response.status === 401) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userName');
+        window.location.href = '/';
+      }
+    }
     const errorCode = json && json.code ? json.code : `HTTP_${response.status}`;
     const errorMessage = json && json.message ? json.message : (response.statusText || 'Đã xảy ra lỗi hệ thống');
     throw new ApiError(errorCode, errorMessage);
@@ -102,6 +110,14 @@ async function handleResponse<T>(response: Response): Promise<T> {
   // Standard API structure: { code, data, message }
   if (json && typeof json === 'object' && 'code' in json) {
     if (json.code !== 'SUCCESS') {
+      if (json.code === 'TOKEN_INVALID' || json.code === 'UNAUTHORIZED') {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('userRole');
+          localStorage.removeItem('userName');
+          window.location.href = '/';
+        }
+      }
       throw new ApiError(json.code, json.message || 'Yêu cầu không thành công');
     }
     return json.data as T;

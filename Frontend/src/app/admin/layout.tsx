@@ -19,7 +19,7 @@ export default function AdminLayout({
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      router.push("/login");
+      router.push("/");
     } else {
       setIsAuthorized(true);
       setLoading(false);
