@@ -20,7 +20,7 @@
 
 .subtitle {
   color: var(--color-steel-secondary);
-  font-size: 1.25rem;
+  font-size: var(--font-size-body);
   max-width: 36rem;
   margin: 0 auto;
 }
@@ -31,6 +31,7 @@
   gap: 3rem;
   margin-bottom: var(--spacing-section-gap);
 }
+
 @media (min-width: 768px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);
@@ -47,6 +48,7 @@
   flex-direction: column;
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15), box-shadow 0.4s ease;
 }
+
 .card:hover {
   transform: scale(1.02) translateY(-4px);
   box-shadow: 0 10px 20px rgba(11, 37, 69, 0.28);
@@ -74,7 +76,7 @@
 }
 
 .cardTitle {
-  font-size: 1.5rem;
+  font-size: var(--font-size-h3);
   font-weight: bold;
   margin-bottom: 0.75rem;
   color: var(--color-on-surface);
@@ -82,6 +84,7 @@
 
 .cardDesc {
   color: var(--color-steel-secondary);
+  font-size: var(--font-size-body);
   margin-bottom: 1.5rem;
   line-height: 1.6;
 }
@@ -91,7 +94,7 @@
   padding: 0;
   margin: 0 0 1.5rem 0;
   color: var(--color-steel-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sub);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -115,10 +118,12 @@
   border-radius: var(--rounded-md);
   border: none;
   cursor: pointer;
+  font-size: var(--font-size-sub);
   font-weight: bold;
   text-align: center;
   transition: background-color 0.3s, transform 0.2s;
 }
+
 .button:hover {
   background-color: #004395;
 }
@@ -126,12 +131,10 @@
 /* Skeleton loader matching Stitch spec */
 .skeletonShimmer {
   background: #f3f4f6;
-  background-image: linear-gradient(
-    90deg,
-    #f3f4f6 0px,
-    #e5e7eb 40px,
-    #f3f4f6 80px
-  );
+  background-image: linear-gradient(90deg,
+      #f3f4f6 0px,
+      #e5e7eb 40px,
+      #f3f4f6 80px);
   background-size: 600px 100%;
   animation: shimmer 1.6s infinite linear;
 }
@@ -144,6 +147,7 @@
   0% {
     background-position: -200px 0;
   }
+
   100% {
     background-position: 400px 0;
   }

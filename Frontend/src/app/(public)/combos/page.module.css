@@ -20,7 +20,7 @@
 
 .subtitle {
   color: var(--color-steel-secondary);
-  font-size: 1.25rem;
+  font-size: var(--font-size-body);
   max-width: 36rem;
   margin: 0 auto;
 }
@@ -92,7 +92,7 @@
 }
 
 .cardTitle {
-  font-size: 1.25rem;
+  font-size: var(--font-size-h3);
   font-weight: bold;
   margin-bottom: 0.5rem;
   color: var(--color-on-surface);
@@ -100,7 +100,7 @@
 
 .cardDesc {
   color: var(--color-steel-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sub);
   margin-bottom: 1.5rem;
   line-height: 1.5;
   flex-grow: 1;
@@ -116,7 +116,7 @@
 }
 
 .price {
-  font-size: 1.25rem;
+  font-size: var(--font-size-h3);
   font-weight: bold;
   color: var(--color-primary);
 }
@@ -128,7 +128,7 @@
   padding: 0.5rem 1rem;
   border-radius: var(--rounded-md);
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sub);
   font-weight: bold;
   transition: background-color 0.3s, color 0.3s, transform 0.2s;
 }

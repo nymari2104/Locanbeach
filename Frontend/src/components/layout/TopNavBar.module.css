@@ -3,7 +3,8 @@
   top: 0;
   width: 100%;
   z-index: 50;
-  background-color: rgba(249, 250, 251, 0.8); /* canvas-white/80 */
+  background-color: rgba(249, 250, 251, 0.8);
+  /* canvas-white/80 */
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-whisper-border);
   transition: all 0.3s ease;
@@ -17,9 +18,10 @@
   align-items: center;
   padding: 0.75rem var(--spacing-gutter);
 }
+
 @media (min-width: 768px) {
   .container {
-    padding: 1.5rem var(--spacing-gutter);
+    padding: 1rem var(--spacing-gutter);
   }
 }
 
@@ -34,6 +36,7 @@
   height: 2rem;
   width: auto;
 }
+
 @media (min-width: 768px) {
   .logo {
     height: 2.75rem;
@@ -46,6 +49,7 @@
   justify-content: center;
   align-items: center;
 }
+
 @media (min-width: 640px) {
   .logoTextWrapper {
     display: flex;
@@ -85,6 +89,7 @@
   margin: 0;
   padding: 0;
 }
+
 @media (min-width: 1024px) {
   .navLinks {
     display: flex;
@@ -95,6 +100,7 @@
   color: var(--color-steel-secondary);
   transition: color 0.3s, opacity 0.3s;
 }
+
 .navLink:hover {
   color: var(--color-primary);
   opacity: 0.8;
@@ -120,6 +126,7 @@
   gap: 1rem;
   color: var(--color-steel-secondary);
 }
+
 @media (min-width: 640px) {
   .icons {
     display: flex;
@@ -134,11 +141,13 @@
   border: none;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
+
 .primaryButton:hover {
   background-color: #004395;
 }
+
 .primaryButton:active {
   transform: scale(0.95);
 }
@@ -157,9 +166,11 @@
   color: var(--color-on-surface);
   transition: background-color 0.2s;
 }
+
 .hamburger:hover {
   background-color: var(--color-surface);
 }
+
 @media (min-width: 1024px) {
   .hamburger {
     display: none;
@@ -177,8 +188,13 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 /* Mobile Drawer */
@@ -197,6 +213,7 @@
   transform: translateX(100%);
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 @media (min-width: 1024px) {
   .drawer {
     display: none;
@@ -228,6 +245,7 @@
   color: var(--color-on-surface);
   transition: background-color 0.2s;
 }
+
 .drawerClose:hover {
   background-color: var(--color-surface);
 }
@@ -251,6 +269,7 @@
   border-bottom: 1px solid var(--color-whisper-border);
   transition: background-color 0.2s, color 0.2s;
 }
+
 .drawerNavLink:hover {
   background-color: var(--color-surface);
   color: var(--color-primary);
@@ -282,6 +301,7 @@
   transition: background-color 0.2s, transform 0.2s;
   text-align: center;
 }
+
 .drawerBookButton:hover {
   background-color: #004395;
   transform: translateY(-1px);

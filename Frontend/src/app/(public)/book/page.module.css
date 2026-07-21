@@ -3,6 +3,7 @@
   margin: 0 auto;
   padding: 1rem 1rem var(--spacing-section-gap) 1rem;
 }
+
 @media (min-width: 768px) {
   .container {
     padding: 2rem var(--spacing-gutter) var(--spacing-section-gap) var(--spacing-gutter);
@@ -16,6 +17,7 @@
   gap: 1rem;
   align-items: start;
 }
+
 @media (min-width: 1024px) {
   .heroFilterSection {
     margin-bottom: var(--spacing-section-gap);
@@ -28,6 +30,7 @@
   grid-column: span 1;
   padding-top: 0.5rem;
 }
+
 @media (min-width: 1024px) {
   .heroText {
     grid-column: span 5;
@@ -42,6 +45,7 @@
   letter-spacing: var(--text-display-hero-tracking);
   margin-bottom: 1rem;
 }
+
 @media (min-width: 768px) {
   .title {
     font-size: var(--text-display-hero-size);
@@ -57,14 +61,15 @@
 
 .description {
   color: var(--color-steel-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   margin-bottom: 1.5rem;
   max-width: 28rem;
   line-height: 1.5;
 }
+
 @media (min-width: 768px) {
   .description {
-    font-size: 1rem;
+    font-size: var(--font-size-body);
     margin-bottom: 2.5rem;
   }
 }
@@ -77,11 +82,13 @@
   padding: 1.25rem;
   box-shadow: 0 -15px 40px var(--color-diffused-shadow);
 }
+
 @media (min-width: 768px) {
   .filterCard {
     padding: 2rem;
   }
 }
+
 @media (min-width: 1024px) {
   .filterCard {
     grid-column: span 7;
@@ -93,6 +100,7 @@
   grid-template-columns: 1fr;
   gap: 1rem;
 }
+
 @media (min-width: 768px) {
   .formGrid {
     grid-template-columns: repeat(2, 1fr);
@@ -108,12 +116,13 @@
 
 .label {
   color: var(--color-steel-secondary);
-  font-size: 0.8rem;
+  font-size: var(--font-size-sub);
   font-weight: 500;
 }
+
 @media (min-width: 768px) {
   .label {
-    font-size: 0.9rem;
+    font-size: var(--font-size-sub);
   }
 }
 
@@ -136,15 +145,17 @@
   border-radius: var(--rounded-md);
   padding: 0.5rem 0.75rem 0.5rem 2.5rem;
   color: var(--color-charcoal-ink);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sub);
   transition: border-color 0.3s;
 }
+
 @media (min-width: 768px) {
   .input {
     padding: 0.75rem 1rem 0.75rem 3rem;
-    font-size: 1rem;
+    font-size: var(--font-size-body);
   }
 }
+
 .input:focus {
   outline: none;
   border-color: var(--color-primary);
@@ -157,16 +168,18 @@
   border-radius: var(--rounded-md);
   padding: 0.5rem 0.75rem 0.5rem 2.5rem;
   color: var(--color-charcoal-ink);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sub);
   appearance: none;
   transition: border-color 0.3s;
 }
+
 @media (min-width: 768px) {
   .select {
     padding: 0.75rem 1rem 0.75rem 3rem;
-    font-size: 1rem;
+    font-size: var(--font-size-body);
   }
 }
+
 .select:focus {
   outline: none;
   border-color: var(--color-primary);
@@ -194,7 +207,7 @@
   border-radius: var(--rounded-md);
   border: none;
   font-weight: bold;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sub);
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
   display: flex;
@@ -202,13 +215,15 @@
   align-items: center;
   gap: 0.5rem;
 }
+
 @media (min-width: 768px) {
   .searchButton {
     padding: 1rem;
-    font-size: 1rem;
+    font-size: var(--font-size-body);
     grid-column: span 2;
   }
 }
+
 .searchButton:hover {
   opacity: 0.9;
   transform: scale(1.02);
@@ -224,6 +239,7 @@
   padding-bottom: 1rem;
   gap: 0.5rem;
 }
+
 @media (min-width: 768px) {
   .resultsHeader {
     flex-direction: row;
@@ -238,11 +254,13 @@
   grid-template-columns: 1fr;
   gap: var(--spacing-bento-gap);
 }
+
 @media (min-width: 768px) {
   .resultsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
 @media (min-width: 1024px) {
   .resultsGrid {
     grid-template-columns: repeat(3, 1fr);
@@ -260,6 +278,7 @@
   height: 100%;
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15), box-shadow 0.4s ease;
 }
+
 .roomCard:hover {
   transform: scale(1.02) translateY(-4px);
   box-shadow: 0 10px 20px rgba(11, 37, 69, 0.28);
@@ -311,6 +330,7 @@
   flex-direction: column;
   justify-content: space-between;
 }
+
 @media (min-width: 768px) {
   .roomDetails {
     padding: 1.25rem;
@@ -326,11 +346,12 @@
 
 .roomName {
   font-weight: bold;
-  font-size: 1.125rem;
+  font-size: var(--font-size-h3);
 }
+
 @media (min-width: 768px) {
   .roomName {
-    font-size: 1.25rem;
+    font-size: var(--font-size-h3);
   }
 }
 
@@ -339,13 +360,14 @@
 }
 
 .price {
-  font-size: 1rem;
+  font-size: var(--font-size-h3);
   font-weight: bold;
   color: var(--color-primary);
 }
+
 @media (min-width: 768px) {
   .price {
-    font-size: 1.125rem;
+    font-size: var(--font-size-h3);
   }
 }
 
@@ -356,18 +378,19 @@
   gap: 0.5rem;
   color: var(--color-steel-secondary);
   margin-top: 0.5rem;
-  font-size: 0.75rem;
+  font-size: var(--font-size-sub);
 }
+
 @media (min-width: 768px) {
   .roomSpecs {
     gap: 1rem;
     margin-top: 1rem;
-    font-size: 0.875rem;
+    font-size: var(--font-size-sub);
   }
 }
 
 .roomDescription {
-  font-size: 0.8rem;
+  font-size: var(--font-size-sub);
   color: var(--color-on-surface-variant);
   margin-top: 0.5rem;
   display: -webkit-box;
@@ -377,9 +400,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 @media (min-width: 768px) {
   .roomDescription {
-    font-size: 0.875rem;
+    font-size: var(--font-size-sub);
     -webkit-line-clamp: 3;
     line-clamp: 3;
   }
@@ -420,17 +444,20 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
+  font-size: var(--font-size-sub);
   transition: background-color 0.3s, transform 0.2s;
 }
+
 @media (min-width: 768px) {
   .selectButton {
     padding: 0.75rem 1.5rem;
-    font-size: 1rem;
+    font-size: var(--font-size-body);
   }
 }
+
 .selectButton:hover {
-  background-color: #004395; /* Slightly darker blue */
+  background-color: #004395;
+  /* Slightly darker blue */
 }
 
 .arrow {
@@ -455,6 +482,7 @@
   align-items: center;
   gap: 0.75rem;
 }
+
 @media (min-width: 768px) {
   .advancedToggleWrapper {
     margin-top: 1.5rem;
@@ -471,14 +499,16 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
+  font-size: var(--font-size-sub);
   cursor: pointer;
   transition: color 0.3s;
 }
+
 @media (min-width: 768px) {
+
   .advancedToggleBtn,
   .resetFilterBtn {
-    font-size: 0.9rem;
+    font-size: var(--font-size-sub);
   }
 }
 
@@ -505,8 +535,15 @@
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .advancedGrid {
@@ -530,7 +567,7 @@
 .filterTitle {
   font-weight: 600;
   color: var(--color-on-surface);
-  font-size: 0.95rem;
+  font-size: var(--font-size-body);
   margin-bottom: 0.5rem;
 }
 
@@ -568,7 +605,7 @@
   border-radius: 50%;
   background-color: var(--color-primary);
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   margin-top: -6px;
 }
 
@@ -617,11 +654,11 @@
   transition: all 0.2s;
 }
 
-.amenityCheckbox:hover input ~ .checkmark {
+.amenityCheckbox:hover input~.checkmark {
   border-color: var(--color-primary);
 }
 
-.amenityCheckbox input:checked ~ .checkmark {
+.amenityCheckbox input:checked~.checkmark {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
 }
@@ -639,7 +676,7 @@
   transform: rotate(45deg);
 }
 
-.amenityCheckbox input:checked ~ .checkmark:after {
+.amenityCheckbox input:checked~.checkmark:after {
   display: block;
 }
 
@@ -648,16 +685,16 @@
   color: var(--color-muted-slate);
 }
 
-.amenityCheckbox input:checked ~ .amenityIcon {
+.amenityCheckbox input:checked~.amenityIcon {
   color: var(--color-primary);
 }
 
 .amenityName {
-  font-size: 0.85rem;
+  font-size: var(--font-size-sub);
   color: var(--color-charcoal-ink);
 }
 
-.amenityCheckbox input:checked ~ .amenityName {
+.amenityCheckbox input:checked~.amenityName {
   color: var(--color-on-surface);
   font-weight: 500;
 }
@@ -665,12 +702,10 @@
 /* Skeleton loader matching Stitch spec */
 .skeletonShimmer {
   background: #f3f4f6;
-  background-image: linear-gradient(
-    90deg,
-    #f3f4f6 0px,
-    #e5e7eb 40px,
-    #f3f4f6 80px
-  );
+  background-image: linear-gradient(90deg,
+      #f3f4f6 0px,
+      #e5e7eb 40px,
+      #f3f4f6 80px);
   background-size: 600px 100%;
   animation: shimmer 1.6s infinite linear;
 }
@@ -683,6 +718,7 @@
   0% {
     background-position: -200px 0;
   }
+
   100% {
     background-position: 400px 0;
   }
