@@ -208,6 +208,7 @@
   font-size: 0.75rem;
   border: none;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 @media (min-width: 768px) {

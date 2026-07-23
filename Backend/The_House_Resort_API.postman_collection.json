@@ -1558,7 +1558,7 @@
             ]
         },
         {
-            "name": "9. Unhappy Cases",
+            "name": "10. Unhappy Cases",
             "item": [
                 {
                     "name": "Auth",
@@ -2726,7 +2726,808 @@
             ]
         },
         {
-            "name": "8. Cleanup (DELETE)",
+            "name": "8. Coupons & Promotions",
+            "item": [
+                {
+                    "name": "1. Admin Create Coupon (WELCOME10_TEST)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Create WELCOME10_TEST successful', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "    pm.expect(res.data.code).to.eql('WELCOME10_TEST');",
+                                    "    pm.collectionVariables.set('welcome10Id', res.data.id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"WELCOME10_TEST\",\n    \"description\": \"Mã ưu đãi chào mừng (Test) - Giảm 10% đơn đặt phòng\",\n    \"discountType\": \"PERCENTAGE\",\n    \"discountValue\": 10.0,\n    \"minBookingAmount\": 500000.0,\n    \"maxDiscountAmount\": 500000.0,\n    \"minLengthOfStay\": 1,\n    \"startDate\": \"2026-01-01T00:00:00\",\n    \"endDate\": \"2026-12-31T23:59:59\",\n    \"maxUsage\": 100,\n    \"isActive\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2. Admin Create Coupon (LOCAN200K_TEST)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Create LOCAN200K_TEST successful', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "    pm.expect(res.data.code).to.eql('LOCAN200K_TEST');",
+                                    "    pm.collectionVariables.set('locan200kId', res.data.id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"LOCAN200K_TEST\",\n    \"description\": \"Ưu đãi tri ân (Test) - Giảm 200.000đ cho đơn từ 1.000.000đ\",\n    \"discountType\": \"FIXED_AMOUNT\",\n    \"discountValue\": 200000.0,\n    \"minBookingAmount\": 1000000.0,\n    \"maxDiscountAmount\": 200000.0,\n    \"minLengthOfStay\": 1,\n    \"startDate\": \"2026-01-01T00:00:00\",\n    \"endDate\": \"2026-12-31T23:59:59\",\n    \"maxUsage\": 50,\n    \"isActive\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3. Admin Create Coupon (SUMMER2026_TEST)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Create coupon SUMMER2026_TEST successful', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "    pm.expect(res.data.code).to.eql('SUMMER2026_TEST');",
+                                    "    pm.collectionVariables.set('createdCouponId', res.data.id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"SUMMER2026_TEST\",\n    \"description\": \"Ưu đãi mùa hè 2026 (Test) - Giảm 15%\",\n    \"discountType\": \"PERCENTAGE\",\n    \"discountValue\": 15.0,\n    \"minBookingAmount\": 1000000.0,\n    \"maxDiscountAmount\": 300000.0,\n    \"minLengthOfStay\": 1,\n    \"startDate\": \"2026-06-01T00:00:00\",\n    \"endDate\": \"2026-09-30T23:59:59\",\n    \"maxUsage\": 50,\n    \"isActive\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "4. Admin Get All Coupons",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Get all coupons successful', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "    pm.expect(res.data).to.be.an('array');",
+                                    "    pm.expect(res.data.length).to.be.at.least(1);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "5. Validate Coupon Percentage (WELCOME10_TEST)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Validate WELCOME10_TEST successful', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "    pm.expect(res.data.code).to.eql('WELCOME10_TEST');",
+                                    "    pm.expect(res.data.discountType).to.eql('PERCENTAGE');",
+                                    "    pm.expect(res.data.discountAmount).to.eql(180000);",
+                                    "    pm.expect(res.data.finalAmount).to.eql(1620000);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"WELCOME10_TEST\",\n    \"totalAmount\": 1800000,\n    \"checkinDate\": \"2026-08-01T14:00:00\",\n    \"checkoutDate\": \"2026-08-02T12:00:00\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/validate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "validate"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "6. Validate Coupon Fixed Amount (LOCAN200K_TEST)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Validate LOCAN200K_TEST successful', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "    pm.expect(res.data.code).to.eql('LOCAN200K_TEST');",
+                                    "    pm.expect(res.data.discountType).to.eql('FIXED_AMOUNT');",
+                                    "    pm.expect(res.data.discountAmount).to.eql(200000);",
+                                    "    pm.expect(res.data.finalAmount).to.eql(1600000);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"LOCAN200K_TEST\",\n    \"totalAmount\": 1800000,\n    \"checkinDate\": \"2026-08-01T14:00:00\",\n    \"checkoutDate\": \"2026-08-02T12:00:00\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/validate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "validate"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "7. Admin Toggle Coupon Status (SUMMER2026_TEST)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Toggle coupon status successful', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "    pm.expect(res.data).to.have.property('isActive');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/{{createdCouponId}}/toggle",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "{{createdCouponId}}",
+                                "toggle"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "8. Unhappy - COUPON_NOT_FOUND (Non-existent Code)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Returns 404 COUPON_NOT_FOUND', function () {",
+                                    "    pm.response.to.have.status(404);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('COUPON_NOT_FOUND');",
+                                    "    pm.expect(res.message).to.eql('Mã giảm giá không tồn tại.');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"INVALID999\",\n    \"totalAmount\": 1000000\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/validate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "validate"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "9. Unhappy - Create Inactive Coupon",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Create Temp Coupon to Test Inactive', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.collectionVariables.set('tempInactiveId', res.data.id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"INACTIVE_TEST\",\n    \"description\": \"Mã ngưng hoạt động\",\n    \"discountType\": \"PERCENTAGE\",\n    \"discountValue\": 10.0,\n    \"startDate\": \"2026-01-01T00:00:00\",\n    \"endDate\": \"2026-12-31T23:59:59\",\n    \"isActive\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "10. Unhappy - Validate COUPON_INACTIVE",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Returns 400 COUPON_INACTIVE', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('COUPON_INACTIVE');",
+                                    "    pm.expect(res.message).to.eql('Mã giảm giá hiện đang bị khóa hoặc ngưng áp dụng.');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"INACTIVE_TEST\",\n    \"totalAmount\": 1500000\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/validate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "validate"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "11. Unhappy - MIN_BOOKING_AMOUNT_NOT_MET",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Returns 400 MIN_BOOKING_AMOUNT_NOT_MET', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('MIN_BOOKING_AMOUNT_NOT_MET');",
+                                    "    pm.expect(res.message).to.eql('Tổng đơn giá chưa đạt giá trị tối thiểu để áp dụng mã giảm giá.');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"LOCAN200K_TEST\",\n    \"totalAmount\": 100000\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/validate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "validate"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "12. Unhappy - Create Coupon (Min 3 Nights Stay)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Create Coupon with Min 3 Nights Stay', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.collectionVariables.set('tempStay3NightsId', res.data.id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"STAY3NIGHTS_TEST\",\n    \"description\": \"Giảm 20% khi ở từ 3 đêm\",\n    \"discountType\": \"PERCENTAGE\",\n    \"discountValue\": 20.0,\n    \"minLengthOfStay\": 3,\n    \"startDate\": \"2026-01-01T00:00:00\",\n    \"endDate\": \"2026-12-31T23:59:59\",\n    \"isActive\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "13. Unhappy - Validate MIN_LENGTH_OF_STAY_NOT_MET (1 Night Stay)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Returns 400 MIN_LENGTH_OF_STAY_NOT_MET', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('MIN_LENGTH_OF_STAY_NOT_MET');",
+                                    "    pm.expect(res.message).to.eql('Số đêm lưu trú chưa đủ điều kiện áp dụng mã giảm giá này.');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"STAY3NIGHTS_TEST\",\n    \"totalAmount\": 3000000,\n    \"checkinDate\": \"2026-08-01T14:00:00\",\n    \"checkoutDate\": \"2026-08-02T12:00:00\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/validate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "validate"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "14. Unhappy - Create Expired Coupon",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Create Expired Coupon', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.collectionVariables.set('tempExpiredId', res.data.id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"EXPIRED2020_TEST\",\n    \"description\": \"Mã đã hết hạn năm 2020\",\n    \"discountType\": \"FIXED_AMOUNT\",\n    \"discountValue\": 50000.0,\n    \"startDate\": \"2020-01-01T00:00:00\",\n    \"endDate\": \"2020-12-31T23:59:59\",\n    \"isActive\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "15. Unhappy - Validate COUPON_EXPIRED",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Returns 400 COUPON_EXPIRED', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('COUPON_EXPIRED');",
+                                    "    pm.expect(res.message).to.eql('Mã giảm giá đã hết hạn sử dụng.');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"EXPIRED2020_TEST\",\n    \"totalAmount\": 1000000\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/validate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "validate"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "16. Unhappy - Create Maxed Out Coupon",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Create Maxed Out Coupon', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.collectionVariables.set('tempMaxedOutId', res.data.id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"MAXEDOUT_TEST\",\n    \"description\": \"Mã đã hết lượt dùng\",\n    \"discountType\": \"FIXED_AMOUNT\",\n    \"discountValue\": 100000.0,\n    \"startDate\": \"2026-01-01T00:00:00\",\n    \"endDate\": \"2026-12-31T23:59:59\",\n    \"maxUsage\": 0,\n    \"isActive\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "17. Unhappy - Validate COUPON_USAGE_LIMIT_EXCEEDED",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Returns 400 COUPON_USAGE_LIMIT_EXCEEDED', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('COUPON_USAGE_LIMIT_EXCEEDED');",
+                                    "    pm.expect(res.message).to.eql('Mã giảm giá đã hết lượt sử dụng.');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"MAXEDOUT_TEST\",\n    \"totalAmount\": 1000000\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/validate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "validate"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "18. Unhappy - COUPON_CODE_ALREADY_EXISTS",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Returns 400 COUPON_CODE_ALREADY_EXISTS', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('COUPON_CODE_ALREADY_EXISTS');",
+                                    "    pm.expect(res.message).to.eql('Mã giảm giá này đã tồn tại trong hệ thống.');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"WELCOME10_TEST\",\n    \"description\": \"Trùng mã WELCOME10_TEST\",\n    \"discountType\": \"PERCENTAGE\",\n    \"discountValue\": 10.0,\n    \"startDate\": \"2026-01-01T00:00:00\",\n    \"endDate\": \"2026-12-31T23:59:59\",\n    \"isActive\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "9. Cleanup (DELETE)",
             "item": [
                 {
                     "name": "Delete Booking",
@@ -2757,6 +3558,216 @@
                                 "staff",
                                 "bookings",
                                 "{{bookingId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Coupon - SUMMER2026_TEST",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Delete SUMMER2026_TEST coupon', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/{{createdCouponId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "{{createdCouponId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Coupon - INACTIVE_TEST",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Delete INACTIVE_TEST coupon', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/{{tempInactiveId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "{{tempInactiveId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Coupon - STAY3NIGHTS_TEST",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Delete STAY3NIGHTS_TEST coupon', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/{{tempStay3NightsId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "{{tempStay3NightsId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Coupon - EXPIRED2020_TEST",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Delete EXPIRED2020_TEST coupon', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/{{tempExpiredId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "{{tempExpiredId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Coupon - MAXEDOUT_TEST",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Delete MAXEDOUT_TEST coupon', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/{{tempMaxedOutId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "{{tempMaxedOutId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Coupon - WELCOME10_TEST",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Delete WELCOME10_TEST coupon', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/{{welcome10Id}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "{{welcome10Id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Coupon - LOCAN200K_TEST",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Delete LOCAN200K_TEST coupon', function () { pm.expect([200, 404]).to.include(pm.response.code); });"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/coupons/{{locan200kId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "coupons",
+                                "{{locan200kId}}"
                             ]
                         }
                     }

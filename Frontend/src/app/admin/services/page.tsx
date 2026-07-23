@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
-import { apiGet, apiPost, apiPut, apiDelete, apiUploadImage, getErrorMessage } from "@/lib/api";
+import { apiGet, apiPost, apiPut, apiDelete, apiUploadImage, getErrorMessage, getMaterialIconName } from "@/lib/api";
 import { ServiceDTO, ServiceGroup, ServiceStatus, AmenityDTO } from "@/types/api";
 
 const POPULAR_ICONS = [
@@ -259,21 +259,9 @@ export default function AdminServices() {
           <p className={`mono-text ${styles.preTitle}`}>Quản lý</p>
           <h1 className={styles.title}>Tiện ích & Dịch vụ</h1>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <button className="mono-text" onClick={handleOpenAddModal} style={{
-            backgroundColor: "var(--color-primary)",
-            color: "var(--color-on-primary)",
-            padding: "0.5rem 1rem",
-            borderRadius: "var(--rounded-lg)",
-            border: "none",
-            fontSize: "0.875rem",
-            fontWeight: "bold",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.25rem"
-          }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>add</span>
+        <div className={styles.headerActions}>
+          <button className="admin-btn admin-btn-primary mono-text" onClick={handleOpenAddModal}>
+            <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>add</span>
             {getAddButtonText()}
           </button>
         </div>
@@ -326,7 +314,7 @@ export default function AdminServices() {
             <article key={item.id} className={styles.card} style={{ padding: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexDirection: "row" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
                 <div style={{ backgroundColor: "var(--color-surface)", color: "var(--color-primary)", width: "3rem", height: "3rem", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>{item.icon}</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>{getMaterialIconName(item.icon, item.name)}</span>
                 </div>
                 <div>
                   <h3 className={styles.roomName} style={{ fontSize: "1.1rem" }}>{item.name}</h3>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
-import { apiGet, apiPost, apiPut, apiUploadImage, getErrorMessage } from "@/lib/api";
+import { apiGet, apiPost, apiPut, apiUploadImage, getErrorMessage, getMaterialIconName } from "@/lib/api";
 import { AccommodationCategoryDTO, AccommodationType, ImageDTO, AmenityDTO } from "@/types/api";
 
 export default function AdminCategories() {
@@ -163,20 +163,8 @@ export default function AdminCategories() {
           <p className={`mono-text ${styles.preTitle}`}>Thiết lập</p>
           <h1 className={styles.title}>Quản lý Hạng phòng</h1>
         </div>
-        <button className="mono-text" onClick={handleOpenAddModal} style={{
-          backgroundColor: "var(--color-primary)",
-          color: "var(--color-on-primary)",
-          padding: "0.5rem 1rem",
-          borderRadius: "var(--rounded-lg)",
-          border: "none",
-          fontSize: "0.875rem",
-          fontWeight: "bold",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: "0.25rem"
-        }}>
-          <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>add</span>
+        <button className="admin-btn admin-btn-primary mono-text" onClick={handleOpenAddModal}>
+          <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>add</span>
           Thêm Hạng phòng mới
         </button>
       </header>
@@ -472,26 +460,17 @@ export default function AdminCategories() {
 
                 <div className={styles.formGroup}>
                   <label className={`mono-text ${styles.label}`}>Tiện nghi đi kèm (Amenities)</label>
-                  <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "0.5rem",
-                    padding: "0.75rem",
-                    border: "1px solid var(--color-whisper-border)",
-                    borderRadius: "var(--rounded-xl)",
-                    maxHeight: "150px",
-                    overflowY: "auto",
-                    backgroundColor: "var(--color-pure-surface)"
-                  }}>
+                  <div className={styles.amenitiesContainer}>
                     {allAmenities.length === 0 ? (
                       <p style={{ gridColumn: "1/-1", fontSize: "0.8rem", color: "var(--color-steel-secondary)", margin: 0 }}>
                         Chưa có tiện nghi nào trong hệ thống. Hãy tạo tiện nghi trước.
                       </p>
                     ) : (
                       allAmenities.map((a) => (
-                        <label key={a.id} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.85rem", cursor: "pointer", color: "var(--color-on-surface)" }}>
+                        <label key={a.id} className={styles.amenityLabel}>
                           <input
                             type="checkbox"
+                            className={styles.amenityCheckbox}
                             checked={selectedAmenityIds.includes(a.id!)}
                             onChange={(e) => {
                               if (e.target.checked) {
@@ -501,8 +480,10 @@ export default function AdminCategories() {
                               }
                             }}
                           />
-                          <span className="material-symbols-outlined" style={{ fontSize: "1.1rem", color: "var(--color-primary)" }}>{a.icon}</span>
-                          <span>{a.name}</span>
+                          <span className="material-symbols-outlined" style={{ fontSize: "1.1rem", color: "var(--color-primary)", flexShrink: 0 }}>
+                            {getMaterialIconName(a.icon, a.name)}
+                          </span>
+                          <span className={styles.amenityName} title={a.name}>{a.name}</span>
                         </label>
                       ))
                     )}

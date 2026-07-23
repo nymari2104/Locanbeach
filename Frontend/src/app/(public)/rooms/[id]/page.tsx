@@ -72,6 +72,7 @@ const FALLBACK_ROOMS: Record<string, any> = {
 
 function RoomDetailContent({ id }: { id: string }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   // Read URL query params
   const [checkin, setCheckin] = useState("");
@@ -81,16 +82,6 @@ function RoomDetailContent({ id }: { id: string }) {
   const [room, setRoom] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isNotFound, setIsNotFound] = useState(false);
-
-  // Booking Modal States
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [guestName, setGuestName] = useState("");
-  const [guestPhone, setGuestPhone] = useState("");
-  const [guestEmail, setGuestEmail] = useState("");
-  const [guestNotes, setGuestNotes] = useState("");
-  const [bookingProgress, setBookingProgress] = useState<"idle" | "holding" | "confirming" | "success" | "error">("idle");
-  const [bookingResult, setBookingResult] = useState<ConfirmBookingResponse | null>(null);
-  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     // Set query params if they exist, otherwise default
@@ -142,7 +133,11 @@ function RoomDetailContent({ id }: { id: string }) {
           }
         });
       } catch (err) {
-        setIsNotFound(true);
+        if (FALLBACK_ROOMS[id]) {
+          setRoom(FALLBACK_ROOMS[id]);
+        } else {
+          setIsNotFound(true);
+        }
       } finally {
         setLoading(false);
       }
@@ -150,47 +145,8 @@ function RoomDetailContent({ id }: { id: string }) {
     loadData();
   }, [id, searchParams]);
 
-  const handleOpenBookingModal = () => {
-    setIsModalOpen(true);
-    setBookingProgress("idle");
-    setBookingResult(null);
-  };
-
-  const handleConfirmBooking = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!checkin || !checkout || !guestName || !guestPhone) return;
-
-    try {
-      setBookingProgress("holding");
-      const checkinDateStr = `${checkin}T14:00:00`;
-      const checkoutDateStr = `${checkout}T12:00:00`;
-
-      // Step 1: Hold room
-      const holdRes = await apiPost<HoldRoomResponse>("/bookings/hold", {
-        categoryId: id,
-        checkinDate: checkinDateStr,
-        checkoutDate: checkoutDateStr
-      });
-
-      setBookingProgress("confirming");
-
-      // Step 2: Confirm booking
-      const confirmRes = await apiPost<ConfirmBookingResponse>("/bookings/confirm", {
-        holdId: holdRes.holdId,
-        guestName,
-        guestPhone,
-        guestEmail: guestEmail || undefined,
-        guestsCount: parseInt(guests) || 2,
-        notes: guestNotes || undefined
-      });
-
-      setBookingResult(confirmRes);
-      setBookingProgress("success");
-    } catch (error: any) {
-      console.error(error);
-      setErrorMessage(getErrorMessage(error));
-      setBookingProgress("error");
-    }
+  const handleRedirectToCheckout = () => {
+    router.push(`/checkout?categoryId=${id}&checkin=${checkin}&checkout=${checkout}&guests=${guests}`);
   };
 
   if (isNotFound) {
@@ -402,267 +358,12 @@ function RoomDetailContent({ id }: { id: string }) {
               </div>
             </div>
             
-            <button className={`mono-text ${styles.bookButton}`} style={{ width: "100%" }} onClick={handleOpenBookingModal}>Đặt ngay</button>
+            <button className={`mono-text ${styles.bookButton}`} style={{ width: "100%" }} onClick={handleRedirectToCheckout}>Đặt ngay</button>
             
             <p className={`mono-text ${styles.cancelPolicy}`}>Không thu phí hủy phòng trước 7 ngày.</p>
           </div>
         </div>
       </div>
-
-      {/* Booking Form Modal */}
-      {isModalOpen && (
-        <div style={{
-          position: "fixed",
-          inset: 0,
-          backgroundColor: "rgba(0,0,0,0.5)",
-          backdropFilter: "blur(4px)",
-          zIndex: 1000,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "1rem"
-        }} onClick={() => setIsModalOpen(false)}>
-          <div style={{
-            backgroundColor: "#fff",
-            borderRadius: "var(--rounded-xl)",
-            width: "100%",
-            maxWidth: "500px",
-            boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-            overflow: "hidden",
-            animation: "slideUp 0.3s ease-out"
-          }} onClick={(e) => e.stopPropagation()}>
-            
-            {/* Modal Header */}
-            <div style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "1.25rem 1.5rem",
-              borderBottom: "1px solid var(--color-whisper-border)"
-            }}>
-              <h2 style={{ fontSize: "1.25rem", fontWeight: "bold", color: "#0b2545", fontFamily: "var(--font-playfair), serif" }}>
-                Xác nhận đặt phòng
-              </h2>
-              <button style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "var(--color-steel-secondary)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
-              }} onClick={() => setIsModalOpen(false)}>
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <form onSubmit={handleConfirmBooking}>
-              <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-                
-                 {/* Fixed Booking Info */}
-                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                   <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                     <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Hạng phòng</label>
-                     <input 
-                       style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", fontSize: "1rem", backgroundColor: "#f3f4f6", color: "#6b7280", cursor: "not-allowed" }}
-                       value={room.name}
-                       readOnly
-                     />
-                   </div>
-
-                   <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                     <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Thời gian nghỉ</label>
-                     <input 
-                       style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", fontSize: "1rem", backgroundColor: "#f3f4f6", color: "#6b7280", cursor: "not-allowed" }}
-                       value={`${checkinVisual} đến ${checkoutVisual}`}
-                       readOnly
-                     />
-                   </div>
-
-                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                     <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                       <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Số khách</label>
-                       <input 
-                         style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", fontSize: "1rem", backgroundColor: "#f3f4f6", color: "#6b7280", cursor: "not-allowed" }}
-                         value={`${guests} khách`}
-                         readOnly
-                       />
-                     </div>
-                     <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                       <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Đơn giá / Đêm</label>
-                       <input 
-                         style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", fontSize: "1rem", backgroundColor: "#f3f4f6", color: "#6b7280", cursor: "not-allowed" }}
-                         value={room.price}
-                         readOnly
-                       />
-                     </div>
-                   </div>
-                 </div>
-
-                {bookingProgress === "idle" && (
-                  <>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                      <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Họ và tên khách hàng</label>
-                      <input 
-                        style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", fontSize: "1rem" }}
-                        placeholder="Nhập họ tên đầy đủ"
-                        value={guestName}
-                        onChange={(e) => setGuestName(e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                        <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Số điện thoại</label>
-                        <input 
-                          style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", fontSize: "1rem" }}
-                          type="tel"
-                          placeholder="VD: 0987654321"
-                          value={guestPhone}
-                          onChange={(e) => setGuestPhone(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                        <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Địa chỉ Email</label>
-                        <input 
-                          style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", fontSize: "1rem" }}
-                          type="email"
-                          placeholder="VD: guest@example.com"
-                          value={guestEmail}
-                          onChange={(e) => setGuestEmail(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                      <label className="mono-text" style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)", fontWeight: "bold", textTransform: "uppercase" }}>Ghi chú đặc biệt</label>
-                      <textarea 
-                        style={{ padding: "0.75rem 1rem", border: "1px solid var(--color-whisper-border)", borderRadius: "var(--rounded-xl)", outline: "none", width: "100%", height: "60px", resize: "none", fontSize: "1rem" }}
-                        placeholder="Yêu cầu đặc biệt (hướng nhìn, tầng thấp, phòng không hút thuốc...)"
-                        value={guestNotes}
-                        onChange={(e) => setGuestNotes(e.target.value)}
-                      />
-                    </div>
-                  </>
-                )}
-
-                {/* API Status screens */}
-                {(bookingProgress === "holding" || bookingProgress === "confirming") && (
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "2rem 0", gap: "1rem" }}>
-                    <div className="spinner" style={{
-                      border: "4px solid rgba(0,0,0,0.1)",
-                      width: "36px",
-                      height: "36px",
-                      borderRadius: "50%",
-                      borderLeftColor: "var(--color-primary)",
-                      animation: "spin 1s linear infinite"
-                    }} />
-                    <p className="mono-text" style={{ fontSize: "0.85rem", color: "var(--color-steel-secondary)" }}>
-                      {bookingProgress === "holding" ? "Đang giữ chỗ phòng trống..." : "Đang tạo đơn đặt phòng..."}
-                    </p>
-                    <style jsx>{`
-                      @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
-                      }
-                    `}</style>
-                  </div>
-                )}
-
-                {bookingProgress === "success" && bookingResult && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", padding: "0.5rem 0" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "green", fontWeight: "bold" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "2rem" }}>check_circle</span>
-                      <span>ĐẶT PHÒNG THÀNH CÔNG!</span>
-                    </div>
-                    <p style={{ fontSize: "0.9rem", margin: 0 }}>Mã đơn đặt phòng: <strong>{bookingResult.bookingId.substring(0, 8)}...</strong></p>
-                    <p style={{ fontSize: "0.9rem", margin: 0 }}>Hệ thống đã xếp phòng: <strong>{bookingResult.accommodationCode}</strong></p>
-                    <p style={{ fontSize: "0.9rem", margin: 0 }}>Tổng chi phí: <strong style={{ fontSize: "1.1rem", color: "var(--color-primary)" }}>{bookingResult.totalAmount.toLocaleString("vi-VN")}₫</strong></p>
-                    <div style={{
-                      border: "1px dashed #e2e8f0",
-                      padding: "1rem",
-                      borderRadius: "var(--rounded-lg)",
-                      backgroundColor: "#fefcbf",
-                      color: "#975a16",
-                      fontSize: "0.85rem",
-                      marginTop: "0.5rem"
-                    }}>
-                      <p style={{ fontWeight: "bold", margin: "0 0 0.25rem 0" }}>Thông tin thanh toán đặt cọc:</p>
-                      <p style={{ margin: 0 }}>Vui lòng chuyển khoản đặt cọc 30%: <strong>{bookingResult.depositAmount.toLocaleString("vi-VN")}₫</strong></p>
-                      <p style={{ margin: "0.25rem 0 0 0" }}>Cú pháp: <strong>{bookingResult.bookingId.substring(0, 8)} {bookingResult.guestPhone}</strong></p>
-                      <p style={{ margin: 0 }}>Ngân hàng: Vietcombank - STK: 123456789 (The House Resort)</p>
-                    </div>
-                  </div>
-                )}
-
-                {bookingProgress === "error" && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", padding: "0.5rem 0", color: "red" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: "bold" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "2rem" }}>error</span>
-                      <span>ĐẶT PHÒNG THẤT BẠI</span>
-                    </div>
-                    <p style={{ fontSize: "0.9rem", margin: 0 }}>{errorMessage}</p>
-                    <button type="button" className={`mono-text ${styles.bookButton}`} onClick={() => setBookingProgress("idle")} style={{ marginTop: "1rem", width: "100%" }}>
-                      Thử lại
-                    </button>
-                  </div>
-                )}
-
-              </div>
-
-              {/* Modal Footer */}
-              {bookingProgress === "idle" && (
-                <div style={{
-                  padding: "1rem 1.5rem",
-                  borderTop: "1px solid var(--color-whisper-border)",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "0.75rem",
-                  backgroundColor: "var(--color-pure-surface)"
-                }}>
-                  <button type="button" className="mono-text" style={{
-                    padding: "0.5rem 1.25rem",
-                    border: "1px solid var(--color-whisper-border)",
-                    borderRadius: "var(--rounded-lg)",
-                    background: "transparent",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                    color: "var(--color-charcoal-ink)"
-                  }} onClick={() => setIsModalOpen(false)}>
-                    Hủy
-                  </button>
-                  <button type="submit" className={`mono-text ${styles.bookButton}`} style={{
-                    padding: "0.5rem 1.5rem",
-                    margin: 0
-                  }}>
-                    Đặt phòng ngay
-                  </button>
-                </div>
-              )}
-
-              {bookingProgress === "success" && (
-                <div style={{
-                  padding: "1rem 1.5rem",
-                  borderTop: "1px solid var(--color-whisper-border)",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  backgroundColor: "var(--color-pure-surface)"
-                }}>
-                  <button type="button" className={`mono-text ${styles.bookButton}`} style={{
-                    padding: "0.5rem 1.5rem",
-                    margin: 0
-                  }} onClick={() => setIsModalOpen(false)}>
-                    Hoàn tất
-                  </button>
-                </div>
-              )}
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

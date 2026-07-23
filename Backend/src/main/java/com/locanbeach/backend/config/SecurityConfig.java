@@ -46,6 +46,7 @@ public class SecurityConfig {
                 // ── Public endpoints ──
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/bookings/hold", "/api/v1/bookings/confirm", "/api/v1/coupons/validate").permitAll()
                 .requestMatchers(HttpMethod.GET,
                     "/api/v1/categories/**",
                     "/api/v1/accommodations/**",
@@ -62,6 +63,7 @@ public class SecurityConfig {
                     "/v3/api-docs/**"
                 ).permitAll()
                 // ── Protected endpoints ──
+                .requestMatchers("/api/v1/coupons/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/staff/**").hasAnyRole("STAFF", "ADMIN")
                 .requestMatchers("/api/v1/bookings/**").hasAnyRole("STAFF", "ADMIN")
                 .requestMatchers("/api/v1/auth/me").hasAnyRole("STAFF", "ADMIN")

@@ -69,6 +69,16 @@ public class Booking {
     @Column(name = "deposit_amount", precision = 12, scale = 2)
     private BigDecimal depositAmount;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "coupon_id")
+    private Coupon coupon;
+
+    @Column(name = "discount_amount", precision = 12, scale = 2)
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
+    @Column(name = "original_price", precision = 12, scale = 2)
+    private BigDecimal originalPrice;
+
     @Column(nullable = false)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private BookingStatus status = BookingStatus.PENDING_DEPOSIT;

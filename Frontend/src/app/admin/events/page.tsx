@@ -201,44 +201,20 @@ export default function AdminEvents() {
           <p className={`mono-text ${styles.preTitle}`}>Quản lý</p>
           <h1 className={styles.title}>Sự kiện & Combo</h1>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        <div className={styles.headerActions}>
           <div className={styles.statsText}>
             <p className="mono-text">{activeCount} Đang hoạt động</p>
           </div>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
             {(activeTab === "Tất cả" || activeTab === "Sự kiện") && (
-              <button className="mono-text" onClick={() => handleOpenModalWithPreset("Sự kiện")} style={{
-                backgroundColor: "var(--color-primary)",
-                color: "var(--color-on-primary)",
-                padding: "0.5rem 1rem",
-                borderRadius: "var(--rounded-lg)",
-                border: "none",
-                fontSize: "0.875rem",
-                fontWeight: "bold",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.25rem"
-              }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>add</span>
+              <button className="admin-btn admin-btn-primary mono-text" onClick={() => handleOpenModalWithPreset("Sự kiện")}>
+                <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>add</span>
                 Thêm sự kiện
               </button>
             )}
             {(activeTab === "Tất cả" || activeTab === "Combo") && (
-              <button className="mono-text" onClick={() => handleOpenModalWithPreset("Combo")} style={{
-                backgroundColor: "var(--color-tertiary, #924700)",
-                color: "#fff",
-                padding: "0.5rem 1rem",
-                borderRadius: "var(--rounded-lg)",
-                border: "none",
-                fontSize: "0.875rem",
-                fontWeight: "bold",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.25rem"
-              }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "1.125rem" }}>add</span>
+              <button className="admin-btn admin-btn-tertiary mono-text" onClick={() => handleOpenModalWithPreset("Combo")}>
+                <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>add</span>
                 Thêm combo
               </button>
             )}

@@ -207,3 +207,80 @@ a {
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
+
+/* Global Admin Header & Compact Mobile Buttons */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-whisper-border);
+  padding-bottom: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1.25rem;
+  }
+}
+
+.admin-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--rounded-md);
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  height: auto;
+}
+
+@media (min-width: 768px) {
+  .admin-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    gap: 0.5rem;
+    border-radius: var(--rounded-lg);
+  }
+}
+
+.admin-btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+.admin-btn-primary:hover {
+  background-color: #004395;
+}
+
+.admin-btn-tertiary {
+  background-color: var(--color-tertiary, #924700);
+  color: #ffffff;
+}
+.admin-btn-tertiary:hover {
+  background-color: #723700;
+}
+
+.admin-btn-outline {
+  background-color: #ffffff;
+  border: 1px solid var(--color-whisper-border);
+  color: var(--color-on-surface);
+}
+.admin-btn-outline:hover {
+  background-color: var(--color-surface);
+}

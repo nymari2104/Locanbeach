@@ -29,6 +29,8 @@ public class BookingService {
     private final AccommodationRepository accommodationRepository;
     private final RoomHoldRepository roomHoldRepository;
     private final BookingRepository bookingRepository;
+    private final CouponService couponService;
+    private final com.locanbeach.backend.repository.CouponRepository couponRepository;
 
     @Transactional
     public RoomHoldResponse holdRoom(RoomHoldRequest request) {
@@ -79,8 +81,30 @@ public class BookingService {
                 roomHold.getCheckoutDate().toLocalDate());
         if (days <= 0) days = 1;
         
-        BigDecimal totalAmount = accommodation.getCategory().getBasePrice().multiply(BigDecimal.valueOf(days));
-        BigDecimal depositAmount = totalAmount.multiply(new BigDecimal("0.3")); // 30% deposit
+        BigDecimal originalTotalAmount = accommodation.getCategory().getBasePrice().multiply(BigDecimal.valueOf(days));
+        BigDecimal finalTotalAmount = originalTotalAmount;
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        com.locanbeach.backend.entity.Coupon appliedCoupon = null;
+
+        if (request.getCouponCode() != null && !request.getCouponCode().trim().isEmpty()) {
+            com.locanbeach.backend.dto.ValidateCouponRequest validateReq = com.locanbeach.backend.dto.ValidateCouponRequest.builder()
+                    .code(request.getCouponCode())
+                    .totalAmount(originalTotalAmount)
+                    .checkinDate(roomHold.getCheckinDate())
+                    .checkoutDate(roomHold.getCheckoutDate())
+                    .build();
+            
+            com.locanbeach.backend.dto.CouponDTO couponDTO = couponService.validateCoupon(validateReq);
+            discountAmount = couponDTO.getDiscountAmount();
+            finalTotalAmount = couponDTO.getFinalAmount();
+            appliedCoupon = couponRepository.findById(couponDTO.getId()).orElse(null);
+            
+            if (appliedCoupon != null) {
+                couponService.incrementCouponUsage(appliedCoupon);
+            }
+        }
+
+        BigDecimal depositAmount = finalTotalAmount.multiply(new BigDecimal("0.3")); // 30% deposit
 
         Booking booking = new Booking();
         booking.setAccommodation(accommodation);
@@ -91,7 +115,10 @@ public class BookingService {
         booking.setCheckoutDate(roomHold.getCheckoutDate());
         booking.setGuestsCount(request.getGuestsCount());
         booking.setNotes(request.getNotes());
-        booking.setTotalAmount(totalAmount);
+        booking.setOriginalPrice(originalTotalAmount);
+        booking.setDiscountAmount(discountAmount);
+        booking.setTotalAmount(finalTotalAmount);
+        booking.setCoupon(appliedCoupon);
         booking.setDepositAmount(depositAmount);
         booking.setStatus(BookingStatus.PENDING_DEPOSIT);
 

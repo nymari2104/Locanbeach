@@ -22,6 +22,8 @@ public class BookingResponse {
     private java.time.LocalDateTime checkoutDate;
     private Integer guestsCount;
     private BigDecimal totalAmount;
+    private BigDecimal discountAmount;
+    private BigDecimal originalPrice;
     private BigDecimal depositAmount;
     private BookingStatus status;
 }

@@ -28,4 +28,6 @@ public class BookingConfirmRequest {
     private Integer guestsCount;
 
     private String notes;
+
+    private String couponCode;
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
-import { apiGet } from "@/lib/api";
+import { apiGet, getMaterialIconName } from "@/lib/api";
 import { 
   AccommodationCategoryDTO, 
   SearchCategoryResultResponse,
@@ -59,25 +59,37 @@ export default function Book() {
         
         // Read URL query parameters safely on mount
         const params = new URLSearchParams(window.location.search);
-        const catId = params.get("categoryId");
-        if (catId && cats.some(c => c.id === catId)) {
+        const catId = params.get("categoryId") || "ALL";
+        if (catId !== "ALL" && cats.some(c => c.id === catId)) {
           setSelectedCatId(catId);
         }
 
-        // Map initial categories as results
-        const mappedResults: SearchCategoryResultResponse[] = cats.map(c => ({
-          categoryId: c.id || "",
-          categoryName: c.name,
-          categoryCode: c.code,
-          description: c.description,
-          basePrice: c.basePrice,
-          maxGuests: c.maxGuests,
-          areaSqm: c.areaSqm,
-          availableRoomsCount: 5, // fallback count
-          images: c.images,
-          amenities: c.amenities
-        }));
-        setSearchResults(mappedResults);
+        // Fetch actual available room counts from backend API
+        try {
+          const checkinDateStr = `${today.toISOString().split("T")[0]}T14:00:00`;
+          const checkoutDateStr = `${tomorrow.toISOString().split("T")[0]}T12:00:00`;
+          let searchUrl = `/search/accommodations?checkinDate=${checkinDateStr}&checkoutDate=${checkoutDateStr}&guestsCount=2`;
+          if (catId !== "ALL") {
+            searchUrl += `&categoryId=${catId}`;
+          }
+          const realResults = await apiGet<SearchCategoryResultResponse[]>(searchUrl);
+          setSearchResults(realResults);
+        } catch (searchErr) {
+          console.error("Failed initial available rooms search:", searchErr);
+          const fallbackResults: SearchCategoryResultResponse[] = cats.map(c => ({
+            categoryId: c.id || "",
+            categoryName: c.name,
+            categoryCode: c.code,
+            description: c.description,
+            basePrice: c.basePrice,
+            maxGuests: c.maxGuests,
+            areaSqm: c.areaSqm,
+            availableRoomsCount: 0,
+            images: c.images,
+            amenities: c.amenities
+          }));
+          setSearchResults(fallbackResults);
+        }
       } catch (error) {
         console.error("Error loading categories:", error);
       } finally {
@@ -323,7 +335,7 @@ export default function Book() {
                           }}
                         />
                         <span className={styles.checkmark}></span>
-                        <span className={`material-symbols-outlined ${styles.amenityIcon}`}>{amenity.icon || 'check_circle'}</span>
+                        <span className={`material-symbols-outlined ${styles.amenityIcon}`}>{getMaterialIconName(amenity.icon, amenity.name)}</span>
                         <span className={styles.amenityName}>{amenity.name}</span>
                       </label>
                     ))}
@@ -410,7 +422,7 @@ export default function Book() {
                         <div className={styles.amenities} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '1rem' }}>
                           {room.amenities.map(a => (
                             <div key={a.id} title={a.name} style={{ display: 'flex', alignItems: 'center', color: 'var(--color-steel-secondary)' }}>
-                              <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>{a.icon}</span>
+                              <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>{getMaterialIconName(a.icon, a.name)}</span>
                             </div>
                           ))}
                         </div>

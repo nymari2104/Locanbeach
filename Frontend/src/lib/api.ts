@@ -94,8 +94,9 @@ async function handleResponse<T>(response: Response): Promise<T> {
   }
 
   if (!response.ok) {
+    // Chỉ tự động logout & redirect khi KHÔNG ở trang login
     if (response.status === 401) {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('userRole');
         localStorage.removeItem('userName');
@@ -111,7 +112,8 @@ async function handleResponse<T>(response: Response): Promise<T> {
   if (json && typeof json === 'object' && 'code' in json) {
     if (json.code !== 'SUCCESS') {
       if (json.code === 'TOKEN_INVALID' || json.code === 'UNAUTHORIZED') {
-        if (typeof window !== 'undefined') {
+        // Chỉ tự động logout & redirect khi KHÔNG ở trang login
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
           localStorage.removeItem('accessToken');
           localStorage.removeItem('userRole');
           localStorage.removeItem('userName');
@@ -190,3 +192,33 @@ export async function apiUploadImage<T>(
   });
   return handleResponse<T>(response);
 }
+
+export function getMaterialIconName(iconName?: string, name?: string): string {
+  const str = `${iconName || ''} ${name || ''}`.toLowerCase().trim();
+  
+  if (!str) return 'check_circle';
+  if (str.includes('wifi')) return 'wifi';
+  if (str.includes('pool') || str.includes('bể bơi')) return 'pool';
+  if (str.includes('balcony') || str.includes('ban công')) return 'balcony';
+  if (str.includes('bbq') || str.includes('bếp') || str.includes('nướng')) return 'outdoor_grill';
+  if (str.includes('tv') || str.includes('truyền hình')) return 'tv';
+  if (str.includes('ac') || str.includes('điều hòa') || str.includes('lạnh')) return 'ac_unit';
+  if (str.includes('bath') || str.includes('tắm') || str.includes('bồn')) return 'bathtub';
+  if (str.includes('bed') || str.includes('giường')) return 'bed';
+  if (str.includes('coffee') || str.includes('cà phê')) return 'coffee';
+  if (str.includes('drink') || str.includes('bar') || str.includes('nước')) return 'local_bar';
+  if (str.includes('parking') || str.includes('đỗ xe')) return 'local_parking';
+  if (str.includes('restaurant') || str.includes('ăn')) return 'restaurant';
+  if (str.includes('ocean') || str.includes('biển')) return 'waves';
+  if (str.includes('view') || str.includes('cảnh')) return 'visibility';
+
+  if (iconName) {
+    const sanitized = iconName.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '');
+    if (sanitized && !sanitized.includes('icon') && !sanitized.includes('-')) {
+      return sanitized;
+    }
+  }
+
+  return 'check_circle';
+}
+
