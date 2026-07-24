@@ -803,6 +803,27 @@
   margin: 0 0 0.5rem 0;
 }
 
+.roomItemRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px dashed var(--color-whisper-border);
+}
+
+.removeRoomBtn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.removeRoomBtn:hover {
+  text-decoration: underline;
+}
+
 .errorModalMessage {
   font-size: 0.95rem;
   color: #475569;

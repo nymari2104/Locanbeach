@@ -4,7 +4,7 @@ import { use, useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import { apiGet, apiPost, getErrorMessage } from "@/lib/api";
-import { AccommodationCategoryDTO, HoldRoomResponse, ConfirmBookingResponse, ValidateCouponResponse } from "@/types/api";
+import { useHoldSession } from "@/hooks/useHoldSession";
 
 const FALLBACK_ROOMS: Record<string, any> = {
   "ocean-view-suite": {
@@ -42,6 +42,8 @@ const FALLBACK_ROOMS: Record<string, any> = {
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  const { session, loading: sessionLoading, addHoldRoom, removeHoldItem } = useHoldSession();
 
   // Query parameters
   const categoryId = searchParams.get("categoryId") || "";
@@ -219,16 +221,18 @@ function CheckoutContent() {
     }
   };
 
-  const holdInitiatedRef = useRef(false);
-
-  // Initiate Hold Room on page load for 7 minutes (strictly once)
+  // Initiate Hold Room on page load for 7 minutes
   useEffect(() => {
     if (!categoryId || !checkin || !checkout) return;
     if (holdInitiatedRef.current) return;
     holdInitiatedRef.current = true;
 
-    handleRenewHold(false);
-  }, [categoryId, checkin, checkout]);
+    const checkinDateStr = `${checkin}T14:00:00`;
+    const checkoutDateStr = `${checkout}T12:00:00`;
+    addHoldRoom(categoryId, checkinDateStr, checkoutDateStr).catch((err) => {
+      console.error("Failed adding room to session:", err);
+    });
+  }, [categoryId, checkin, checkout, addHoldRoom]);
 
   // Hold Timer countdown interval (7 minutes - timestamp based)
   useEffect(() => {
@@ -424,7 +428,7 @@ function CheckoutContent() {
 
       // Step 2: Confirm booking and generate bill
       const confirmRes = await apiPost<ConfirmBookingResponse>("/bookings/confirm", {
-        holdId: activeHoldId!,
+        holdId: activeHoldId || (session?.items?.[0]?.itemId ? (session.items[0].itemId as any) : undefined),
         guestName: `${contactLastName} ${contactFirstName}`,
         guestPhone: contactPhone,
         guestEmail: contactEmail || undefined,
@@ -595,13 +599,50 @@ function CheckoutContent() {
   };
 
   const renderTripSummary = (isMobile: boolean = false) => {
+    const hasItems = session && session.items && session.items.length > 0;
+    const items = hasItems
+      ? session.items
+      : room
+      ? [
+          {
+            itemId: "fallback",
+            categoryName: room.name,
+            accommodationCode: "Tự động",
+            numNights,
+            pricePerNight: room.basePrice,
+            itemTotalAmount: rawTotalPrice
+          }
+        ]
+      : [];
+
+    const displayTotal = session && session.totalAmount > 0 ? session.totalAmount : rawTotalPrice;
+    const displayDeposit = session && session.depositAmount > 0 ? session.depositAmount : depositPrice;
+
     return (
       <div className={styles.summaryCard} style={isMobile ? { border: "none", padding: 0, boxShadow: "none" } : {}}>
-        <h2 className={styles.summaryTitle}>Chuyến đi của bạn</h2>
+        <h2 className={styles.summaryTitle}>Chuyến đi của bạn ({items.length} phòng)</h2>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          <span className={styles.summaryResort}>The House - Lộc An Beach</span>
-          <span className={styles.summaryRoomType}>{room.name}</span>
+          <span className={styles.summaryResort}>The House - Lộc An Beach Resort</span>
         </div>
+
+        {items.map((it: any) => (
+          <div key={it.itemId} className={styles.roomItemRow}>
+            <div>
+              <div className={styles.summaryRoomType}>{it.categoryName}</div>
+              <div style={{ fontSize: "0.8rem", color: "#64748b" }}>
+                Phòng {it.accommodationCode} • {it.numNights} đêm × {it.pricePerNight?.toLocaleString("vi-VN")}₫
+              </div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontWeight: "bold" }}>{it.itemTotalAmount?.toLocaleString("vi-VN")}₫</div>
+              {hasItems && session.items.length > 1 && (
+                <button className={styles.removeRoomBtn} onClick={() => removeHoldItem(it.itemId)}>
+                  (x) Xóa
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
 
         <div className={styles.summaryDates}>
           <div className={styles.dateBlock}>
@@ -697,13 +738,20 @@ function CheckoutContent() {
           )}
           <div className={`${styles.priceRow} ${styles.priceRowTotal}`}>
             <span>Tổng cộng (gồm thuế)</span>
-            <span>{totalPrice.toLocaleString("vi-VN")}₫</span>
+            <span style={{ color: "var(--color-primary)", fontSize: "1.2rem" }}>
+              {(appliedCoupon ? (totalPrice - discountAmount) : displayTotal).toLocaleString("vi-VN")}₫
+            </span>
           </div>
         </div>
 
         <div className={styles.depositRow}>
-          <span>Đặt cọc trực tuyến (30%)</span>
-          <span>{depositPrice.toLocaleString("vi-VN")}₫</span>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span>Đặt cọc trực tuyến (30%)</span>
+            <span style={{ fontSize: "0.7rem", fontWeight: "normal", color: "#92400e" }}>Xác nhận phòng tức thì</span>
+          </div>
+          <span style={{ fontSize: "1.1rem" }}>
+            {Math.round((appliedCoupon ? (totalPrice - discountAmount) : displayTotal) * 0.3).toLocaleString("vi-VN")}₫
+          </span>
         </div>
 
         {bookingProgress === "error" && errorMessage && (

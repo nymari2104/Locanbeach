@@ -46,7 +46,8 @@ public class SecurityConfig {
                 // ── Public endpoints ──
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v1/bookings/hold", "/api/v1/bookings/confirm", "/api/v1/coupons/validate").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/bookings/confirm", "/api/v1/coupons/validate").permitAll()
+                .requestMatchers("/api/v1/bookings/hold/**", "/api/v1/bookings/hold").permitAll()
                 .requestMatchers("/api/v1/payments/**").permitAll()
                 .requestMatchers(HttpMethod.GET,
                     "/api/v1/categories/**",

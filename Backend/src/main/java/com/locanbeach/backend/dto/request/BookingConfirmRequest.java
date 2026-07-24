@@ -11,8 +11,7 @@ import java.util.UUID;
 @Data
 public class BookingConfirmRequest {
 
-    @NotNull(message = "Hold ID is required")
-    private UUID holdId;
+    private UUID holdId; // Optional for backward compatibility / single hold
 
     @NotBlank(message = "Guest name is required")
     private String guestName;
