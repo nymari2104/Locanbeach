@@ -38,6 +38,16 @@ export const ERROR_MESSAGES: Record<string, string> = {
   'NO_AVAILABLE_ROOM': 'Đã hết phòng trống cho loại phòng và thời gian bạn đã chọn.',
   'HOLD_EXPIRED': 'Phiên giữ phòng của bạn đã hết hạn (quá 10 phút). Vui lòng thử lại.',
 
+  // Nhóm Mã Giảm Giá & Ưu Đãi
+  'COUPON_NOT_FOUND': 'Mã giảm giá không tồn tại.',
+  'COUPON_INACTIVE': 'Mã giảm giá hiện đang bị khóa hoặc ngưng áp dụng.',
+  'COUPON_NOT_STARTED': 'Mã giảm giá chưa đến thời gian áp dụng.',
+  'COUPON_EXPIRED': 'Mã giảm giá đã hết hạn sử dụng.',
+  'COUPON_USAGE_LIMIT_EXCEEDED': 'Mã giảm giá đã hết lượt sử dụng.',
+  'MIN_BOOKING_AMOUNT_NOT_MET': 'Tổng đơn giá chưa đạt giá trị tối thiểu để áp dụng mã giảm giá.',
+  'MIN_LENGTH_OF_STAY_NOT_MET': 'Số đêm lưu trú chưa đủ điều kiện áp dụng mã giảm giá này.',
+  'COUPON_CODE_ALREADY_EXISTS': 'Mã giảm giá này đã tồn tại trong hệ thống.',
+
   // Nhóm Danh Mục & Loại Phòng
   'CATEGORY_NOT_FOUND': 'Không tìm thấy loại phòng yêu cầu.',
   'ACCOMMODATION_NOT_FOUND': 'Không tìm thấy phòng vật lý yêu cầu.',

@@ -118,6 +118,15 @@ export default function SideNavBar({
         </Link>
 
         <Link
+          href="/admin/coupons"
+          title="Mã giảm giá"
+          className={`${styles.navLink} ${pathname.startsWith("/admin/coupons") ? styles.active : ""}`}
+        >
+          <span className="material-symbols-outlined">local_offer</span>
+          {!isCollapsed && <span>Mã giảm giá</span>}
+        </Link>
+
+        <Link
           href="/admin/services"
           title="Tiện ích & Dịch vụ"
           className={`${styles.navLink} ${pathname.startsWith("/admin/services") ? styles.active : ""}`}

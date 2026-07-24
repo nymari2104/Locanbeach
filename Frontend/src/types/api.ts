@@ -94,12 +94,51 @@ export interface HoldRoomResponse {
   expiresAt: string; // ISO DateTime
 }
 
+export type CouponDiscountType = 'PERCENTAGE' | 'FIXED_AMOUNT';
+
+export interface CouponDTO {
+  id?: string;
+  code: string;
+  description: string;
+  discountType: CouponDiscountType;
+  discountValue: number;
+  minBookingAmount?: number;
+  maxDiscountAmount?: number;
+  minLengthOfStay: number;
+  startDate: string;
+  endDate: string;
+  maxUsage?: number;
+  currentUsage: number;
+  isActive: boolean;
+}
+
+export interface ValidateCouponRequest {
+  code: string;
+  totalAmount: number;
+  checkinDate?: string;
+  checkoutDate?: string;
+}
+
+export interface ValidateCouponResponse {
+  id: string;
+  code: string;
+  description: string;
+  discountType: CouponDiscountType;
+  discountValue: number;
+  originalAmount: number;
+  discountAmount: number;
+  finalAmount: number;
+  minBookingAmount?: number;
+  maxDiscountAmount?: number;
+}
+
 export interface ConfirmBookingRequest {
   holdId: string;
   guestName: string;
   guestPhone: string;
   guestEmail?: string;
   guestsCount: number;
+  couponCode?: string;
   notes?: string;
 }
 
@@ -114,8 +153,11 @@ export interface ConfirmBookingResponse {
   checkinDate: string;
   checkoutDate: string;
   guestsCount: number;
+  originalPrice?: number;
+  discountAmount?: number;
   totalAmount: number;
   depositAmount: number;
+  couponCode?: string;
   status: string;
 }
 

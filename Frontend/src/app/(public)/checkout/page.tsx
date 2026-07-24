@@ -1,10 +1,10 @@
 "use client";
 
-import { use, useState, useEffect, Suspense } from "react";
+import { use, useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import { apiGet, apiPost, getErrorMessage } from "@/lib/api";
-import { AccommodationCategoryDTO, HoldRoomResponse, ConfirmBookingResponse } from "@/types/api";
+import { AccommodationCategoryDTO, HoldRoomResponse, ConfirmBookingResponse, ValidateCouponResponse } from "@/types/api";
 
 const FALLBACK_ROOMS: Record<string, any> = {
   "ocean-view-suite": {
@@ -59,6 +59,7 @@ function CheckoutContent() {
   const [contactLastName, setContactLastName] = useState("");
   const [contactFirstName, setContactFirstName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
+  const [contactPhonePrefix, setContactPhonePrefix] = useState("+84");
   const [contactPhone, setContactPhone] = useState("");
   const [contactCountry, setContactCountry] = useState("Việt Nam");
   const [isStayingGuest, setIsStayingGuest] = useState(true);
@@ -68,6 +69,7 @@ function CheckoutContent() {
   const [stayingLastName, setStayingLastName] = useState("");
   const [stayingFirstName, setStayingFirstName] = useState("");
   const [stayingEmail, setStayingEmail] = useState("");
+  const [stayingPhonePrefix, setStayingPhonePrefix] = useState("+84");
   const [stayingPhone, setStayingPhone] = useState("");
   const [stayingCountry, setStayingCountry] = useState("Việt Nam");
 
@@ -85,13 +87,20 @@ function CheckoutContent() {
   const [bookingProgress, setBookingProgress] = useState<"idle" | "holding" | "confirming" | "success" | "error">("idle");
   const [bookingResult, setBookingResult] = useState<ConfirmBookingResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showErrorModal, setShowErrorModal] = useState(false);
+
+  // Hold Room states (7 minutes = 420 seconds)
+  const [holdId, setHoldId] = useState<string | null>(null);
+  const [holdTimeLeft, setHoldTimeLeft] = useState<number>(420);
+  const [holdExpired, setHoldExpired] = useState(false);
+  const [holdingRoom, setHoldingRoom] = useState(false);
 
   // Mobile drawer state
   const [isMobileSummaryExpanded, setIsMobileSummaryExpanded] = useState(false);
 
   // Coupon states
   const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<ValidateCouponResponse | null>(null);
   const [couponError, setCouponError] = useState("");
   const [validatingCoupon, setValidatingCoupon] = useState(false);
 
@@ -134,6 +143,149 @@ function CheckoutContent() {
 
     loadRoomDetails();
   }, [categoryId]);
+
+  const handleRenewHold = async (forceNew: boolean = false) => {
+    if (!categoryId || !checkin || !checkout) return;
+
+    const storageKey = `active_hold_${categoryId}_${checkin}_${checkout}`;
+
+    // Re-use active hold from sessionStorage if available and unexpired
+    if (!forceNew && typeof window !== "undefined") {
+      try {
+        const savedHold = sessionStorage.getItem(storageKey);
+        if (savedHold) {
+          const parsed = JSON.parse(savedHold);
+          const now = Date.now();
+          const remainingSecs = Math.floor((parsed.expiresAtTimestamp - now) / 1000);
+
+          if (remainingSecs > 0) {
+            setHoldId(parsed.holdId);
+            setHoldTimeLeft(remainingSecs);
+            setHoldExpired(false);
+            setShowErrorModal(false);
+            setBookingProgress("idle");
+            return;
+          } else {
+            // Expired in sessionStorage: Do NOT auto-renew without user action!
+            sessionStorage.removeItem(storageKey);
+            setHoldId(null);
+            setHoldTimeLeft(0);
+            setHoldExpired(true);
+            setErrorMessage("Phiên giữ phòng của bạn đã hết hạn (quá 7 phút). Bạn có thể bấm nút 'Gia hạn giữ chỗ' để tiếp tục.");
+            setShowErrorModal(true);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to parse saved hold from sessionStorage:", e);
+      }
+    }
+
+    setHoldingRoom(true);
+    try {
+      const checkinDateStr = `${checkin}T14:00:00`;
+      const checkoutDateStr = `${checkout}T12:00:00`;
+      const holdRes = await apiPost<HoldRoomResponse>("/bookings/hold", {
+        categoryId,
+        checkinDate: checkinDateStr,
+        checkoutDate: checkoutDateStr
+      });
+
+      if (typeof window !== "undefined") {
+        const expiresAtTimestamp = Date.now() + 420 * 1000; // 7 minutes from now
+        sessionStorage.setItem(
+          storageKey,
+          JSON.stringify({ holdId: holdRes.holdId, expiresAtTimestamp })
+        );
+      }
+
+      setHoldId(holdRes.holdId);
+      setHoldTimeLeft(420); // 7 minutes
+      setHoldExpired(false);
+      setShowErrorModal(false);
+      setBookingProgress("idle");
+    } catch (err: any) {
+      console.error("Hold room failed:", err);
+      const msg = getErrorMessage(err);
+      setErrorMessage(msg);
+      setShowErrorModal(true);
+      if (err?.code === "HOLD_EXPIRED") {
+        setHoldExpired(true);
+      } else {
+        setHoldExpired(false);
+      }
+    } finally {
+      setHoldingRoom(false);
+    }
+  };
+
+  const holdInitiatedRef = useRef(false);
+
+  // Initiate Hold Room on page load for 7 minutes (strictly once)
+  useEffect(() => {
+    if (!categoryId || !checkin || !checkout) return;
+    if (holdInitiatedRef.current) return;
+    holdInitiatedRef.current = true;
+
+    handleRenewHold(false);
+  }, [categoryId, checkin, checkout]);
+
+  // Hold Timer countdown interval (7 minutes - timestamp based)
+  useEffect(() => {
+    if (!holdId || bookingProgress === "success") return;
+
+    const storageKey = `active_hold_${categoryId}_${checkin}_${checkout}`;
+
+    const checkTimer = () => {
+      if (typeof window === "undefined") return;
+      try {
+        const savedHold = sessionStorage.getItem(storageKey);
+        if (savedHold) {
+          const parsed = JSON.parse(savedHold);
+          const now = Date.now();
+          const secs = Math.floor((parsed.expiresAtTimestamp - now) / 1000);
+
+          if (secs <= 0) {
+            sessionStorage.removeItem(storageKey);
+            setHoldTimeLeft(0);
+            setHoldExpired(true);
+            setErrorMessage("Phiên giữ phòng của bạn đã hết hạn (quá 7 phút). Bạn có thể bấm nút 'Gia hạn giữ chỗ' để tiếp tục.");
+            setShowErrorModal(true);
+            return;
+          }
+
+          setHoldTimeLeft(secs);
+          setHoldExpired(false);
+          return;
+        }
+      } catch (e) {
+        console.error("Error reading timer:", e);
+      }
+
+      setHoldExpired(true);
+    };
+
+    checkTimer();
+    const interval = setInterval(checkTimer, 1000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        checkTimer();
+      }
+    };
+    window.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [holdId, categoryId, checkin, checkout, bookingProgress]);
+
+  const formatHoldTimer = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  };
 
   if (loading) {
     return (
@@ -193,7 +345,7 @@ function CheckoutContent() {
     try {
       const checkinDateStr = checkin ? `${checkin}T14:00:00` : undefined;
       const checkoutDateStr = checkout ? `${checkout}T12:00:00` : undefined;
-      const res = await apiPost<any>("/coupons/validate", {
+      const res = await apiPost<ValidateCouponResponse>("/coupons/validate", {
         code: couponCode.trim(),
         totalAmount: originalTotalPrice,
         checkinDate: checkinDateStr,
@@ -221,17 +373,29 @@ function CheckoutContent() {
     e.preventDefault();
     if (!checkin || !checkout || !contactLastName || !contactFirstName || !contactPhone) return;
 
-    try {
-      setBookingProgress("holding");
-      const checkinDateStr = `${checkin}T14:00:00`;
-      const checkoutDateStr = `${checkout}T12:00:00`;
+    if (holdExpired) {
+      setErrorMessage("Phiên giữ phòng của bạn đã hết hạn (quá 7 phút). Vui lòng tải lại trang để chọn lại.");
+      setShowErrorModal(true);
+      return;
+    }
 
-      // Step 1: Hold room physical availability
-      const holdRes = await apiPost<HoldRoomResponse>("/bookings/hold", {
-        categoryId,
-        checkinDate: checkinDateStr,
-        checkoutDate: checkoutDateStr
-      });
+    try {
+      let activeHoldId = holdId;
+
+      if (!activeHoldId) {
+        setBookingProgress("holding");
+        const checkinDateStr = `${checkin}T14:00:00`;
+        const checkoutDateStr = `${checkout}T12:00:00`;
+
+        // Step 1: Hold room physical availability
+        const holdRes = await apiPost<HoldRoomResponse>("/bookings/hold", {
+          categoryId,
+          checkinDate: checkinDateStr,
+          checkoutDate: checkoutDateStr
+        });
+        activeHoldId = holdRes.holdId;
+        setHoldId(activeHoldId);
+      }
 
       setBookingProgress("confirming");
 
@@ -260,7 +424,7 @@ function CheckoutContent() {
 
       // Step 2: Confirm booking and generate bill
       const confirmRes = await apiPost<ConfirmBookingResponse>("/bookings/confirm", {
-        holdId: holdRes.holdId,
+        holdId: activeHoldId!,
         guestName: `${contactLastName} ${contactFirstName}`,
         guestPhone: contactPhone,
         guestEmail: contactEmail || undefined,
@@ -274,8 +438,13 @@ function CheckoutContent() {
       setIsMobileSummaryExpanded(false);
     } catch (err: any) {
       console.error(err);
-      setErrorMessage(getErrorMessage(err));
+      const msg = getErrorMessage(err);
+      setErrorMessage(msg);
       setBookingProgress("error");
+      setShowErrorModal(true);
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
   };
 
@@ -303,8 +472,20 @@ function CheckoutContent() {
               <strong>Khách hàng:</strong> {bookingResult.guestName} ({bookingResult.guestPhone})
             </div>
             <div style={{ borderTop: "1px solid var(--color-whisper-border)", paddingTop: "0.75rem", marginTop: "0.25rem" }}>
+              {bookingResult.discountAmount && bookingResult.discountAmount > 0 ? (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.95rem", color: "#64748b" }}>
+                    <span>Giá phòng gốc:</span>
+                    <span>{(bookingResult.originalPrice || (bookingResult.totalAmount + bookingResult.discountAmount)).toLocaleString("vi-VN")}₫</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.95rem", color: "#16a34a", fontWeight: "bold" }}>
+                    <span>Giảm giá ({bookingResult.couponCode || "Coupon"}):</span>
+                    <span>-{bookingResult.discountAmount.toLocaleString("vi-VN")}₫</span>
+                  </div>
+                </>
+              ) : null}
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.1rem" }}>
-                <span>Tổng chi phí:</span>
+                <span>Tổng chi phí thực tế:</span>
                 <strong>{bookingResult.totalAmount.toLocaleString("vi-VN")}₫</strong>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.1rem", color: "#b45309", fontWeight: "bold", marginTop: "0.25rem" }}>
@@ -338,7 +519,12 @@ function CheckoutContent() {
             )}
           </div>
 
-          <button className={styles.successBackBtn} onClick={() => router.push("/")}>Quay lại Trang chủ</button>
+          <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
+            <button className={styles.successBackBtn} style={{ background: "#0284c7" }} onClick={() => router.push(`/payment?bookingId=${bookingResult.bookingId}`)}>
+              Thanh Toán Ngay Bằng VietQR (Tự Động Xác Nhận)
+            </button>
+            <button className={styles.successBackBtn} style={{ background: "#64748b" }} onClick={() => router.push("/")}>Quay lại Trang chủ</button>
+          </div>
         </div>
       </div>
     );
@@ -431,6 +617,16 @@ function CheckoutContent() {
           </div>
         </div>
 
+        {holdId && !holdExpired && (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#fffbeb", border: "1px solid #fde68a", padding: "0.6rem 0.85rem", borderRadius: "10px", color: "#92400e", fontSize: "0.85rem", fontWeight: "bold" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: "1.1rem", color: "#d97706" }}>schedule</span>
+              Thời gian giữ phòng:
+            </span>
+            <span style={{ color: "#d97706", fontFamily: "monospace", fontSize: "1.05rem" }}>{formatHoldTimer(holdTimeLeft)}</span>
+          </div>
+        )}
+
         {/* Coupon Input Block */}
         <div style={{ margin: "1rem 0", padding: "0.75rem", background: "#f8fafc", borderRadius: "12px", border: "1px solid #cbd5e1" }}>
           <div style={{ fontSize: "0.85rem", fontWeight: "bold", marginBottom: "0.5rem", color: "#334155" }}>Mã giảm giá / Promo code</div>
@@ -510,6 +706,16 @@ function CheckoutContent() {
           <span>{depositPrice.toLocaleString("vi-VN")}₫</span>
         </div>
 
+        {bookingProgress === "error" && errorMessage && (
+          <div style={{ backgroundColor: "#fee2e2", border: "1px solid #fecaca", padding: "0.75rem", borderRadius: "10px", color: "#991b1b", fontSize: "0.85rem", marginTop: "1rem", marginBottom: "0.5rem" }}>
+            <div style={{ display: "flex", gap: "0.35rem", alignItems: "center", fontWeight: "bold", marginBottom: "0.2rem" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>error</span>
+              <span>Lỗi đặt phòng</span>
+            </div>
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
         {!isMobile && (
           <button
             type="submit"
@@ -542,6 +748,44 @@ function CheckoutContent() {
           <span style={{ fontWeight: "bold", color: "var(--color-primary)" }}>Thanh toán</span>
         </div>
       </div>
+
+      {/* Hold Room Countdown Banner (7 minutes) */}
+      {holdId && !holdExpired && bookingProgress !== "success" && (
+        <div className={styles.holdTimerBanner}>
+          <div className={styles.holdTimerIconWrapper}>
+            <span className="material-symbols-outlined" style={{ fontSize: "1.75rem" }}>
+              timer
+            </span>
+          </div>
+          <div className={styles.holdTimerContent}>
+            <div className={styles.holdTimerTitle}>
+              Phòng của bạn đang được tạm giữ trong:{" "}
+              <span className={styles.holdTimerClock}>{formatHoldTimer(holdTimeLeft)}</span>
+            </div>
+            <div className={styles.holdTimerSub}>
+              Vui lòng hoàn tất thông tin trước khi hết 7 phút để đảm bảo giữ nguyên ưu đãi và số lượng phòng trống.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {holdExpired && (
+        <div className={styles.holdExpiredBanner}>
+          <span className="material-symbols-outlined" style={{ fontSize: "1.5rem" }}>timer_off</span>
+          <div style={{ flex: 1 }}>
+            <strong>Phiên giữ phòng đã hết hạn!</strong> Vui lòng bấm gia hạn để tiếp tục giữ chỗ 7 phút mới mà không bị mất thông tin đã điền.
+          </div>
+          <button
+            type="button"
+            className={styles.bannerBtn}
+            onClick={() => handleRenewHold(true)}
+            disabled={holdingRoom}
+            style={{ fontSize: "0.85rem", padding: "0.5rem 1rem", backgroundColor: "#dc2626", whiteSpace: "nowrap" }}
+          >
+            {holdingRoom ? "Đang xử lý..." : "Gia hạn giữ chỗ (7 phút mới)"}
+          </button>
+        </div>
+      )}
 
       {bookingProgress === "error" && (
         <div style={{ backgroundColor: "#fee2e2", border: "1px solid #fecaca", padding: "1rem", borderRadius: "12px", color: "#991b1b", marginBottom: "1.5rem" }}>
@@ -630,7 +874,12 @@ function CheckoutContent() {
                 <div className={styles.formGroup}>
                   <label className={styles.label}>Điện thoại liên hệ<span className={styles.required}>*</span></label>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <select className={styles.select} style={{ width: "35%" }} value="+84">
+                    <select
+                      className={styles.select}
+                      style={{ width: "35%" }}
+                      value={contactPhonePrefix}
+                      onChange={(e) => setContactPhonePrefix(e.target.value)}
+                    >
                       <option value="+84">+84 (VN)</option>
                       <option value="+1">+1 (US)</option>
                       <option value="+44">+44 (UK)</option>
@@ -730,7 +979,12 @@ function CheckoutContent() {
                   <div className={styles.formGroup}>
                     <label className={styles.label}>Điện thoại liên hệ<span className={styles.required}>*</span></label>
                     <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <select className={styles.select} style={{ width: "35%" }} value="+84">
+                      <select
+                        className={styles.select}
+                        style={{ width: "35%" }}
+                        value={stayingPhonePrefix}
+                        onChange={(e) => setStayingPhonePrefix(e.target.value)}
+                      >
                         <option value="+84">+84 (VN)</option>
                         <option value="+1">+1 (US)</option>
                       </select>
@@ -879,6 +1133,52 @@ function CheckoutContent() {
               {renderTripSummary(true)}
             </div>
           </>
+        )}
+
+        {/* Custom Error Modal Popup */}
+        {showErrorModal && (
+          <div className={styles.errorModalOverlay} onClick={() => setShowErrorModal(false)}>
+            <div className={styles.errorModalContent} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.errorModalIconWrapper}>
+                <span className="material-symbols-outlined" style={{ fontSize: "2.5rem", color: "#dc2626" }}>
+                  error
+                </span>
+              </div>
+              <h3 className={styles.errorModalTitle}>Đặt phòng không thành công</h3>
+              <p className={styles.errorModalMessage}>{errorMessage}</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", width: "100%" }}>
+                {holdExpired && (
+                  <button
+                    type="button"
+                    className={styles.errorModalBtn}
+                    onClick={() => handleRenewHold(true)}
+                    disabled={holdingRoom}
+                    style={{ backgroundColor: "#0284c7" }}
+                  >
+                    {holdingRoom ? "Đang gia hạn..." : "Gia hạn giữ chỗ (7 phút mới)"}
+                  </button>
+                )}
+                {!holdId && !holdExpired && (
+                  <button
+                    type="button"
+                    className={styles.errorModalBtn}
+                    onClick={() => router.push("/book")}
+                    style={{ backgroundColor: "#0284c7" }}
+                  >
+                    Chọn loại phòng khác
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className={styles.errorModalBtn}
+                  onClick={() => setShowErrorModal(false)}
+                  style={holdExpired || !holdId ? { backgroundColor: "#64748b" } : {}}
+                >
+                  {holdExpired || !holdId ? "Đóng" : "Đã hiểu"}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
       </form>

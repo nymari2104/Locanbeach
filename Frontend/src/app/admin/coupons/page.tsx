@@ -1,27 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { apiGet, apiPost, apiPatch } from "@/lib/api";
+import { apiGet, apiPost, apiPatch, apiDelete, getErrorMessage } from "@/lib/api";
+import { CouponDTO } from "@/types/api";
 import styles from "./page.module.css";
 
-interface CouponItem {
-  id: string;
-  code: string;
-  description: string;
-  discountType: "PERCENTAGE" | "FIXED_AMOUNT" | "VALUE_ADD";
-  discountValue: number;
-  minBookingAmount?: number;
-  maxDiscountAmount?: number;
-  minLengthOfStay: number;
-  startDate: string;
-  endDate: string;
-  maxUsage?: number;
-  currentUsage: number;
-  isActive: boolean;
-}
-
 export default function AdminCouponsPage() {
-  const [coupons, setCoupons] = useState<CouponItem[]>([]);
+  const [coupons, setCoupons] = useState<CouponDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -41,9 +26,9 @@ export default function AdminCouponsPage() {
   const fetchCoupons = async () => {
     setLoading(true);
     try {
-      const res = await apiGet<CouponItem[]>("/coupons");
+      const res = await apiGet<CouponDTO[]>("/coupons");
       setCoupons(res || []);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Lỗi lấy danh sách coupon:", err);
     } finally {
       setLoading(false);
@@ -67,7 +52,17 @@ export default function AdminCouponsPage() {
       await apiPatch(`/coupons/${id}/toggle`, {});
       fetchCoupons();
     } catch (err: any) {
-      alert("Lỗi đổi trạng thái: " + err.message);
+      alert("Lỗi đổi trạng thái: " + getErrorMessage(err));
+    }
+  };
+
+  const handleDeleteCoupon = async (id: string, code: string) => {
+    if (!confirm(`Bạn có chắc chắn muốn xóa mã giảm giá "${code}" không?`)) return;
+    try {
+      await apiDelete(`/coupons/${id}`);
+      fetchCoupons();
+    } catch (err: any) {
+      alert("Lỗi xóa mã giảm giá: " + getErrorMessage(err));
     }
   };
 
@@ -100,7 +95,7 @@ export default function AdminCouponsPage() {
       setMaxDiscountAmount("");
       fetchCoupons();
     } catch (err: any) {
-      alert("Lỗi tạo mã: " + err.message);
+      alert("Lỗi tạo mã: " + getErrorMessage(err));
     } finally {
       setSaving(false);
     }
@@ -162,11 +157,20 @@ export default function AdminCouponsPage() {
               <div className={styles.cardFooter}>
                 <button
                   className={styles.btnOutline}
-                  onClick={() => handleToggleStatus(item.id)}
+                  onClick={() => item.id && handleToggleStatus(item.id)}
                   style={{ fontSize: "0.8rem" }}
                 >
                   {item.isActive ? "Tắt kích hoạt" : "Bật kích hoạt"}
                 </button>
+                {item.id && (
+                  <button
+                    className={styles.btnOutline}
+                    onClick={() => handleDeleteCoupon(item.id!, item.code)}
+                    style={{ fontSize: "0.8rem", color: "#dc2626", borderColor: "#fecaca" }}
+                  >
+                    Xóa mã
+                  </button>
+                )}
               </div>
             </div>
           ))}

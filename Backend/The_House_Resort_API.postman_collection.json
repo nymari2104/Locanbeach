@@ -3527,7 +3527,146 @@
             ]
         },
         {
-            "name": "9. Cleanup (DELETE)",
+            "name": "9. Payment & VietQR Webhooks",
+            "item": [
+                {
+                    "name": "1. Create VietQR Payment Details",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Create VietQR successful', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "    pm.expect(res.data).to.have.property('qrImageUrl');",
+                                    "    pm.expect(res.data).to.have.property('transferContent');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"bookingId\": \"{{bookingId}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/payments/create-qr",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "payments",
+                                "create-qr"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2. Bank Webhook Callback (Auto Confirm Booking)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Process payment webhook successful', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "    pm.expect(res.data.status).to.eql('SUCCESS');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"transactionId\": \"FT26205891234\",\n    \"amount\": 900000.0,\n    \"content\": \"Chuyen tien coc LOCAN {{bookingId}}\",\n    \"gateway\": \"VIETQR\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/payments/webhook",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "payments",
+                                "webhook"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3. Get Payment & Booking Status (Polling)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Get payment status successful', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const res = pm.response.json();",
+                                    "    pm.expect(res.code).to.eql('SUCCESS');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/payments/booking/{{bookingId}}/status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "payments",
+                                "booking",
+                                "{{bookingId}}",
+                                "status"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "10. Cleanup (DELETE)",
             "item": [
                 {
                     "name": "Delete Booking",

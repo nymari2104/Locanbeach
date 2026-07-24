@@ -497,14 +497,100 @@ Khách hàng vãng lai trên trang Checkout nhập mã khuyến mãi (ví dụ `
 
 ---
 
-### 5.5 Xóa Mã Giảm Giá (Delete Coupon - Admin Only)
-- **HTTP Method**: `DELETE`
-- **Path**: `/api/v1/coupons/{id}`
-- **Headers**: `Authorization: Bearer <adminToken>`
+---
+
+## 💳 6. API Thanh Toán VietQR & Webhook Tự Động (Payment & Auto-Confirmation)
+
+### 6.1 Tạo mã VietQR Động cho Đơn Đặt Phòng (Create VietQR - Public Endpoint)
+Khởi tạo dữ liệu mã VietQR tĩnh/động cho đơn đặt phòng vừa được confirm.
+
+- **HTTP Method**: `POST`
+- **Path**: `/api/v1/payments/create-qr`
+- **Request Body**:
+  ```json
+  {
+    "bookingId": "8f89-8d63-4b6d-a365-27a3c7b39678"
+  }
+  ```
+- **Response Mẫu (200 OK)**:
+  ```json
+  {
+    "code": "SUCCESS",
+    "data": {
+      "bookingId": "8f89-8d63-4b6d-a365-27a3c7b39678",
+      "bookingCode": "8F898D63",
+      "depositAmount": 810000.00, // Số tiền cọc 30%
+      "totalAmount": 2700000.00,
+      "bankName": "MBBank",
+      "bankAccountNo": "0987654321",
+      "bankAccountName": "THE HOUSE LOC AN BEACH",
+      "transferContent": "LOCAN 8F898D63", // Nội dung chuyển khoản bắt buộc
+      "qrImageUrl": "https://img.vietqr.io/image/mb-0987654321-compact2.png?amount=810000&addInfo=LOCAN+8F898D63&accountName=THE+HOUSE+LOC+AN+BEACH",
+      "status": "PENDING_DEPOSIT"
+    },
+    "message": "Tạo mã VietQR thanh toán thành công"
+  }
+  ```
 
 ---
 
-## ⚠️ 6. Xử Lý Lỗi & Danh Sách Error Codes (Error Handling for Frontend)
+### 6.2 Nạp dữ liệu Webhook Ngân hàng / PayOS / Casso (Bank Webhook Callback)
+Endpoint tiếp nhận thông báo tự động từ Ngân hàng / PayOS / Casso khi tiền về tài khoản Resort. Backend tự động đối soát nội dung `LOCAN <Code>` và chuyển trạng thái đơn sang `CONFIRMED`.
+
+- **HTTP Method**: `POST`
+- **Path**: `/api/v1/payments/webhook`
+- **Request Body**:
+  ```json
+  {
+    "transactionId": "FT26205891234", // Mã giao dịch ngân hàng
+    "amount": 810000.00,
+    "content": "Chuyen tien coc phong LOCAN 8F898D63",
+    "gateway": "VIETQR"
+  }
+  ```
+- **Response Mẫu (200 OK)**:
+  ```json
+  {
+    "code": "SUCCESS",
+    "data": {
+      "id": "e0b2d3c4-5678-90ab-cdef-1234567890ab",
+      "bookingId": "8f89-8d63-4b6d-a365-27a3c7b39678",
+      "transactionId": "FT26205891234",
+      "amount": 810000.00,
+      "paymentMethod": "VIETQR",
+      "transferContent": "Chuyen tien coc phong LOCAN 8F898D63",
+      "status": "SUCCESS",
+      "paidAt": "2026-07-23T21:05:00"
+    },
+    "message": "Xử lý webhook thanh toán thành công"
+  }
+  ```
+
+---
+
+### 6.3 Kiểm Tra Trạng Thái Thanh Toán (Polling Payment Status)
+Frontend màn hình `/payment` gọi định kỳ mỗi 3 giây để biết khi nào ngân hàng xác nhận tiền cọc thành công.
+
+- **HTTP Method**: `GET`
+- **Path**: `/api/v1/payments/booking/{bookingId}/status`
+- **Response Mẫu (200 OK)**:
+  ```json
+  {
+    "code": "SUCCESS",
+    "data": {
+      "bookingId": "8f89-8d63-4b6d-a365-27a3c7b39678",
+      "bookingCode": "8F898D63",
+      "depositAmount": 810000.00,
+      "totalAmount": 2700000.00,
+      "status": "CONFIRMED" // Chuyển sang CONFIRMED sau khi Webhook nhận tiền!
+    },
+    "message": "Lấy trạng thái thanh toán thành công"
+  }
+  ```
+
+---
+
+## ⚠️ 7. Xử Lý Lỗi & Danh Sách Error Codes (Error Handling for Frontend)
 
 Hệ thống sử dụng cấu trúc phản hồi lỗi chuẩn khi xảy ra lỗi (HTTP Status code khác `2xx`). Frontend nên dựa vào thuộc tính `code` để thực hiện dịch ngôn ngữ hoặc hiển thị thông báo thân thiện cho người dùng.
 

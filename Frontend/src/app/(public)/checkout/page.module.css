@@ -676,3 +676,154 @@
   cursor: pointer;
   margin-top: 1rem;
 }
+
+/* Hold Room Timer Banner */
+.holdTimerBanner {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #fde68a;
+  border-radius: var(--rounded-2xl);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 4px 15px rgba(217, 119, 6, 0.08);
+}
+
+.holdTimerIconWrapper {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  background-color: #f59e0b;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.holdTimerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.holdTimerTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #78350f;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.holdTimerClock {
+  font-family: monospace;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #d97706;
+  background-color: #ffffff;
+  padding: 0.2rem 0.6rem;
+  border-radius: 8px;
+  border: 1px dashed #f59e0b;
+  letter-spacing: 1px;
+}
+
+.holdTimerSub {
+  font-size: 0.875rem;
+  color: #92400e;
+  line-height: 1.4;
+}
+
+.holdExpiredBanner {
+  background-color: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: var(--rounded-xl);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  color: #991b1b;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+
+/* Custom Error Modal */
+.errorModalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.5rem;
+  animation: fadeIn 0.25s ease;
+}
+
+.errorModalContent {
+  background-color: #ffffff;
+  border-radius: 24px;
+  max-width: 440px;
+  width: 100%;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalPop {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.errorModalIconWrapper {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  background-color: #fef2f2;
+  border: 1px solid #fee2e2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.errorModalTitle {
+  font-family: var(--font-playfair), serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+.errorModalMessage {
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0 0 1.5rem 0;
+}
+
+.errorModalBtn {
+  width: 100%;
+  background-color: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.errorModalBtn:hover {
+  background-color: #b91c1c;
+}
+
