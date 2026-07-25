@@ -83,15 +83,45 @@ public class BookingService {
             throw new AppException(BookingErrorCode.INVALID_CHECKIN_STATUS, "Check-out date must be after check-in date");
         }
 
+        LocalDateTime now = LocalDateTime.now();
+
+        // 1. Delete expired holds in DB
+        try {
+            roomHoldRepository.deleteExpiredHolds(now);
+        } catch (Exception e) {
+            log.warn("Could not clean expired holds in DB: {}", e.getMessage());
+        }
+
+        // 2. If guest holds the same room category & dates, release previous hold first to prevent self-locking
+        if (guestToken != null && !guestToken.trim().isEmpty()) {
+            HoldSession session = holdSessionStore.get(guestToken);
+            if (session != null && session.getItems() != null) {
+                Iterator<HoldItem> iterator = session.getItems().iterator();
+                while (iterator.hasNext()) {
+                    HoldItem item = iterator.next();
+                    if (item.getCategoryId().equals(request.getCategoryId())
+                            && item.getCheckinDate().equals(request.getCheckinDate())
+                            && item.getCheckoutDate().equals(request.getCheckoutDate())) {
+                        iterator.remove();
+                        try {
+                            roomHoldRepository.deleteById(UUID.fromString(item.getItemId()));
+                        } catch (Exception e) {
+                            log.warn("Could not delete previous room hold {}: {}", item.getItemId(), e.getMessage());
+                        }
+                    }
+                }
+            }
+        }
+
         // Lock 1 available accommodation
         Accommodation accommodation = accommodationRepository.findAvailableAccommodationWithLock(
-                request.getCategoryId(), request.getCheckinDate(), request.getCheckoutDate());
+                request.getCategoryId(), request.getCheckinDate(), request.getCheckoutDate(), now);
 
         if (accommodation == null) {
             throw new AppException(BookingErrorCode.NO_AVAILABLE_ROOM);
         }
 
-        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(7); // 7 minutes timer
+        LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(10); // 10 seconds timer for testing
 
         RoomHold roomHold = new RoomHold();
         roomHold.setAccommodation(accommodation);

@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,13 +24,14 @@ public interface AccommodationRepository extends JpaRepository<Accommodation, UU
             ") " +
             "AND a.id NOT IN ( " +
             "   SELECT rh.accommodation_id FROM room_holds rh " +
-            "   WHERE rh.expires_at > CURRENT_TIMESTAMP " +
+            "   WHERE rh.expires_at > :now " +
             "   AND rh.checkin_date < :checkoutDate " +
             "   AND rh.checkout_date > :checkinDate " +
             ")", nativeQuery = true)
     List<Accommodation> findAvailableAccommodations(
-            @Param("checkinDate") java.time.LocalDateTime checkinDate,
-            @Param("checkoutDate") java.time.LocalDateTime checkoutDate
+            @Param("checkinDate") LocalDateTime checkinDate,
+            @Param("checkoutDate") LocalDateTime checkoutDate,
+            @Param("now") LocalDateTime now
     );
 
     @Query(value = "SELECT * FROM accommodations a " +
@@ -44,13 +45,14 @@ public interface AccommodationRepository extends JpaRepository<Accommodation, UU
             ") " +
             "AND a.id NOT IN ( " +
             "   SELECT rh.accommodation_id FROM room_holds rh " +
-            "   WHERE rh.expires_at > CURRENT_TIMESTAMP " +
+            "   WHERE rh.expires_at > :now " +
             "   AND rh.checkin_date < :checkoutDate " +
             "   AND rh.checkout_date > :checkinDate " +
             ") LIMIT 1 FOR UPDATE SKIP LOCKED", nativeQuery = true)
     Accommodation findAvailableAccommodationWithLock(
             @Param("categoryId") UUID categoryId,
-            @Param("checkinDate") java.time.LocalDateTime checkinDate,
-            @Param("checkoutDate") java.time.LocalDateTime checkoutDate
+            @Param("checkinDate") LocalDateTime checkinDate,
+            @Param("checkoutDate") LocalDateTime checkoutDate,
+            @Param("now") LocalDateTime now
     );
 }

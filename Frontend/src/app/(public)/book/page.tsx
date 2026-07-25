@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
-import { apiGet, getMaterialIconName } from "@/lib/api";
+import { apiGet, apiDelete, getMaterialIconName } from "@/lib/api";
 import { 
   AccommodationCategoryDTO, 
   SearchCategoryResultResponse,
@@ -40,6 +40,11 @@ export default function Book() {
 
     async function initData() {
       try {
+        // Automatically release any unconfirmed draft hold session when visiting search page
+        try {
+          await apiDelete("/bookings/hold");
+        } catch (e) {}
+
         let cats: AccommodationCategoryDTO[] = [];
         try {
           cats = await apiGet<AccommodationCategoryDTO[]>("/categories");

@@ -142,6 +142,7 @@ export async function apiGet<T>(path: string): Promise<T> {
   const response = await fetch(`${getBaseUrl()}${path}`, {
     method: 'GET',
     headers: getHeaders(),
+    credentials: 'include',
   });
   return handleResponse<T>(response);
 }
@@ -151,6 +152,7 @@ export async function apiPost<T>(path: string, body: any): Promise<T> {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify(body),
+    credentials: 'include',
   });
   return handleResponse<T>(response);
 }
@@ -160,6 +162,7 @@ export async function apiPut<T>(path: string, body: any): Promise<T> {
     method: 'PUT',
     headers: getHeaders(),
     body: JSON.stringify(body),
+    credentials: 'include',
   });
   return handleResponse<T>(response);
 }
@@ -169,6 +172,7 @@ export async function apiPatch<T>(path: string, body: any): Promise<T> {
     method: 'PATCH',
     headers: getHeaders(),
     body: JSON.stringify(body),
+    credentials: 'include',
   });
   return handleResponse<T>(response);
 }
@@ -177,6 +181,7 @@ export async function apiDelete<T>(path: string): Promise<T> {
   const response = await fetch(`${getBaseUrl()}${path}`, {
     method: 'DELETE',
     headers: getHeaders(),
+    credentials: 'include',
   });
   return handleResponse<T>(response);
 }

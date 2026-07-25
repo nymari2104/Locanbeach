@@ -37,7 +37,7 @@ public class SearchService {
 
         // 1. Lấy tất cả phòng trống (bất kể loại)
         List<Accommodation> availableAccommodations = accommodationRepository.findAvailableAccommodations(
-                request.getCheckinDate(), request.getCheckoutDate()
+                request.getCheckinDate(), request.getCheckoutDate(), java.time.LocalDateTime.now()
         );
 
         // 2. Lọc theo categoryId nếu có

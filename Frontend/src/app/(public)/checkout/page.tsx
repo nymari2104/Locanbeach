@@ -91,11 +91,12 @@ function CheckoutContent() {
   const [errorMessage, setErrorMessage] = useState("");
   const [showErrorModal, setShowErrorModal] = useState(false);
 
-  // Hold Room states (7 minutes = 420 seconds)
+  // Hold Room states (10 seconds for testing)
   const [holdId, setHoldId] = useState<string | null>(null);
-  const [holdTimeLeft, setHoldTimeLeft] = useState<number>(420);
+  const [holdTimeLeft, setHoldTimeLeft] = useState<number>(10);
   const [holdExpired, setHoldExpired] = useState(false);
   const [holdingRoom, setHoldingRoom] = useState(false);
+  const holdInitiatedRef = useRef(false);
 
   // Mobile drawer state
   const [isMobileSummaryExpanded, setIsMobileSummaryExpanded] = useState(false);
@@ -173,7 +174,7 @@ function CheckoutContent() {
             setHoldId(null);
             setHoldTimeLeft(0);
             setHoldExpired(true);
-            setErrorMessage("Phiên giữ phòng của bạn đã hết hạn (quá 7 phút). Bạn có thể bấm nút 'Gia hạn giữ chỗ' để tiếp tục.");
+            setErrorMessage("Phiên giữ phòng của bạn đã hết hạn (quá 10 giây). Bạn có thể bấm nút 'Gia hạn giữ chỗ' để tiếp tục.");
             setShowErrorModal(true);
             return;
           }
@@ -194,7 +195,7 @@ function CheckoutContent() {
       });
 
       if (typeof window !== "undefined") {
-        const expiresAtTimestamp = Date.now() + 420 * 1000; // 7 minutes from now
+        const expiresAtTimestamp = Date.now() + 10 * 1000; // 10 seconds for testing
         sessionStorage.setItem(
           storageKey,
           JSON.stringify({ holdId: holdRes.holdId, expiresAtTimestamp })
@@ -202,7 +203,7 @@ function CheckoutContent() {
       }
 
       setHoldId(holdRes.holdId);
-      setHoldTimeLeft(420); // 7 minutes
+      setHoldTimeLeft(10); // 10 seconds
       setHoldExpired(false);
       setShowErrorModal(false);
       setBookingProgress("idle");
@@ -223,50 +224,97 @@ function CheckoutContent() {
 
   // Initiate Hold Room on page load for 7 minutes
   useEffect(() => {
-    if (!categoryId || !checkin || !checkout) return;
+    if (!categoryId || !checkin || !checkout || sessionLoading) return;
     if (holdInitiatedRef.current) return;
-    holdInitiatedRef.current = true;
 
     const checkinDateStr = `${checkin}T14:00:00`;
     const checkoutDateStr = `${checkout}T12:00:00`;
+
+    // Check if this category and date range is already held in the session
+    const alreadyHeld = session?.items?.some(
+      (item) =>
+        item.categoryId === categoryId &&
+        item.checkinDate.startsWith(checkin) &&
+        item.checkoutDate.startsWith(checkout)
+    );
+
+    if (alreadyHeld) {
+      holdInitiatedRef.current = true;
+      return;
+    }
+
+    holdInitiatedRef.current = true;
     addHoldRoom(categoryId, checkinDateStr, checkoutDateStr).catch((err) => {
       console.error("Failed adding room to session:", err);
     });
-  }, [categoryId, checkin, checkout, addHoldRoom]);
+  }, [categoryId, checkin, checkout, session, sessionLoading, addHoldRoom]);
 
-  // Hold Timer countdown interval (7 minutes - timestamp based)
+  const bookingProgressRef = useRef(bookingProgress);
   useEffect(() => {
-    if (!holdId || bookingProgress === "success") return;
+    bookingProgressRef.current = bookingProgress;
+  }, [bookingProgress]);
 
-    const storageKey = `active_hold_${categoryId}_${checkin}_${checkout}`;
+  // Release hold session automatically when closing tab / browser or leaving page before payment
+  useEffect(() => {
+    const handlePageHide = () => {
+      if (bookingProgressRef.current !== "success") {
+        try {
+          fetch(`${getBaseUrl()}/bookings/hold`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            keepalive: true,
+          }).catch(() => {});
+        } catch (e) {}
+      }
+    };
+
+    window.addEventListener("pagehide", handlePageHide);
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide);
+    };
+  }, []);
+
+  // Hold Timer countdown interval (7 minutes - session & timestamp based)
+  useEffect(() => {
+    if (bookingProgress === "success") return;
 
     const checkTimer = () => {
-      if (typeof window === "undefined") return;
-      try {
-        const savedHold = sessionStorage.getItem(storageKey);
-        if (savedHold) {
-          const parsed = JSON.parse(savedHold);
-          const now = Date.now();
-          const secs = Math.floor((parsed.expiresAtTimestamp - now) / 1000);
+      let expTimestamp: number | null = null;
 
-          if (secs <= 0) {
-            sessionStorage.removeItem(storageKey);
-            setHoldTimeLeft(0);
-            setHoldExpired(true);
-            setErrorMessage("Phiên giữ phòng của bạn đã hết hạn (quá 7 phút). Bạn có thể bấm nút 'Gia hạn giữ chỗ' để tiếp tục.");
-            setShowErrorModal(true);
-            return;
-          }
-
-          setHoldTimeLeft(secs);
-          setHoldExpired(false);
-          return;
+      if (session?.expiresAtTimestamp && session.expiresAtTimestamp > 0) {
+        expTimestamp = session.expiresAtTimestamp;
+      } else if (session?.expiresAt) {
+        const sanitized = session.expiresAt.replace(/(\.\d{3})\d+/, '$1');
+        const t = new Date(sanitized).getTime();
+        if (!isNaN(t)) expTimestamp = t;
+      } else if (!sessionLoading && (!session || !session.items || session.items.length === 0)) {
+        const storageKey = `active_hold_${categoryId}_${checkin}_${checkout}`;
+        if (typeof window !== "undefined") {
+          try {
+            const savedHold = sessionStorage.getItem(storageKey);
+            if (savedHold) {
+              expTimestamp = JSON.parse(savedHold).expiresAtTimestamp;
+            }
+          } catch (e) {}
         }
-      } catch (e) {
-        console.error("Error reading timer:", e);
       }
 
-      setHoldExpired(true);
+      if (expTimestamp) {
+        const now = Date.now();
+        const secs = Math.floor((expTimestamp - now) / 1000);
+        if (secs <= 0) {
+          setHoldTimeLeft(0);
+          setHoldExpired(true);
+          setErrorMessage("Phiên giữ phòng của bạn đã hết hạn (quá 10 giây). Bạn có thể bấm nút 'Gia hạn giữ chỗ' để tiếp tục.");
+          setShowErrorModal(true);
+          return;
+        }
+        setHoldTimeLeft(secs);
+        setHoldExpired(false);
+      } else if (session?.items && session.items.length > 0) {
+        setHoldExpired(false);
+      }
     };
 
     checkTimer();
@@ -283,7 +331,7 @@ function CheckoutContent() {
       clearInterval(interval);
       window.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [holdId, categoryId, checkin, checkout, bookingProgress]);
+  }, [session, categoryId, checkin, checkout, bookingProgress]);
 
   const formatHoldTimer = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -610,12 +658,12 @@ function CheckoutContent() {
             accommodationCode: "Tự động",
             numNights,
             pricePerNight: room.basePrice,
-            itemTotalAmount: rawTotalPrice
+            itemTotalAmount: originalTotalPrice
           }
         ]
       : [];
 
-    const displayTotal = session && session.totalAmount > 0 ? session.totalAmount : rawTotalPrice;
+    const displayTotal = session && session.totalAmount > 0 ? session.totalAmount : originalTotalPrice;
     const displayDeposit = session && session.depositAmount > 0 ? session.depositAmount : depositPrice;
 
     return (
@@ -658,7 +706,7 @@ function CheckoutContent() {
           </div>
         </div>
 
-        {holdId && !holdExpired && (
+        {((session?.items && session.items.length > 0) || holdId) && !holdExpired && (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#fffbeb", border: "1px solid #fde68a", padding: "0.6rem 0.85rem", borderRadius: "10px", color: "#92400e", fontSize: "0.85rem", fontWeight: "bold" }}>
             <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
               <span className="material-symbols-outlined" style={{ fontSize: "1.1rem", color: "#d97706" }}>schedule</span>
@@ -798,7 +846,7 @@ function CheckoutContent() {
       </div>
 
       {/* Hold Room Countdown Banner (7 minutes) */}
-      {holdId && !holdExpired && bookingProgress !== "success" && (
+      {((session?.items && session.items.length > 0) || holdId) && !holdExpired && bookingProgress !== "success" && (
         <div className={styles.holdTimerBanner}>
           <div className={styles.holdTimerIconWrapper}>
             <span className="material-symbols-outlined" style={{ fontSize: "1.75rem" }}>
