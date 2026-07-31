@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { HoldSession, HoldItem } from "@/types/api";
+import { HoldSession, HoldItem } from "@/hooks/useHoldSession";
 import styles from "./FloatingHoldBar.module.css";
 
 interface FloatingHoldBarProps {
