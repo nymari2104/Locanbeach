@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { apiGet, apiPost, apiPut } from "@/lib/api";
 import { BookingStatus, PageResponse, ConfirmBookingResponse } from "@/types/api";
+import CheckInModal, { GuestInput } from "@/components/booking/CheckInModal";
 import styles from "./page.module.css";
 
 type BookingResponse = ConfirmBookingResponse; // Reusing the type since they have the same fields
@@ -20,6 +21,9 @@ export default function BookingsPage() {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [selectedBooking, setSelectedBooking] = useState<BookingResponse | null>(null);
+  
+  // Advanced check-in modal state
+  const [checkInBooking, setCheckInBooking] = useState<BookingResponse | null>(null);
 
   // Custom confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -107,23 +111,16 @@ export default function BookingsPage() {
     });
   };
 
-  const handleCheckIn = (id: string) => {
-    setConfirmDialog({
-      isOpen: true,
-      title: "Nhận phòng (Check-in)",
-      message: "Xác nhận thực hiện Check-in nhận phòng cho khách hàng này?",
-      confirmText: "Check-in",
-      isDanger: false,
-      onConfirm: async () => {
-        try {
-          const res = await apiPost<BookingResponse>(`/staff/bookings/${id}/check-in`, {});
-          setSelectedBooking(res);
-          await fetchBookings();
-        } catch (err: any) {
-          alert("Lỗi khi nhận phòng: " + err.message);
-        }
-      }
-    });
+  const handleCheckInSubmit = async (id: string, guests: GuestInput[]) => {
+    try {
+      // Modify payload to include guests. If backend doesn't support it yet, it will ignore.
+      const res = await apiPost<BookingResponse>(`/staff/bookings/${id}/check-in`, { guests });
+      setSelectedBooking(res);
+      setCheckInBooking(null);
+      await fetchBookings();
+    } catch (err: any) {
+      alert("Lỗi khi nhận phòng: " + err.message);
+    }
   };
 
   const handleCheckOut = (id: string) => {
@@ -455,7 +452,10 @@ export default function BookingsPage() {
 
               {selectedBooking.status === 'CONFIRMED' && (
                 <>
-                  <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => handleCheckIn(selectedBooking.bookingId)}>
+                  <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => {
+                    setCheckInBooking(selectedBooking);
+                    setSelectedBooking(null);
+                  }}>
                     Check-in
                   </button>
                   <button className={`${styles.btn}`} style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none' }} onClick={() => handleStatusChange(selectedBooking.bookingId, 'CANCELLED')}>
@@ -472,6 +472,15 @@ export default function BookingsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Advanced Check-in Modal */}
+      {checkInBooking && (
+        <CheckInModal
+          booking={checkInBooking}
+          onClose={() => setCheckInBooking(null)}
+          onCheckIn={handleCheckInSubmit}
+        />
       )}
 
       {/* Custom Confirmation Modal (Stitch Spec) */}

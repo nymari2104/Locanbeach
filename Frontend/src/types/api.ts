@@ -209,3 +209,25 @@ export interface StaffCategoryAvailability {
   images: string[];
   rooms: StaffRoomAvailability[];
 }
+
+export interface HoldItem {
+  itemId: string;
+  categoryId: string;
+  categoryName: string;
+  categoryCode: string;
+  accommodationId?: string;
+  accommodationCode?: string;
+  checkinDate: string;
+  checkoutDate: string;
+  numNights: number;
+  pricePerNight: number;
+  itemTotalAmount: number;
+}
+
+export interface HoldSession {
+  sessionId: string;
+  totalAmount: number;
+  expiresAtTimestamp: number;
+  items: HoldItem[];
+}
+
