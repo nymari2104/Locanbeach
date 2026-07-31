@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -56,7 +57,7 @@ public class StaffBookingService {
     }
 
     @Transactional
-    public BookingResponse checkIn(UUID id) {
+    public BookingResponse checkIn(UUID id, com.locanbeach.backend.dto.request.staff.CheckInRequest request) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new AppException(BookingErrorCode.BOOKING_NOT_FOUND));
         
@@ -68,6 +69,34 @@ public class StaffBookingService {
         booking.setActualCheckinAt(LocalDateTime.now());
         if (booking.getAccommodation() != null) {
             booking.getAccommodation().setOperationalStatus(com.locanbeach.backend.entity.enums.OperationalStatus.OCCUPIED);
+        }
+        
+        if (request != null && request.getGuests() != null) {
+            for (int i = 0; i < request.getGuests().size(); i++) {
+                com.locanbeach.backend.dto.request.staff.GuestInputDTO guestDto = request.getGuests().get(i);
+                Guest guest = new Guest();
+                guest.setFullName(guestDto.getFullName());
+                guest.setIdNumber(guestDto.getIdentityCard());
+                guest.setIdType(com.locanbeach.backend.entity.enums.GuestIdType.CCCD);
+                guest.setPhone(guestDto.getPhone());
+                guest.setGender(guestDto.getGender());
+                
+                if (guestDto.getDateOfBirth() != null && !guestDto.getDateOfBirth().trim().isEmpty()) {
+                    try {
+                        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        guest.setDob(LocalDate.parse(guestDto.getDateOfBirth(), formatter));
+                    } catch (Exception e) {
+                        // Ignore parse error for DOB
+                    }
+                }
+                guest = guestRepository.save(guest);
+                
+                BookingGuest bg = new BookingGuest();
+                bg.setBooking(booking);
+                bg.setGuest(guest);
+                bg.setPrimary(i == 0);
+                bookingGuestRepository.save(bg);
+            }
         }
         
         return mapToResponse(bookingRepository.save(booking));

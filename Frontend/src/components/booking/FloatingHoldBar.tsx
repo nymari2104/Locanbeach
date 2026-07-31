@@ -24,7 +24,7 @@ export default function FloatingHoldBar({ session, onRemoveItem }: FloatingHoldB
 
     const interval = setInterval(() => {
       const now = Date.now();
-      const diffMs = session.expiresAtTimestamp - now;
+      const diffMs = (session.expiresAtTimestamp ?? 0) - now;
 
       if (diffMs <= 0) {
         setTimeLeftStr("Hết hạn");

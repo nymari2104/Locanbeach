@@ -35,7 +35,8 @@ public class Guest {
     @Column(name = "id_type")
     private GuestIdType idType;
 
-    @Column(name = "id_number", length = 50)
+    @Column(name = "id_number", length = 255) // Increased length to store base64 encrypted string
+    @Convert(converter = com.locanbeach.backend.common.converter.CryptoConverter.class)
     private String idNumber;
 
     @Column(name = "phone", length = 20)
