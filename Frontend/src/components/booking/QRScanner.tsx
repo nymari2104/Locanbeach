@@ -26,7 +26,7 @@ export default function QRScanner({ onScanSuccess, onClose }: QRScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const requestRef = useRef<number>();
+  const requestRef = useRef<number | undefined>(undefined);
   const onScanSuccessRef = useRef(onScanSuccess);
 
   useEffect(() => {
