@@ -11,6 +11,7 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
@@ -137,14 +138,38 @@ export default function RegisterPage() {
                   <span className="material-symbols-outlined styles.inputIcon" style={{ position: "absolute", left: "1rem", color: "#A1A1AA", pointerEvents: "none", fontSize: "1.25rem" }}>lock</span>
                   <input 
                     id="password"
-                    type="password" 
+                    type={showPassword ? "text" : "password"} 
                     className={styles.input} 
+                    style={{ paddingRight: "2.75rem" }}
                     placeholder="••••••••"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     disabled={loading}
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: "absolute",
+                      right: "0.85rem",
+                      background: "none",
+                      border: "none",
+                      color: "#A1A1AA",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "0.25rem",
+                      borderRadius: "0.375rem"
+                    }}
+                    tabIndex={-1}
+                    title={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: "1.25rem" }}>
+                      {showPassword ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
                 </div>
               </div>
 
@@ -154,14 +179,38 @@ export default function RegisterPage() {
                   <span className="material-symbols-outlined styles.inputIcon" style={{ position: "absolute", left: "1rem", color: "#A1A1AA", pointerEvents: "none", fontSize: "1.25rem" }}>lock_reset</span>
                   <input 
                     id="confirmPassword"
-                    type="password" 
+                    type={showPassword ? "text" : "password"} 
                     className={styles.input} 
+                    style={{ paddingRight: "2.75rem" }}
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                     disabled={loading}
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: "absolute",
+                      right: "0.85rem",
+                      background: "none",
+                      border: "none",
+                      color: "#A1A1AA",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "0.25rem",
+                      borderRadius: "0.375rem"
+                    }}
+                    tabIndex={-1}
+                    title={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: "1.25rem" }}>
+                      {showPassword ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
                 </div>
               </div>
 
