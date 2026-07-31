@@ -23,9 +23,7 @@ spring:
     enabled: true
     baseline-on-migrate: true
     repair-on-migrate: true
-    ignore-migration-patterns:
-      - "*:missing"
-      - "*:ignored"
+    ignore-migration-patterns: "*:missing"
 
   data:
     redis:
