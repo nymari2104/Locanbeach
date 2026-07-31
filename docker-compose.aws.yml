@@ -33,6 +33,8 @@ services:
       dockerfile: Dockerfile
     container_name: hotel-chatbot-backend
     restart: always
+    env_file:
+      - .env
     environment:
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
