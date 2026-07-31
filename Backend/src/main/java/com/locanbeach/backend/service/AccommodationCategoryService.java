@@ -6,6 +6,8 @@ import com.locanbeach.backend.entity.AccommodationCategory;
 import com.locanbeach.backend.exception.errorcode.AccommodationErrorCode;
 import com.locanbeach.backend.repository.AccommodationCategoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,19 +23,22 @@ public class AccommodationCategoryService {
     private final AccommodationCategoryRepository repository;
     private final com.locanbeach.backend.repository.AmenityRepository amenityRepository;
 
+    @Cacheable(value = "categories", key = "'all'")
     @Transactional(readOnly = true)
     public List<AccommodationCategoryDTO> getAllCategories() {
         return repository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
+    @Cacheable(value = "categories", key = "#id.toString()")
     @Transactional(readOnly = true)
     public AccommodationCategoryDTO getCategoryById(UUID id) {
-        return repository.findById(id).map(this::convertToDto)
+        return repository.findByIdWithDetails(id).map(this::convertToDto)
                 .orElseThrow(() -> new AppException(
                         com.locanbeach.backend.exception.errorcode.CategoryErrorCode.CATEGORY_NOT_FOUND,
                         "Category not found with id: " + id));
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     @Transactional
     public AccommodationCategoryDTO createCategory(AccommodationCategoryDTO dto) {
         AccommodationCategory entity = new AccommodationCategory();
@@ -50,6 +55,7 @@ public class AccommodationCategoryService {
         return convertToDto(repository.save(entity));
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     @Transactional
     public AccommodationCategoryDTO updateCategory(UUID id, AccommodationCategoryDTO dto) {
         AccommodationCategory entity = repository.findById(id)
@@ -73,6 +79,7 @@ public class AccommodationCategoryService {
         return convertToDto(repository.save(entity));
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     @Transactional
     public void deleteCategory(UUID id) {
         AccommodationCategory entity = repository.findById(id)

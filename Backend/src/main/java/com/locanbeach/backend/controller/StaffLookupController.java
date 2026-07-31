@@ -16,12 +16,16 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.locanbeach.backend.dto.response.staff.StaffCategoryAvailabilityResponse;
+import com.locanbeach.backend.service.StaffAccommodationService;
+
 @RestController
 @RequestMapping("/api/v1/staff")
 @RequiredArgsConstructor
 public class StaffLookupController {
 
     private final StaffLookupService staffLookupService;
+    private final StaffAccommodationService staffAccommodationService;
 
     @GetMapping("/services")
     public ResponseEntity<ApiResponse<List<ServiceDTO>>> getServices() {
@@ -36,10 +40,18 @@ public class StaffLookupController {
     }
 
     @GetMapping("/accommodations/availability")
-    public ResponseEntity<ApiResponse<List<AccommodationDTO>>> getAvailableAccommodations(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+    public ResponseEntity<ApiResponse<List<StaffCategoryAvailabilityResponse>>> getAvailableAccommodations(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime checkinDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime checkoutDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        
+        LocalDateTime start = checkinDate != null ? checkinDate : startDate;
+        LocalDateTime end = checkoutDate != null ? checkoutDate : endDate;
+        if (start == null) start = LocalDateTime.now();
+        if (end == null) end = start.plusDays(1);
+
         return ResponseEntity.ok(
-                ApiResponse.success("Fetched available accommodations", staffLookupService.getAvailableAccommodations(startDate, endDate)));
+                ApiResponse.success("Fetched available accommodations", staffAccommodationService.getRoomAvailability(start, end)));
     }
 }

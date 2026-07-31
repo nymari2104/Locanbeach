@@ -248,7 +248,10 @@ export default function AdminRooms() {
                     src={coverImage}
                   />
                    <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", position: "absolute", top: "1rem", right: "1rem", zIndex: 5 }}>
-                    <div className={`${styles.badge} ${room.status === "ACTIVE" ? styles.badgeVacant : styles.badgeOccupied}`} style={{ position: "static" }}>
+                    <div className={`${styles.badge} ${room.status === "ACTIVE" ? styles.badgeVacant : styles.badgeInactive}`} style={{ position: "static", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                      {room.status !== "ACTIVE" && (
+                        <span className="material-symbols-outlined" style={{ fontSize: "0.85rem" }}>pause_circle</span>
+                      )}
                       <span className="mono-text">{room.status === "ACTIVE" ? "Hoạt động" : "Tạm ngưng"}</span>
                     </div>
                     {room.status === "ACTIVE" && (

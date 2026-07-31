@@ -1,9 +1,9 @@
 package com.locanbeach.backend.service;
 
+import com.locanbeach.backend.dto.AccommodationCategoryDTO;
 import com.locanbeach.backend.dto.request.SearchAvailableRequest;
 import com.locanbeach.backend.dto.response.SearchCategoryResultResponse;
 import com.locanbeach.backend.entity.Accommodation;
-import com.locanbeach.backend.entity.AccommodationCategory;
 import com.locanbeach.backend.common.exception.AppException;
 import com.locanbeach.backend.common.exception.errorcode.GeneralErrorCode;
 import com.locanbeach.backend.repository.AccommodationRepository;
@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class SearchService {
 
     AccommodationRepository accommodationRepository;
+    AccommodationCategoryService accommodationCategoryService;
 
     @Transactional(readOnly = true)
     public List<SearchCategoryResultResponse> searchAvailableCategories(SearchAvailableRequest request) {
@@ -40,86 +42,67 @@ public class SearchService {
                 request.getCheckinDate(), request.getCheckoutDate(), java.time.LocalDateTime.now()
         );
 
-        // 2. Lọc theo categoryId nếu có
-        if (request.getCategoryId() != null) {
-            availableAccommodations = availableAccommodations.stream()
-                    .filter(a -> a.getCategory().getId().equals(request.getCategoryId()))
-                    .collect(Collectors.toList());
-        }
+        // 2. Nhóm theo Category ID (UUID) và đếm số lượng phòng trống.
+        // a.getCategory().getId() chỉ đọc FK từ entity, KHÔNG kích hoạt query DB
+        Map<UUID, Long> categoryCountMap = availableAccommodations.stream()
+                .collect(Collectors.groupingBy(a -> a.getCategory().getId(), Collectors.counting()));
 
-        // 3. Lọc theo số khách nếu có
-        if (request.getGuestsCount() != null) {
-            availableAccommodations = availableAccommodations.stream()
-                    .filter(a -> a.getCategory().getMaxGuests() >= request.getGuestsCount())
-                    .collect(Collectors.toList());
-        }
-
-        // 4. Lọc theo khoảng giá tối thiểu nếu có
-        if (request.getMinPrice() != null) {
-            availableAccommodations = availableAccommodations.stream()
-                    .filter(a -> a.getCategory().getBasePrice().compareTo(request.getMinPrice()) >= 0)
-                    .collect(Collectors.toList());
-        }
-
-        // 5. Lọc theo khoảng giá tối đa nếu có
-        if (request.getMaxPrice() != null) {
-            availableAccommodations = availableAccommodations.stream()
-                    .filter(a -> a.getCategory().getBasePrice().compareTo(request.getMaxPrice()) <= 0)
-                    .collect(Collectors.toList());
-        }
-
-        // 6. Lọc theo loại hình (ROOM, CAMPING, GLAMPING) nếu có
-        if (request.getType() != null) {
-            availableAccommodations = availableAccommodations.stream()
-                    .filter(a -> a.getCategory().getType() == request.getType())
-                    .collect(Collectors.toList());
-        }
-
-        // 7. Lọc theo danh sách tiện ích nếu có
-        if (request.getAmenityIds() != null && !request.getAmenityIds().isEmpty()) {
-            availableAccommodations = availableAccommodations.stream()
-                    .filter(a -> {
-                        java.util.Set<UUID> categoryAmenityIds = a.getCategory().getAmenities().stream()
-                                .map(com.locanbeach.backend.entity.Amenity::getId)
-                                .collect(Collectors.toSet());
-                        return categoryAmenityIds.containsAll(request.getAmenityIds());
-                    })
-                    .collect(Collectors.toList());
-        }
-
-        // 4. Nhóm theo AccommodationCategory và đếm số lượng phòng
-        Map<AccommodationCategory, Long> categoryCountMap = availableAccommodations.stream()
-                .collect(Collectors.groupingBy(Accommodation::getCategory, Collectors.counting()));
-
-        // 5. Chuyển đổi sang Response DTO
+        // 3. Chuyển đổi sang DTO và lọc bằng dữ liệu từ Valkey Cache
         return categoryCountMap.entrySet().stream()
                 .map(entry -> {
-                    AccommodationCategory category = entry.getKey();
+                    UUID categoryId = entry.getKey();
                     long availableCount = entry.getValue();
+
+                    // Lấy DTO từ Valkey Cache (hoặc DB 1 lần nếu cache miss)
+                    AccommodationCategoryDTO cachedCat = accommodationCategoryService.getCategoryById(categoryId);
+                    if (cachedCat == null) return null;
+
+                    // Lọc theo categoryId
+                    if (request.getCategoryId() != null && !cachedCat.getId().equals(request.getCategoryId())) {
+                        return null;
+                    }
+
+                    // Lọc theo số khách
+                    if (request.getGuestsCount() != null && (cachedCat.getMaxGuests() == null || cachedCat.getMaxGuests() < request.getGuestsCount())) {
+                        return null;
+                    }
+
+                    // Lọc theo khoảng giá tối thiểu
+                    if (request.getMinPrice() != null && (cachedCat.getBasePrice() == null || cachedCat.getBasePrice().compareTo(request.getMinPrice()) < 0)) {
+                        return null;
+                    }
+
+                    // Lọc theo khoảng giá tối đa
+                    if (request.getMaxPrice() != null && (cachedCat.getBasePrice() == null || cachedCat.getBasePrice().compareTo(request.getMaxPrice()) > 0)) {
+                        return null;
+                    }
+
+                    // Lọc theo loại hình (ROOM, CAMPING, GLAMPING)
+                    if (request.getType() != null && cachedCat.getType() != request.getType()) {
+                        return null;
+                    }
+
+                    // Lọc theo tiện ích
+                    if (request.getAmenityIds() != null && !request.getAmenityIds().isEmpty()) {
+                        if (cachedCat.getAmenityIds() == null || !cachedCat.getAmenityIds().containsAll(request.getAmenityIds())) {
+                            return null;
+                        }
+                    }
+
                     return SearchCategoryResultResponse.builder()
-                            .categoryId(category.getId())
-                            .categoryName(category.getName())
-                            .categoryCode(category.getCode())
-                            .description(category.getDescription())
-                            .basePrice(category.getBasePrice())
-                            .maxGuests(category.getMaxGuests())
-                            .areaSqm(category.getAreaSqm())
+                            .categoryId(cachedCat.getId())
+                            .categoryName(cachedCat.getName())
+                            .categoryCode(cachedCat.getCode())
+                            .description(cachedCat.getDescription())
+                            .basePrice(cachedCat.getBasePrice())
+                            .maxGuests(cachedCat.getMaxGuests())
+                            .areaSqm(cachedCat.getAreaSqm())
                             .availableRoomsCount(availableCount)
-                            .images(category.getImages() != null ? category.getImages().stream().map(img -> com.locanbeach.backend.dto.ImageDTO.builder()
-                                    .id(img.getId())
-                                    .url(img.getUrl())
-                                    .isCover(img.getIsCover())
-                                    .sortOrder(img.getSortOrder())
-                                    .build()).collect(Collectors.toList()) : java.util.Collections.emptyList())
-                            .amenities(category.getAmenities() != null ? category.getAmenities().stream().map(a -> {
-                                com.locanbeach.backend.dto.AmenityDTO amenityDto = new com.locanbeach.backend.dto.AmenityDTO();
-                                amenityDto.setId(a.getId());
-                                amenityDto.setName(a.getName());
-                                amenityDto.setIcon(a.getIcon());
-                                return amenityDto;
-                            }).collect(Collectors.toList()) : java.util.Collections.emptyList())
+                            .images(cachedCat.getImages() != null ? cachedCat.getImages() : java.util.Collections.emptyList())
+                            .amenities(cachedCat.getAmenities() != null ? cachedCat.getAmenities() : java.util.Collections.emptyList())
                             .build();
                 })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 }

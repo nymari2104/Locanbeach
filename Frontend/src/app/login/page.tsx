@@ -15,10 +15,13 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // If already logged in, redirect to admin
+    // If already logged in, redirect based on role
     const token = localStorage.getItem("accessToken");
+    const role = localStorage.getItem("userRole");
     if (token) {
-      router.push("/admin");
+      if (role === 'STAFF') router.push('/staff');
+      else if (role === 'HOUSEKEEPER') router.push('/housekeeping');
+      else router.push('/admin');
     }
   }, [router]);
 
@@ -44,8 +47,10 @@ export default function LoginPage() {
       localStorage.setItem("fullName", res.fullName);
       localStorage.setItem("userRole", res.role);
 
-      // Redirect to dashboard
-      router.push("/admin");
+      // Redirect based on role
+      if (res.role === 'STAFF') router.push('/staff');
+      else if (res.role === 'HOUSEKEEPER') router.push('/housekeeping');
+      else router.push('/admin');
     } catch (err: any) {
       setErrorMsg(getErrorMessage(err));
     } finally {
@@ -74,11 +79,13 @@ export default function LoginPage() {
       <div className={styles.formSection}>
         <div className={styles.formCard}>
           <div className={styles.header}>
-            <img 
-              alt="Lộc An Beach Logo" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuC63fPEZhWhvU55JIkbViURS55j5q5kDcPbpZR_bwqR71tLJFxzIyWh9r4Q5vHFgGK_GOZteySv_qliX84iBS-yYz2dPlDP612DCrUiqnY85dv1SlVIgsZWHUbRpDlwVinqjxU5It6KoNcqZqbk3tjUd6MdRoc3Mdv56xmvr6DcYL4OIzDoJB7Ttk4yuoVPsmLkVO428zazuLQpng8HCorpThOwHyaDAtM8qiCjabmHTynCP7iX_5J7TC0f7O8AlrBigg"
-              className={styles.logo}
-            />
+            <Link href="/" title="Quay về trang chủ">
+              <img 
+                alt="Lộc An Beach Logo" 
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC63fPEZhWhvU55JIkbViURS55j5q5kDcPbpZR_bwqR71tLJFxzIyWh9r4Q5vHFgGK_GOZteySv_qliX84iBS-yYz2dPlDP612DCrUiqnY85dv1SlVIgsZWHUbRpDlwVinqjxU5It6KoNcqZqbk3tjUd6MdRoc3Mdv56xmvr6DcYL4OIzDoJB7Ttk4yuoVPsmLkVO428zazuLQpng8HCorpThOwHyaDAtM8qiCjabmHTynCP7iX_5J7TC0f7O8AlrBigg"
+                className={styles.logo}
+              />
+            </Link>
             <h1 className={styles.title}>Đăng nhập</h1>
             <p className={styles.subtitle}>Nhập thông tin quản trị viên hoặc nhân viên</p>
           </div>
@@ -139,7 +146,13 @@ export default function LoginPage() {
           </form>
 
           <div className={styles.footer}>
-            <p>Chưa có tài khoản? <Link href="/register" className={styles.link}>Đăng ký ngay</Link></p>
+            <p style={{ margin: 0 }}>Chưa có tài khoản? <Link href="/register" className={styles.link}>Đăng ký ngay</Link></p>
+            <p style={{ marginTop: "0.75rem", marginBottom: 0 }}>
+              <Link href="/" className={styles.homeLink}>
+                <span className="material-symbols-outlined" style={{ fontSize: "1rem", verticalAlign: "middle", marginRight: "0.25rem" }}>arrow_back</span>
+                Quay về trang chủ
+              </Link>
+            </p>
           </div>
         </div>
       </div>

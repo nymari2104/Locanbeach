@@ -46,13 +46,11 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final CouponService couponService;
     private final CouponRepository couponRepository;
-
-    // In-memory hold session store per guest token
-    private final Map<String, HoldSession> holdSessionStore = new ConcurrentHashMap<>();
+    private final com.locanbeach.backend.repository.HoldSessionRepository holdSessionRepository;
 
     @Transactional(readOnly = true)
     public HoldSession getHoldSession(String guestToken) {
-        HoldSession session = holdSessionStore.get(guestToken);
+        HoldSession session = holdSessionRepository.get(guestToken);
         if (session == null) {
             return HoldSession.builder()
                     .guestToken(guestToken)
@@ -65,6 +63,7 @@ public class BookingService {
         // Clean expired items
         cleanExpiredItems(session);
         recalculateSession(session);
+        holdSessionRepository.save(guestToken, session);
         return session;
     }
 
@@ -92,16 +91,14 @@ public class BookingService {
             log.warn("Could not clean expired holds in DB: {}", e.getMessage());
         }
 
-        // 2. If guest holds the same room category & dates, release previous hold first to prevent self-locking
+        // 2. If guest holds the same room category, release previous hold first to prevent self-locking
         if (guestToken != null && !guestToken.trim().isEmpty()) {
-            HoldSession session = holdSessionStore.get(guestToken);
+            HoldSession session = holdSessionRepository.get(guestToken);
             if (session != null && session.getItems() != null) {
                 Iterator<HoldItem> iterator = session.getItems().iterator();
                 while (iterator.hasNext()) {
                     HoldItem item = iterator.next();
-                    if (item.getCategoryId().equals(request.getCategoryId())
-                            && item.getCheckinDate().equals(request.getCheckinDate())
-                            && item.getCheckoutDate().equals(request.getCheckoutDate())) {
+                    if (item.getCategoryId().equals(request.getCategoryId())) {
                         iterator.remove();
                         try {
                             roomHoldRepository.deleteById(UUID.fromString(item.getItemId()));
@@ -110,8 +107,12 @@ public class BookingService {
                         }
                     }
                 }
+                holdSessionRepository.save(guestToken, session);
             }
         }
+
+        // FORCE FLUSH DELETIONS TO POSTGRESQL BEFORE EXECUTING NATIVE QUERY
+        roomHoldRepository.flush();
 
         // Lock 1 available accommodation
         Accommodation accommodation = accommodationRepository.findAvailableAccommodationWithLock(
@@ -121,7 +122,7 @@ public class BookingService {
             throw new AppException(BookingErrorCode.NO_AVAILABLE_ROOM);
         }
 
-        LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(10); // 10 seconds timer for testing
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(7); // 7 minutes hold expiration
 
         RoomHold roomHold = new RoomHold();
         roomHold.setAccommodation(accommodation);
@@ -133,10 +134,13 @@ public class BookingService {
 
         // If guestToken provided, update multi-room HoldSession
         if (guestToken != null && !guestToken.trim().isEmpty()) {
-            HoldSession session = holdSessionStore.computeIfAbsent(guestToken, token -> HoldSession.builder()
-                    .guestToken(token)
-                    .items(new ArrayList<>())
-                    .build());
+            HoldSession session = holdSessionRepository.get(guestToken);
+            if (session == null) {
+                session = HoldSession.builder()
+                        .guestToken(guestToken)
+                        .items(new ArrayList<>())
+                        .build();
+            }
 
             cleanExpiredItems(session);
 
@@ -165,6 +169,7 @@ public class BookingService {
             session.setExpiresAt(expiresAt);
             session.setExpiresAtTimestamp(expiresAt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
             recalculateSession(session);
+            holdSessionRepository.save(guestToken, session);
         }
 
         return RoomHoldResponse.builder()
@@ -175,7 +180,7 @@ public class BookingService {
 
     @Transactional
     public HoldSession removeHoldItem(String guestToken, String itemId) {
-        HoldSession session = holdSessionStore.get(guestToken);
+        HoldSession session = holdSessionRepository.get(guestToken);
         if (session != null) {
             Iterator<HoldItem> iterator = session.getItems().iterator();
             while (iterator.hasNext()) {
@@ -191,13 +196,14 @@ public class BookingService {
                 }
             }
             recalculateSession(session);
+            holdSessionRepository.save(guestToken, session);
         }
         return getHoldSession(guestToken);
     }
 
     @Transactional
     public void releaseHoldSession(String guestToken) {
-        HoldSession session = holdSessionStore.remove(guestToken);
+        HoldSession session = holdSessionRepository.get(guestToken);
         if (session != null) {
             for (HoldItem item : session.getItems()) {
                 try {
@@ -206,6 +212,7 @@ public class BookingService {
                     log.warn("Failed releasing hold item {}: {}", item.getItemId(), e.getMessage());
                 }
             }
+            holdSessionRepository.delete(guestToken);
         }
     }
 
@@ -216,7 +223,7 @@ public class BookingService {
 
     @Transactional
     public BookingResponse confirmBookingWithToken(String guestToken, BookingConfirmRequest request) {
-        HoldSession session = guestToken != null ? holdSessionStore.get(guestToken) : null;
+        HoldSession session = guestToken != null ? holdSessionRepository.get(guestToken) : null;
 
         // Fallback for single holdId
         if (session == null || session.getItems().isEmpty()) {
@@ -305,7 +312,9 @@ public class BookingService {
         }
 
         // Clear session
-        holdSessionStore.remove(guestToken);
+        if (guestToken != null) {
+            holdSessionRepository.delete(guestToken);
+        }
 
         return mapToBookingResponse(firstBooking != null ? firstBooking : createdBookings.get(0));
     }

@@ -13,7 +13,8 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class HoldItem {
+public class HoldItem implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     private String itemId;
     private UUID categoryId;
     private String categoryName;

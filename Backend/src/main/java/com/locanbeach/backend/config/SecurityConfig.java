@@ -66,9 +66,10 @@ public class SecurityConfig {
                 ).permitAll()
                 // ── Protected endpoints ──
                 .requestMatchers("/api/v1/coupons/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/staff/accommodations/**").hasAnyRole("STAFF", "ADMIN", "HOUSEKEEPER")
                 .requestMatchers("/api/v1/staff/**").hasAnyRole("STAFF", "ADMIN")
                 .requestMatchers("/api/v1/bookings/**").hasAnyRole("STAFF", "ADMIN")
-                .requestMatchers("/api/v1/auth/me").hasAnyRole("STAFF", "ADMIN")
+                .requestMatchers("/api/v1/auth/me").hasAnyRole("STAFF", "ADMIN", "HOUSEKEEPER")
                 // Mọi route còn lại đều cần xác thực
                 .anyRequest().authenticated()
             )

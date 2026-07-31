@@ -1,0 +1,502 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  margin: calc(var(--spacing-gutter) * -1);
+  /* Mobile padding negation */
+  min-height: calc(100vh - 64px);
+  background-color: #f8f9fa;
+}
+
+@media (min-width: 1024px) {
+  .container {
+    flex-direction: row;
+    margin: calc(var(--spacing-container-padding) * -1);
+    height: 100vh;
+  }
+}
+
+.sidebar {
+  width: 100%;
+  background-color: white;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    width: 250px;
+    border-right: 1px solid #e0e0e0;
+    border-bottom: none;
+  }
+}
+
+.sidebarHeader {
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  border-bottom: 1px solid #e0e0e0;
+  color: var(--color-on-surface);
+}
+
+.mobileTabDropdown {
+  padding: 1rem 1.5rem;
+}
+
+.mobileSelect {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 0.95rem;
+  background-color: white;
+  color: #374151;
+  outline: none;
+}
+
+.mobileSelect:focus {
+  border-color: var(--color-primary);
+}
+
+.tabList {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .mobileTabDropdown {
+    display: none;
+  }
+
+  .tabList {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0;
+    white-space: normal;
+  }
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  text-align: center;
+  cursor: pointer;
+  color: var(--color-on-surface-variant);
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  border-bottom: 3px solid transparent;
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .tab {
+    text-align: left;
+    border-bottom: none;
+    border-left: 3px solid transparent;
+  }
+}
+
+.tab:hover {
+  background-color: #f0f4f8;
+}
+
+.activeTab {
+  background-color: #e3f2fd;
+  color: var(--color-primary);
+  border-bottom: 3px solid var(--color-primary);
+  font-weight: 500;
+}
+
+@media (min-width: 1024px) {
+  .activeTab {
+    border-bottom: none;
+    border-left: 3px solid var(--color-primary);
+  }
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topBar {
+  padding: 1rem;
+  background-color: white;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .topBar {
+    padding: 1.5rem;
+  }
+}
+
+.filterRow {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.actionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .actionRow {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.searchInput {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 250px;
+  outline: none;
+  font-size: 0.8rem;
+}
+
+.searchInput:focus {
+  border-color: var(--color-primary);
+}
+
+.dateInput {
+  padding: 0.4rem 0.74rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  outline: none;
+  font-size: 0.8rem;
+  color: #374151;
+
+}
+
+.selectInput {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  outline: none;
+  font-size: 0.8rem;
+  background-color: white;
+  color: #374151;
+  width: 100%;
+  max-width: 160px;
+}
+
+.selectInput:focus {
+  border-color: var(--color-primary);
+}
+
+.btn {
+  padding: 0.35rem 0.6rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  border: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    gap: 0.5rem;
+  }
+}
+
+.btnPrimary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.btnPrimary:hover {
+  background-color: #1565c0;
+}
+
+.btnOutline {
+  background-color: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.btnOutline:hover {
+  background-color: #f3f4f6;
+}
+
+.btnDanger {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.btnDanger:hover {
+  background-color: #fecaca;
+}
+
+.contentBody {
+  flex: 1;
+  padding: 0.75rem;
+  overflow-y: auto;
+}
+
+@media (min-width: 1024px) {
+  .contentBody {
+    padding: 1.5rem;
+  }
+}
+
+.tableWrapper {
+  display: none;
+  /* Hidden on mobile */
+}
+
+.mobileCardList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .tableWrapper {
+    display: block;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+  }
+
+  .mobileCardList {
+    display: none;
+    /* Hidden on desktop */
+  }
+}
+
+.bookingCard {
+  background: white;
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border: 1px solid #e5e7eb;
+  height: 100%;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.75rem;
+}
+
+.cardTitle {
+  font-weight: 600;
+  color: var(--color-on-surface);
+  font-size: 1rem;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 0.25rem;
+  font-size: 0.8rem;
+}
+
+.cardGrid .statusBadge {
+  font-size: 0.6rem;
+  padding: 0.2rem 0.4rem;
+  white-space: nowrap;
+  display: inline-block;
+  width: fit-content;
+}
+
+.cardLabel {
+  color: #6b7280;
+  font-size: 0.75rem;
+  margin-bottom: 0.2rem;
+}
+
+.cardValue {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+  backdrop-filter: blur(2px);
+}
+
+.modalContent {
+  background-color: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--color-on-surface);
+}
+
+.modalCloseBtn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+}
+
+.modalCloseBtn:hover {
+  color: #111827;
+}
+
+.modalBody {
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.modalDetailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed #e5e7eb;
+}
+
+.modalDetailRow:last-child {
+  border-bottom: none;
+}
+
+.modalDetailLabel {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.modalDetailValue {
+  color: #1f2937;
+  font-weight: 500;
+  text-align: right;
+}
+
+.modalFooter {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: collapse;
+}
+
+.table th {
+  background-color: #f3f4f6;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+  color: #1f2937;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover {
+  background-color: #f9fafb;
+}
+
+.statusBadge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status_CONFIRMED {
+  background-color: #e0f2f1;
+  color: #00796b;
+}
+
+.status_CHECKED_IN {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status_CHECKED_OUT {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.status_PENDING_DEPOSIT {
+  background-color: #fff8e1;
+  color: #f57f17;
+}
+
+.status_CANCELLED {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.status_COMPLETED {
+  background-color: #ede7f6;
+  color: #4527a0;
+}

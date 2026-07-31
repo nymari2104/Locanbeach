@@ -13,15 +13,22 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate # Let Flyway manage the schema
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
     enabled: true
     baseline-on-migrate: true
+    repair-on-migrate: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
 
 springdoc:
   api-docs:

@@ -26,4 +26,10 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable);
+
+    @Query(value = "SELECT * FROM bookings b WHERE b.status != 'CANCELLED' " +
+           "AND b.checkin_date < :checkoutDate AND b.checkout_date > :checkinDate", nativeQuery = true)
+    java.util.List<Booking> findOverlappingBookings(
+            @Param("checkinDate") LocalDateTime checkinDate,
+            @Param("checkoutDate") LocalDateTime checkoutDate);
 }

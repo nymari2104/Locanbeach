@@ -121,7 +121,7 @@
 body {
   background-color: var(--color-canvas-white);
   color: var(--color-charcoal-ink);
-  font-family: var(--font-be-vietnam-pro), sans-serif;
+  font-family: var(--font-lora), serif;
   font-size: var(--text-body-md-size);
   font-weight: var(--text-body-md-weight);
   line-height: var(--text-body-md-leading);
@@ -164,7 +164,7 @@ a {
 }
 
 .mono-text {
-  font-family: var(--font-be-vietnam-pro), sans-serif;
+  font-family: var(--font-lora), serif;
   font-size: var(--text-mono-metadata-size);
   line-height: var(--text-mono-metadata-leading);
 }

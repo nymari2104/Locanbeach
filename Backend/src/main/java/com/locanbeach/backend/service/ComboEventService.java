@@ -6,6 +6,8 @@ import com.locanbeach.backend.dto.ComboEventDTO;
 import com.locanbeach.backend.entity.ComboEvent;
 import com.locanbeach.backend.repository.ComboEventRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,19 +22,22 @@ public class ComboEventService {
 
     private final ComboEventRepository repository;
 
+    @Cacheable(value = "combos", key = "'all'")
     @Transactional(readOnly = true)
     public List<ComboEventDTO> getAllCombos() {
         return repository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
+    @Cacheable(value = "combos", key = "#id.toString()")
     @Transactional(readOnly = true)
     public ComboEventDTO getComboById(UUID id) {
-        return repository.findById(id).map(this::convertToDto)
+        return repository.findByIdWithDetails(id).map(this::convertToDto)
                 .orElseThrow(() -> new AppException(
                         ComboErrorCode.COMBO_NOT_FOUND,
                         "Combo or Event not found with id: " + id));
     }
 
+    @CacheEvict(value = "combos", allEntries = true)
     @Transactional
     public ComboEventDTO createCombo(ComboEventDTO dto) {
         ComboEvent entity = new ComboEvent();
@@ -40,6 +45,7 @@ public class ComboEventService {
         return convertToDto(repository.save(entity));
     }
 
+    @CacheEvict(value = "combos", allEntries = true)
     @Transactional
     public ComboEventDTO updateCombo(UUID id, ComboEventDTO dto) {
         ComboEvent entity = repository.findById(id)
@@ -50,6 +56,7 @@ public class ComboEventService {
         return convertToDto(repository.save(entity));
     }
 
+    @CacheEvict(value = "combos", allEntries = true)
     @Transactional
     public void deleteCombo(UUID id) {
         ComboEvent entity = repository.findById(id)

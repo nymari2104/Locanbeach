@@ -55,7 +55,7 @@ export function useHoldSession() {
     }
   }, []);
 
-  const addHoldRoom = async (categoryId: string, checkinDate: string, checkoutDate: string) => {
+  const addHoldRoom = useCallback(async (categoryId: string, checkinDate: string, checkoutDate: string) => {
     try {
       setLoading(true);
       await apiPost("/bookings/hold", {
@@ -71,9 +71,9 @@ export function useHoldSession() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchSession, notifyOtherTabs]);
 
-  const removeHoldItem = async (itemId: string) => {
+  const removeHoldItem = useCallback(async (itemId: string) => {
     try {
       setLoading(true);
       const updated = await apiDelete<HoldSession>(`/bookings/hold/items/${itemId}`);
@@ -84,9 +84,9 @@ export function useHoldSession() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [notifyOtherTabs]);
 
-  const releaseSession = async () => {
+  const releaseSession = useCallback(async () => {
     try {
       setLoading(true);
       await apiDelete("/bookings/hold");
@@ -97,7 +97,7 @@ export function useHoldSession() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [notifyOtherTabs]);
 
   useEffect(() => {
     fetchSession();

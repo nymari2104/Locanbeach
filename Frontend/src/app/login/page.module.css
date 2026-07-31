@@ -71,10 +71,27 @@
 
 /* Right Form Section */
 .formSection {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
+}
+
+
+
+.homeLink {
+  color: #6B7280;
+  text-decoration: none;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.homeLink:hover {
+  color: #111827;
+  text-decoration: underline;
 }
 
 .formCard {
@@ -254,8 +271,13 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
+  .formSection {
+    padding: 1.25rem 1rem;
+  }
+
   .formCard {
-    padding: 2rem 1.5rem;
+    padding: 2rem 1.25rem;
+    border-radius: 1.5rem;
   }
 }

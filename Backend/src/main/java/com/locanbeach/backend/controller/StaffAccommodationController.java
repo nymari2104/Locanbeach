@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import com.locanbeach.backend.dto.response.staff.StaffCategoryAvailabilityResponse;
+import org.springframework.format.annotation.DateTimeFormat;
+import java.time.LocalDateTime;
+
 @RestController
 @RequestMapping("/api/v1/staff/accommodations")
 @RequiredArgsConstructor

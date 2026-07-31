@@ -5,6 +5,8 @@ import com.locanbeach.backend.common.exception.errorcode.GeneralErrorCode;
 import com.locanbeach.backend.dto.ServiceDTO;
 import com.locanbeach.backend.repository.ServiceRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,19 +21,22 @@ public class ServiceService {
 
     private final ServiceRepository repository;
 
+    @Cacheable(value = "services", key = "'all'")
     @Transactional(readOnly = true)
     public List<ServiceDTO> getAllServices() {
         return repository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
+    @Cacheable(value = "services", key = "#id.toString()")
     @Transactional(readOnly = true)
     public ServiceDTO getServiceById(UUID id) {
-        return repository.findById(id).map(this::convertToDto)
+        return repository.findByIdWithDetails(id).map(this::convertToDto)
                 .orElseThrow(() -> new AppException(
                         com.locanbeach.backend.exception.errorcode.ServiceErrorCode.SERVICE_NOT_FOUND,
                         "Service not found with id: " + id));
     }
 
+    @CacheEvict(value = "services", allEntries = true)
     @Transactional
     public ServiceDTO createService(ServiceDTO dto) {
         if (repository.existsByName(dto.getName())) {
@@ -42,6 +47,7 @@ public class ServiceService {
         return convertToDto(repository.save(entity));
     }
 
+    @CacheEvict(value = "services", allEntries = true)
     @Transactional
     public ServiceDTO updateService(UUID id, ServiceDTO dto) {
         com.locanbeach.backend.entity.Service entity = repository.findById(id)
@@ -57,6 +63,7 @@ public class ServiceService {
         return convertToDto(repository.save(entity));
     }
 
+    @CacheEvict(value = "services", allEntries = true)
     @Transactional
     public void deleteService(UUID id) {
         com.locanbeach.backend.entity.Service entity = repository.findById(id)

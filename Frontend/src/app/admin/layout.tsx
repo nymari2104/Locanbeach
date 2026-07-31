@@ -13,14 +13,21 @@ export default function AdminLayout({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [userRole, setUserRole] = useState<string>("ADMIN");
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
+    const role = localStorage.getItem("userRole") || "ADMIN";
     if (!token) {
-      router.push("/");
+      router.push("/login");
+    } else if (role === "STAFF") {
+      router.replace("/staff");
+    } else if (role === "HOUSEKEEPER") {
+      router.replace("/housekeeping");
     } else {
+      setUserRole(role);
       setIsAuthorized(true);
       setLoading(false);
     }
@@ -72,6 +79,7 @@ export default function AdminLayout({
         onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
         isMobileOpen={isMobileMenuOpen}
         onMobileClose={() => setIsMobileMenuOpen(false)}
+        role={userRole}
       />
       <main className={`${styles.adminMain} ${isSidebarCollapsed ? styles.adminMainCollapsed : ''}`}>
         {/* Mobile Header */}

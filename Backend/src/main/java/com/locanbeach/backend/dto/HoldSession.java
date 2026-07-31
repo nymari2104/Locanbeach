@@ -14,7 +14,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class HoldSession {
+public class HoldSession implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     private String guestToken;
     @Builder.Default
     private List<HoldItem> items = new ArrayList<>();

@@ -122,15 +122,10 @@
 }
 
 .icons {
-  display: none;
-  gap: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   color: var(--color-steel-secondary);
-}
-
-@media (min-width: 640px) {
-  .icons {
-    display: flex;
-  }
 }
 
 .primaryButton {

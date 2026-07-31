@@ -127,6 +127,23 @@ export default function TopNavBar() {
               </Link>
             </li>
           ))}
+
+          {/* Login link for Mobile Drawer */}
+          <li>
+            <Link 
+              href="/login" 
+              className={`${styles.drawerNavLink} ${pathname === '/login' ? styles.drawerNavLinkActive : ''}`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '1.25rem', color: 'var(--color-primary)' }}>account_circle</span>
+                <span>Đăng nhập hệ thống</span>
+              </div>
+              <span className="material-symbols-outlined" style={{ fontSize: '1.1rem', opacity: 0.5 }}>
+                chevron_right
+              </span>
+            </Link>
+          </li>
         </ul>
 
         {!hideBookButton && (

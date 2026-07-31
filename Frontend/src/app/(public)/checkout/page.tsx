@@ -3,8 +3,14 @@
 import { use, useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import styles from "./page.module.css";
-import { apiGet, apiPost, getErrorMessage } from "@/lib/api";
+import { apiGet, apiPost, getErrorMessage, getBaseUrl } from "@/lib/api";
 import { useHoldSession } from "@/hooks/useHoldSession";
+import { 
+  AccommodationCategoryDTO, 
+  HoldRoomResponse, 
+  ConfirmBookingResponse, 
+  ValidateCouponResponse 
+} from "@/types/api";
 
 const FALLBACK_ROOMS: Record<string, any> = {
   "ocean-view-suite": {
@@ -43,7 +49,7 @@ function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const { session, loading: sessionLoading, addHoldRoom, removeHoldItem } = useHoldSession();
+  const { session, loading: sessionLoading, addHoldRoom, removeHoldItem, fetchSession } = useHoldSession();
 
   // Query parameters
   const categoryId = searchParams.get("categoryId") || "";
@@ -207,6 +213,8 @@ function CheckoutContent() {
       setHoldExpired(false);
       setShowErrorModal(false);
       setBookingProgress("idle");
+      // Refresh session so checkTimer reads the new expiresAt from the server
+      await fetchSession();
     } catch (err: any) {
       console.error("Hold room failed:", err);
       const msg = getErrorMessage(err);
@@ -246,6 +254,9 @@ function CheckoutContent() {
     holdInitiatedRef.current = true;
     addHoldRoom(categoryId, checkinDateStr, checkoutDateStr).catch((err) => {
       console.error("Failed adding room to session:", err);
+      const msg = getErrorMessage(err);
+      setErrorMessage(msg);
+      setShowErrorModal(true);
     });
   }, [categoryId, checkin, checkout, session, sessionLoading, addHoldRoom]);
 
@@ -312,8 +323,16 @@ function CheckoutContent() {
         }
         setHoldTimeLeft(secs);
         setHoldExpired(false);
+        if (errorMessage.includes("hết hạn")) {
+          setShowErrorModal(false);
+          setErrorMessage("");
+        }
       } else if (session?.items && session.items.length > 0) {
         setHoldExpired(false);
+        if (errorMessage.includes("hết hạn")) {
+          setShowErrorModal(false);
+          setErrorMessage("");
+        }
       }
     };
 
@@ -1233,7 +1252,13 @@ function CheckoutContent() {
 
         {/* Custom Error Modal Popup */}
         {showErrorModal && (
-          <div className={styles.errorModalOverlay} onClick={() => setShowErrorModal(false)}>
+          <div className={styles.errorModalOverlay} onClick={() => {
+            if (holdExpired) {
+              router.push("/book");
+            } else {
+              setShowErrorModal(false);
+            }
+          }}>
             <div className={styles.errorModalContent} onClick={(e) => e.stopPropagation()}>
               <div className={styles.errorModalIconWrapper}>
                 <span className="material-symbols-outlined" style={{ fontSize: "2.5rem", color: "#dc2626" }}>
@@ -1254,24 +1279,34 @@ function CheckoutContent() {
                     {holdingRoom ? "Đang gia hạn..." : "Gia hạn giữ chỗ (7 phút mới)"}
                   </button>
                 )}
-                {!holdId && !holdExpired && (
+                {holdExpired ? (
+                  <button
+                    type="button"
+                    className={styles.errorModalBtn}
+                    onClick={() => router.push("/book")}
+                    style={{ backgroundColor: "#64748b" }}
+                  >
+                    Quay về trang tìm phòng
+                  </button>
+                ) : (!session?.items || session.items.length === 0) ? (
                   <button
                     type="button"
                     className={styles.errorModalBtn}
                     onClick={() => router.push("/book")}
                     style={{ backgroundColor: "#0284c7" }}
                   >
-                    Chọn loại phòng khác
+                    Quay về trang tìm phòng
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.errorModalBtn}
+                    onClick={() => setShowErrorModal(false)}
+                    style={{ backgroundColor: "#0284c7" }}
+                  >
+                    Đã hiểu
                   </button>
                 )}
-                <button
-                  type="button"
-                  className={styles.errorModalBtn}
-                  onClick={() => setShowErrorModal(false)}
-                  style={holdExpired || !holdId ? { backgroundColor: "#64748b" } : {}}
-                >
-                  {holdExpired || !holdId ? "Đóng" : "Đã hiểu"}
-                </button>
               </div>
             </div>
           </div>

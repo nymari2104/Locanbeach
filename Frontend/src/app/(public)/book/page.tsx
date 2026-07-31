@@ -3,14 +3,19 @@
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
-import { apiGet, apiDelete, getMaterialIconName } from "@/lib/api";
+import { apiGet, getMaterialIconName, getErrorMessage } from "@/lib/api";
 import { 
   AccommodationCategoryDTO, 
   SearchCategoryResultResponse,
   AmenityDTO
 } from "@/types/api";
+import { useHoldSession } from "@/hooks/useHoldSession";
+import FloatingHoldBar from "@/components/booking/FloatingHoldBar";
 
 export default function Book() {
+  const { session: holdSession, addHoldRoom, removeHoldItem } = useHoldSession();
+  const [addingCatId, setAddingCatId] = useState<string | null>(null);
+  const [toastMsg, setToastMsg] = useState<string>("");
   const [categories, setCategories] = useState<AccommodationCategoryDTO[]>([]);
   const [searchResults, setSearchResults] = useState<SearchCategoryResultResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,11 +45,6 @@ export default function Book() {
 
     async function initData() {
       try {
-        // Automatically release any unconfirmed draft hold session when visiting search page
-        try {
-          await apiDelete("/bookings/hold");
-        } catch (e) {}
-
         let cats: AccommodationCategoryDTO[] = [];
         try {
           cats = await apiGet<AccommodationCategoryDTO[]>("/categories");
@@ -154,8 +154,44 @@ export default function Book() {
     }
   };
 
+  const handleAddRoomToHold = async (catId: string, catName: string) => {
+    if (!checkin || !checkout) return;
+    setAddingCatId(catId);
+    try {
+      const checkinISO = `${checkin}T14:00:00`;
+      const checkoutISO = `${checkout}T12:00:00`;
+      await addHoldRoom(catId, checkinISO, checkoutISO);
+      setToastMsg(`Đã thêm ${catName} vào giỏ phòng!`);
+      setTimeout(() => setToastMsg(""), 3000);
+    } catch (err: any) {
+      alert(getErrorMessage(err));
+    } finally {
+      setAddingCatId(null);
+    }
+  };
+
   return (
     <div className={styles.container}>
+      {toastMsg && (
+        <div style={{
+          position: "fixed",
+          top: "1.5rem",
+          right: "1.5rem",
+          zIndex: 1100,
+          backgroundColor: "#10b981",
+          color: "#ffffff",
+          padding: "0.85rem 1.25rem",
+          borderRadius: "0.75rem",
+          fontWeight: 600,
+          boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem"
+        }}>
+          <span className="material-symbols-outlined">check_circle</span>
+          <span>{toastMsg}</span>
+        </div>
+      )}
       {/* Hero / Filter Section */}
       <section className={styles.heroFilterSection}>
         <div className={styles.heroText}>
@@ -388,6 +424,10 @@ export default function Book() {
                 </div>
               ))}
             </>
+          ) : searchResults.length === 0 ? (
+            <div style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '3rem 0', color: 'var(--color-steel-secondary)' }}>
+              <span>Không tìm thấy phòng phù hợp. Vui lòng thử tìm kiếm lại với tiêu chí khác.</span>
+            </div>
           ) : (
             searchResults.map((room, idx) => {
               const isFeatured = idx === 0;
@@ -440,12 +480,22 @@ export default function Book() {
                       </div>
                       
                       {room.availableRoomsCount > 0 ? (
-                        <Link href={`/rooms/${room.categoryId}?checkin=${checkin}&checkout=${checkout}&guests=${guests}`}>
-                          <button className={`mono-text ${styles.selectButton}`}>
-                            <span>Chọn phòng</span>
-                            <span className={styles.arrow}>&rarr;</span>
+                        <div style={{ display: "flex", gap: "0.5rem" }}>
+                          <Link href={`/rooms/${room.categoryId}?checkin=${checkin}&checkout=${checkout}&guests=${guests}`}>
+                            <button className={`mono-text ${styles.selectButton}`} style={{ backgroundColor: "#f1f5f9", color: "#334155" }} title="Xem chi tiết phòng">
+                              <span>Chi tiết</span>
+                            </button>
+                          </Link>
+                          <button
+                            type="button"
+                            className={`mono-text ${styles.selectButton}`}
+                            disabled={addingCatId === room.categoryId}
+                            onClick={() => handleAddRoomToHold(room.categoryId, room.categoryName)}
+                          >
+                            <span>{addingCatId === room.categoryId ? "Đang chọn..." : "Chọn phòng"}</span>
+                            <span className={styles.arrow}>+</span>
                           </button>
-                        </Link>
+                        </div>
                       ) : (
                         <button className={`mono-text ${styles.selectButton}`} disabled>
                           <span>Hết phòng</span>
@@ -460,6 +510,9 @@ export default function Book() {
           )}
         </div>
       </section>
+
+      {/* Floating Hold Bar */}
+      <FloatingHoldBar session={holdSession} onRemoveItem={removeHoldItem} />
     </div>
   );
 }

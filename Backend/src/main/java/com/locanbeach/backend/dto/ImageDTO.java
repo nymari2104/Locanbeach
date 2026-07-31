@@ -1,13 +1,19 @@
 package com.locanbeach.backend.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 @Data
 @Builder
-public class ImageDTO {
+@NoArgsConstructor
+@AllArgsConstructor
+public class ImageDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
     private UUID id;
     private String url;
     private Boolean isCover;

@@ -176,7 +176,7 @@ export interface PageResponse<T> {
   number: number;
 }
 
-export type UserRole = 'ADMIN' | 'STAFF' | 'GUEST';
+export type UserRole = 'ADMIN' | 'STAFF' | 'HOUSEKEEPER' | 'GUEST';
 
 export interface LoginResponse {
   accessToken: string;
@@ -185,4 +185,27 @@ export interface LoginResponse {
   username: string;
   fullName: string;
   role: UserRole;
+}
+
+export interface StaffRoomAvailability {
+  id: string;
+  code: string;
+  status: 'AVAILABLE' | 'HELD' | 'BOOKED' | 'DIRTY';
+  holdExpiresAt?: string;
+  guestName?: string;
+  bookingId?: string;
+}
+
+export interface StaffCategoryAvailability {
+  categoryId: string;
+  categoryName: string;
+  categoryCode: string;
+  basePrice: number;
+  maxGuests: number;
+  totalRooms: number;
+  availableCount: number;
+  heldCount: number;
+  bookedCount: number;
+  images: string[];
+  rooms: StaffRoomAvailability[];
 }

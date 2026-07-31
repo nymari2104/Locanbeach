@@ -13,7 +13,14 @@ import java.util.UUID;
 @Repository
 public interface RoomHoldRepository extends JpaRepository<RoomHold, UUID> {
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = "DELETE FROM room_holds WHERE expires_at <= :now", nativeQuery = true)
     void deleteExpiredHolds(@Param("now") LocalDateTime now);
+
+    @Query("SELECT rh FROM RoomHold rh WHERE rh.expiresAt > :now " +
+           "AND rh.checkinDate < :checkoutDate AND rh.checkoutDate > :checkinDate")
+    java.util.List<RoomHold> findOverlappingHolds(
+            @Param("checkinDate") LocalDateTime checkinDate,
+            @Param("checkoutDate") LocalDateTime checkoutDate,
+            @Param("now") LocalDateTime now);
 }

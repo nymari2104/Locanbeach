@@ -195,6 +195,14 @@
   border-color: rgba(186, 26, 26, 0.2);
 }
 
+.badgeInactive {
+  background-color: #1e293b;
+  color: #f1f5f9;
+  border-color: rgba(0, 0, 0, 0.35);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 .badgeCleaning {
   background-color: var(--color-surface-variant);
   color: var(--color-on-surface-variant);

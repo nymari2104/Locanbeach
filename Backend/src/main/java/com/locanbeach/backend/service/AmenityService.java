@@ -6,6 +6,8 @@ import com.locanbeach.backend.dto.AmenityDTO;
 import com.locanbeach.backend.entity.Amenity;
 import com.locanbeach.backend.repository.AmenityRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +22,13 @@ public class AmenityService {
 
     private final AmenityRepository repository;
 
+    @Cacheable(value = "amenities", key = "'all'")
     @Transactional(readOnly = true)
     public List<AmenityDTO> getAllAmenities() {
         return repository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
+    @Cacheable(value = "amenities", key = "#id")
     @Transactional(readOnly = true)
     public AmenityDTO getAmenityById(UUID id) {
         return repository.findById(id).map(this::convertToDto)
@@ -33,6 +37,7 @@ public class AmenityService {
                         "Amenity not found with id: " + id));
     }
 
+    @CacheEvict(value = {"amenities", "categories"}, allEntries = true)
     @Transactional
     public AmenityDTO createAmenity(AmenityDTO dto) {
         Amenity entity = new Amenity();
@@ -40,6 +45,7 @@ public class AmenityService {
         return convertToDto(repository.save(entity));
     }
 
+    @CacheEvict(value = {"amenities", "categories"}, allEntries = true)
     @Transactional
     public AmenityDTO updateAmenity(UUID id, AmenityDTO dto) {
         Amenity entity = repository.findById(id)
@@ -50,6 +56,7 @@ public class AmenityService {
         return convertToDto(repository.save(entity));
     }
 
+    @CacheEvict(value = {"amenities", "categories"}, allEntries = true)
     @Transactional
     public void deleteAmenity(UUID id) {
         if (!repository.existsById(id)) {
