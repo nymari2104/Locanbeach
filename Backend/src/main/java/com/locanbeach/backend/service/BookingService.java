@@ -141,6 +141,9 @@ public class BookingService {
                         .items(new ArrayList<>())
                         .build();
             }
+            if (session.getItems() == null) {
+                session.setItems(new ArrayList<>());
+            }
 
             cleanExpiredItems(session);
 
