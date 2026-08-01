@@ -42,7 +42,16 @@ public class BookingController {
 
     private final BookingService service;
 
+    private static final String GUEST_HEADER_NAME = "X-Guest-Token";
+
     private String resolveOrCreateGuestToken(HttpServletRequest request, HttpServletResponse response) {
+        // 1. Check header first
+        String headerToken = request.getHeader(GUEST_HEADER_NAME);
+        if (headerToken != null && !headerToken.trim().isEmpty()) {
+            return headerToken.trim();
+        }
+
+        // 2. Check cookie
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (GUEST_COOKIE_NAME.equals(cookie.getName()) && cookie.getValue() != null && !cookie.getValue().trim().isEmpty()) {
@@ -50,12 +59,18 @@ public class BookingController {
                 }
             }
         }
+
+        // 3. Fallback: Generate new token & set cookie + header
         String newToken = UUID.randomUUID().toString();
-        Cookie newCookie = new Cookie(GUEST_COOKIE_NAME, newToken);
-        newCookie.setPath("/");
-        newCookie.setMaxAge(86400); // 1 day
-        newCookie.setHttpOnly(false); // Accessible to frontend js
-        response.addCookie(newCookie);
+        org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie.from(GUEST_COOKIE_NAME, newToken)
+                .path("/")
+                .maxAge(86400)
+                .httpOnly(false)
+                .secure(true)
+                .sameSite("None")
+                .build();
+        response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString());
+        response.setHeader(GUEST_HEADER_NAME, newToken);
         return newToken;
     }
 

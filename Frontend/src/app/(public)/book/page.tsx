@@ -511,8 +511,6 @@ export default function Book() {
         </div>
       </section>
 
-      {/* Floating Hold Bar */}
-      <FloatingHoldBar session={holdSession} onRemoveItem={removeHoldItem} />
     </div>
   );
 }

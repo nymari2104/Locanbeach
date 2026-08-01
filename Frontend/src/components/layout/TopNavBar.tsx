@@ -3,7 +3,39 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useHoldSession } from '@/hooks/useHoldSession';
 import styles from './TopNavBar.module.css';
+
+function CartNavIcon() {
+  const { session } = useHoldSession();
+  const itemCount = session?.items?.length || 0;
+
+  return (
+    <Link href="/checkout" title="Giỏ phòng đang chọn" style={{ color: 'inherit', display: 'flex', alignItems: 'center', position: 'relative' }}>
+      <span className="material-symbols-outlined" style={{ cursor: 'pointer' }}>shopping_bag</span>
+      {itemCount > 0 && (
+        <span style={{
+          position: 'absolute',
+          top: '-6px',
+          right: '-8px',
+          backgroundColor: '#ef4444',
+          color: '#ffffff',
+          borderRadius: '50%',
+          width: '18px',
+          height: '18px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '0.7rem',
+          fontWeight: 'bold',
+          lineHeight: 1
+        }}>
+          {itemCount}
+        </span>
+      )}
+    </Link>
+  );
+}
 
 export default function TopNavBar() {
   const pathname = usePathname();
@@ -63,6 +95,7 @@ export default function TopNavBar() {
           {/* Trailing Actions */}
           <div className={styles.actions}>
             <div className={styles.icons}>
+              <CartNavIcon />
               <span className="material-symbols-outlined" style={{cursor: 'pointer'}}>language</span>
               <Link href="/login" title="Đăng nhập hệ thống" style={{ color: 'inherit', display: 'flex', alignItems: 'center' }}>
                 <span className="material-symbols-outlined" style={{cursor: 'pointer'}}>account_circle</span>

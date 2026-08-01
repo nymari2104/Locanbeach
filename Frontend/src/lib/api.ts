@@ -90,6 +90,14 @@ function getHeaders(isMultipart = false): HeadersInit {
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
+    
+    // Persistent guest token for multi-room hold sessions
+    let guestToken = localStorage.getItem('locan_guest_token');
+    if (!guestToken) {
+      guestToken = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'guest_' + Math.random().toString(36).substring(2) + Date.now();
+      localStorage.setItem('locan_guest_token', guestToken);
+    }
+    headers['X-Guest-Token'] = guestToken;
   }
   return headers;
 }
