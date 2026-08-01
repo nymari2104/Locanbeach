@@ -15,7 +15,8 @@ public class WebConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of("*")); // Cho phép mọi nguồn (Origin) trong môi trường Dev
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedHeaders(List.of("*", "X-Guest-Token"));
+        config.setExposedHeaders(List.of("Set-Cookie", "X-Guest-Token"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L); // Cache preflight response trong 1 giờ
 
