@@ -45,8 +45,22 @@ services:
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      REDIS_HOST: valkey
+      REDIS_PORT: 6379
     ports:
       - "8080:8080"
+    depends_on:
+      - valkey
+    networks:
+      - hotel-chatbot-net
+
+  # ── Valkey (Redis-compatible Cache & Lock) ──
+  valkey:
+    image: valkey/valkey:8-alpine
+    container_name: hotel-chatbot-valkey
+    restart: always
+    ports:
+      - "127.0.0.1:6379:6379"
     networks:
       - hotel-chatbot-net
 
