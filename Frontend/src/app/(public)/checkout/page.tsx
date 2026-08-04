@@ -51,11 +51,23 @@ function CheckoutContent() {
 
   const { session, loading: sessionLoading, addHoldRoom, removeHoldItem, fetchSession } = useHoldSession();
 
-  // Query parameters
-  const categoryId = searchParams.get("categoryId") || "";
-  const checkin = searchParams.get("checkin") || "";
-  const checkout = searchParams.get("checkout") || "";
+  // Query parameters with fallback to session items if missing in searchParams
+  const categoryIdParam = searchParams.get("categoryId") || "";
+  const checkinParam = searchParams.get("checkin") || "";
+  const checkoutParam = searchParams.get("checkout") || "";
   const guests = searchParams.get("guests") || "2";
+
+  const sessionCheckin = session?.items?.[0]?.checkinDate
+    ? session.items[0].checkinDate.split("T")[0]
+    : "";
+  const sessionCheckout = session?.items?.[0]?.checkoutDate
+    ? session.items[0].checkoutDate.split("T")[0]
+    : "";
+  const sessionCatId = session?.items?.[0]?.categoryId || "";
+
+  const categoryId = categoryIdParam || sessionCatId;
+  const checkin = checkinParam || sessionCheckin;
+  const checkout = checkoutParam || sessionCheckout;
 
   // Data states
   const [room, setRoom] = useState<any>(null);
@@ -382,12 +394,41 @@ function CheckoutContent() {
   const hasSessionItems = session && session.items && session.items.length > 0;
 
   if ((errorStatus || !room) && !hasSessionItems) {
+    const isExpiredSession = holdExpired || errorStatus === "MISSING_CATEGORY_ID";
     return (
       <div className={styles.container}>
-        <div style={{ textAlign: "center", padding: "5rem 0" }}>
-          <h2 style={{ fontFamily: "var(--font-playfair)", fontSize: "2rem", marginBottom: "1rem" }}>Không tìm thấy hạng phòng</h2>
-          <p style={{ color: "var(--color-steel-secondary)", marginBottom: "2rem" }}>Yêu cầu đặt phòng của bạn không hợp lệ hoặc hạng phòng đã chọn không tồn tại.</p>
-          <button className={styles.bannerBtn} onClick={() => router.push("/book")}>Quay lại Đặt phòng</button>
+        <div style={{ textAlign: "center", padding: "5rem 1rem", maxWidth: "600px", margin: "0 auto" }}>
+          <div style={{
+            width: "4rem", height: "4rem", borderRadius: "50%",
+            backgroundColor: isExpiredSession ? "#fef3c7" : "#fee2e2",
+            color: isExpiredSession ? "#d97706" : "#dc2626",
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            marginBottom: "1.25rem"
+          }}>
+            <span className="material-symbols-outlined" style={{ fontSize: "2.25rem" }}>
+              {isExpiredSession ? "timer_off" : "error"}
+            </span>
+          </div>
+          <h2 style={{ fontFamily: "var(--font-playfair)", fontSize: "1.75rem", fontWeight: "bold", marginBottom: "0.75rem" }}>
+            {isExpiredSession ? "Phiên giữ phòng đã hết hạn" : "Không tìm thấy hạng phòng"}
+          </h2>
+          <p style={{ color: "var(--color-steel-secondary)", marginBottom: "2rem", lineHeight: "1.6" }}>
+            {isExpiredSession 
+              ? "Thời gian giữ chỗ 7 phút cho lựa chọn của bạn đã kết thúc. Vui lòng quay lại danh sách phòng để chọn thời gian hoặc hạng phòng mới." 
+              : "Yêu cầu đặt phòng của bạn không hợp lệ hoặc hạng phòng đã chọn không còn tồn tại trên hệ thống."}
+          </p>
+          <button 
+            className={styles.bannerBtn} 
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                sessionStorage.clear();
+              }
+              router.push("/book");
+            }}
+            style={{ padding: "0.75rem 1.75rem", fontSize: "0.95rem" }}
+          >
+            Quay lại Tìm phòng mới
+          </button>
         </div>
       </div>
     );
@@ -443,10 +484,61 @@ function CheckoutContent() {
 
   const handleSubmitBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!checkin || !checkout || !contactLastName || !contactFirstName || !contactPhone) return;
+    console.log("🚀 [Checkout] Submit booking clicked with form data:", {
+      checkin,
+      checkout,
+      contactLastName,
+      contactFirstName,
+      contactPhone,
+      contactEmail,
+      isStayingGuest,
+      stayingLastName,
+      stayingFirstName,
+      stayingPhone,
+      holdId,
+      holdExpired
+    });
+
+    if (!checkin || !checkout) {
+      setErrorMessage("Thời gian nhận/trả phòng không hợp lệ. Vui lòng chọn lại phòng.");
+      setBookingProgress("error");
+      setShowErrorModal(true);
+      return;
+    }
+
+    if (!contactLastName.trim() || !contactFirstName.trim()) {
+      setErrorMessage("Vui lòng nhập đầy đủ Họ và Tên của người đặt chỗ.");
+      setBookingProgress("error");
+      setShowErrorModal(true);
+      return;
+    }
+
+    if (!contactPhone.trim()) {
+      setErrorMessage("Vui lòng nhập Số điện thoại liên hệ của người đặt chỗ.");
+      setBookingProgress("error");
+      setShowErrorModal(true);
+      return;
+    }
+
+    if (!contactEmail.trim()) {
+      setErrorMessage("Vui lòng nhập Email để nhận thông tin xác nhận đơn đặt phòng.");
+      setBookingProgress("error");
+      setShowErrorModal(true);
+      return;
+    }
+
+    if (!isStayingGuest) {
+      if (!stayingLastName.trim() || !stayingFirstName.trim() || !stayingPhone.trim()) {
+        setErrorMessage("Vui lòng nhập đầy đủ Họ tên và Số điện thoại của người lưu trú.");
+        setBookingProgress("error");
+        setShowErrorModal(true);
+        return;
+      }
+    }
 
     if (holdExpired) {
-      setErrorMessage("Phiên giữ phòng của bạn đã hết hạn (quá 7 phút). Vui lòng tải lại trang để chọn lại.");
+      setErrorMessage("Phiên giữ phòng của bạn đã hết hạn (quá 7 phút). Vui lòng gia hạn hoặc chọn lại phòng.");
+      setBookingProgress("error");
       setShowErrorModal(true);
       return;
     }
@@ -508,6 +600,7 @@ function CheckoutContent() {
       setBookingResult(confirmRes);
       setBookingProgress("success");
       setIsMobileSummaryExpanded(false);
+      router.push(`/payment?bookingId=${confirmRes.bookingId}`);
     } catch (err: any) {
       console.error(err);
       const msg = getErrorMessage(err);
@@ -914,7 +1007,7 @@ function CheckoutContent() {
       )}
 
       {/* Main Form Submit Wrapper */}
-      <form onSubmit={handleSubmitBooking}>
+      <form noValidate onSubmit={handleSubmitBooking}>
         <div className={styles.layout}>
           
           {/* Left Column: Input Fields Form */}

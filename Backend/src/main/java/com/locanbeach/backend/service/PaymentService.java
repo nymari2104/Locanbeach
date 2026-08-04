@@ -53,8 +53,12 @@ public class PaymentService {
                 .transferContent(transferContent)
                 .qrImageUrl(qrImageUrl)
                 .status(booking.getStatus().name())
+                .expiresAt(booking.getExpiresAt())
+                .renewCount(booking.getRenewCount() != null ? booking.getRenewCount() : 0)
                 .build();
     }
+
+    private final com.locanbeach.backend.repository.AccommodationRepository accommodationRepository;
 
     @Transactional
     public PaymentDTO processWebhook(PaymentWebhookRequest request) {
@@ -74,8 +78,45 @@ public class PaymentService {
                 .toList();
 
         if (pendingBookings.isEmpty()) {
-            log.error("No PENDING_DEPOSIT booking found matching content: {}", content);
-            throw new AppException(BookingErrorCode.BOOKING_NOT_FOUND);
+            // Check for recently CANCELLED bookings matching content
+            List<Booking> cancelledBookings = bookingRepository.findAll().stream()
+                    .filter(b -> b.getStatus() == BookingStatus.CANCELLED)
+                    .filter(b -> content.toUpperCase().contains(b.getId().toString().substring(0, 8).toUpperCase()))
+                    .filter(b -> b.getCancelledAt() != null && b.getCancelledAt().isAfter(LocalDateTime.now().minusMinutes(30)))
+                    .toList();
+
+            if (!cancelledBookings.isEmpty()) {
+                Booking cancelledBooking = cancelledBookings.get(0);
+                var accommodation = accommodationRepository.findAvailableAccommodationWithLock(
+                        cancelledBooking.getAccommodation().getCategory().getId(),
+                        cancelledBooking.getCheckinDate(),
+                        cancelledBooking.getCheckoutDate(),
+                        LocalDateTime.now());
+
+                if (accommodation != null) {
+                    cancelledBooking.setStatus(BookingStatus.CONFIRMED);
+                    cancelledBooking.setAccommodation(accommodation);
+                    bookingRepository.save(cancelledBooking);
+                    log.info("AUTO-RECOVERED CANCELLED booking ID {} to CONFIRMED as room was available", cancelledBooking.getId());
+                    pendingBookings = List.of(cancelledBooking);
+                } else {
+                    log.error("CRITICAL: Payment received for CANCELLED booking ID {}, but room is OVERBOOKED!", cancelledBooking.getId());
+                    Payment payment = Payment.builder()
+                            .booking(cancelledBooking)
+                            .transactionId(request.getTransactionId() != null ? request.getTransactionId() : UUID.randomUUID().toString())
+                            .amount(request.getAmount() != null ? request.getAmount() : cancelledBooking.getDepositAmount())
+                            .paymentMethod(request.getGateway() != null ? request.getGateway() : "VIETQR")
+                            .transferContent(content)
+                            .status("REFUND_REQUIRED")
+                            .paidAt(LocalDateTime.now())
+                            .build();
+                    Payment savedPayment = paymentRepository.save(payment);
+                    return mapToDTO(savedPayment);
+                }
+            } else {
+                log.error("No PENDING_DEPOSIT or CANCELLED booking found matching content: {}", content);
+                throw new AppException(BookingErrorCode.BOOKING_NOT_FOUND);
+            }
         }
 
         Booking booking = pendingBookings.get(0);
@@ -120,6 +161,8 @@ public class PaymentService {
                 .depositAmount(booking.getDepositAmount())
                 .totalAmount(booking.getTotalAmount())
                 .status(booking.getStatus().name())
+                .expiresAt(booking.getExpiresAt())
+                .renewCount(booking.getRenewCount() != null ? booking.getRenewCount() : 0)
                 .build();
     }
 

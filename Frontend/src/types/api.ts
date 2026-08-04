@@ -156,9 +156,25 @@ export interface ConfirmBookingResponse {
   originalPrice?: number;
   discountAmount?: number;
   totalAmount: number;
-  depositAmount: number;
   couponCode?: string;
   status: string;
+  expiresAt?: string;
+  renewCount?: number;
+}
+
+export interface PaymentQrResponse {
+  bookingId: string;
+  bookingCode: string;
+  depositAmount: number;
+  totalAmount: number;
+  bankName: string;
+  bankAccountNo: string;
+  bankAccountName: string;
+  transferContent: string;
+  qrImageUrl: string;
+  status: string;
+  expiresAt?: string;
+  renewCount?: number;
 }
 
 export type BookingStatus = 'PENDING_DEPOSIT' | 'CONFIRMED' | 'CHECKED_IN' | 'CHECKED_OUT' | 'COMPLETED' | 'CANCELLED';

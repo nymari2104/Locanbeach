@@ -31,5 +31,7 @@ public class BookingResponse {
     private BigDecimal originalPrice;
     private BigDecimal depositAmount;
     private BookingStatus status;
+    private LocalDateTime expiresAt;
+    private Integer renewCount;
     private LocalDateTime createdAt;
 }

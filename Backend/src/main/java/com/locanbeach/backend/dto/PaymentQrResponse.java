@@ -23,4 +23,6 @@ public class PaymentQrResponse {
     private String transferContent;
     private String qrImageUrl;
     private String status;
+    private java.time.LocalDateTime expiresAt;
+    private Integer renewCount;
 }

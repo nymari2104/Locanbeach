@@ -119,6 +119,12 @@ public class BookingController {
                 HttpStatus.CREATED);
     }
 
+    @PostMapping("/{bookingId}/renew-hold")
+    public ResponseEntity<ApiResponse<BookingResponse>> renewBookingHold(@PathVariable UUID bookingId) {
+        BookingResponse response = service.renewBookingHold(bookingId);
+        return ResponseEntity.ok(ApiResponse.success("Gia hạn thời gian thanh toán thành công", response));
+    }
+
     @GetMapping
     public ResponseEntity<ApiResponse<Page<BookingResponse>>> getBookings(
             @RequestParam(required = false) String search,

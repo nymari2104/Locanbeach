@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { HoldSession, HoldItem } from "@/hooks/useHoldSession";
 import styles from "./FloatingHoldBar.module.css";
 
@@ -12,6 +12,7 @@ interface FloatingHoldBarProps {
 
 export default function FloatingHoldBar({ session, onRemoveItem }: FloatingHoldBarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [expanded, setExpanded] = useState(false);
   const [timeLeftStr, setTimeLeftStr] = useState<string>("07:00");
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -19,12 +20,15 @@ export default function FloatingHoldBar({ session, onRemoveItem }: FloatingHoldB
   const items = session?.items || [];
   const itemCount = items.length;
 
+  const now = Date.now();
+  const isExpired = session?.expiresAtTimestamp ? (session.expiresAtTimestamp <= now) : false;
+
   useEffect(() => {
     if (!session || !session.expiresAtTimestamp) return;
 
     const interval = setInterval(() => {
-      const now = Date.now();
-      const diffMs = (session.expiresAtTimestamp ?? 0) - now;
+      const currentNow = Date.now();
+      const diffMs = (session.expiresAtTimestamp ?? 0) - currentNow;
 
       if (diffMs <= 0) {
         setTimeLeftStr("Hết hạn");
@@ -40,7 +44,7 @@ export default function FloatingHoldBar({ session, onRemoveItem }: FloatingHoldB
     return () => clearInterval(interval);
   }, [session]);
 
-  if (!session || itemCount === 0) {
+  if (pathname === "/checkout" || pathname === "/payment" || !session || itemCount === 0 || isExpired || timeLeftStr === "Hết hạn") {
     return null;
   }
 
@@ -105,7 +109,15 @@ export default function FloatingHoldBar({ session, onRemoveItem }: FloatingHoldB
             <button
               type="button"
               className={styles.checkoutBtn}
-              onClick={() => router.push("/checkout")}
+              onClick={() => {
+                if (items.length > 0 && items[0].checkinDate && items[0].checkoutDate) {
+                  const cin = items[0].checkinDate.split("T")[0];
+                  const cout = items[0].checkoutDate.split("T")[0];
+                  router.push(`/checkout?checkin=${cin}&checkout=${cout}`);
+                } else {
+                  router.push("/checkout");
+                }
+              }}
             >
               <span>Tiến hành thanh toán</span>
               <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>

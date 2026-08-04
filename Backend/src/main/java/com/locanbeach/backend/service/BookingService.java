@@ -91,26 +91,6 @@ public class BookingService {
             log.warn("Could not clean expired holds in DB: {}", e.getMessage());
         }
 
-        // 2. If guest holds the same room category, release previous hold first to prevent self-locking
-        if (guestToken != null && !guestToken.trim().isEmpty()) {
-            HoldSession session = holdSessionRepository.get(guestToken);
-            if (session != null && session.getItems() != null) {
-                Iterator<HoldItem> iterator = session.getItems().iterator();
-                while (iterator.hasNext()) {
-                    HoldItem item = iterator.next();
-                    if (item.getCategoryId().equals(request.getCategoryId())) {
-                        iterator.remove();
-                        try {
-                            roomHoldRepository.deleteById(UUID.fromString(item.getItemId()));
-                        } catch (Exception e) {
-                            log.warn("Could not delete previous room hold {}: {}", item.getItemId(), e.getMessage());
-                        }
-                    }
-                }
-                holdSessionRepository.save(guestToken, session);
-            }
-        }
-
         // FORCE FLUSH DELETIONS TO POSTGRESQL BEFORE EXECUTING NATIVE QUERY
         roomHoldRepository.flush();
 
@@ -298,6 +278,8 @@ public class BookingService {
             }
 
             booking.setStatus(BookingStatus.PENDING_DEPOSIT);
+            booking.setExpiresAt(LocalDateTime.now().plusMinutes(10));
+            booking.setRenewCount(0);
 
             Booking saved = bookingRepository.save(booking);
             createdBookings.add(saved);
@@ -382,11 +364,45 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.PENDING_DEPOSIT);
+        booking.setExpiresAt(LocalDateTime.now().plusMinutes(10));
+        booking.setRenewCount(0);
 
         bookingRepository.save(booking);
         roomHoldRepository.delete(roomHold);
 
         return mapToBookingResponse(booking);
+    }
+
+    @Transactional
+    public BookingResponse renewBookingHold(UUID bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new AppException(BookingErrorCode.BOOKING_NOT_FOUND));
+
+        if (booking.getStatus() != BookingStatus.PENDING_DEPOSIT) {
+            throw new AppException(BookingErrorCode.INVALID_INPUT, "Chỉ có thể gia hạn khi đơn hàng ở trạng thái chờ đặt cọc.");
+        }
+
+        if (booking.getExpiresAt() != null && booking.getExpiresAt().isBefore(LocalDateTime.now())) {
+            booking.setStatus(BookingStatus.CANCELLED);
+            booking.setCancelledAt(LocalDateTime.now());
+            booking.setCancelledReason("Quá thời gian thanh toán 10 phút (Tự động hủy)");
+            bookingRepository.save(booking);
+            throw new AppException(BookingErrorCode.HOLD_EXPIRED, "Đơn hàng đã hết hạn giữ chỗ và bị hủy. Không thể gia hạn nữa.");
+        }
+
+        int currentRenew = booking.getRenewCount() != null ? booking.getRenewCount() : 0;
+        if (currentRenew >= 3) {
+            throw new AppException(BookingErrorCode.INVALID_INPUT, "Đã đạt tối đa 3 lần gia hạn cho đơn hàng này.");
+        }
+
+        booking.setExpiresAt(LocalDateTime.now().plusMinutes(10));
+        booking.setRenewCount(currentRenew + 1);
+
+        Booking saved = bookingRepository.save(booking);
+        log.info("Successfully renewed hold for booking ID {}. New expiresAt: {}, renewCount: {}", 
+                saved.getId(), saved.getExpiresAt(), saved.getRenewCount());
+
+        return mapToBookingResponse(saved);
     }
 
     private void cleanExpiredItems(HoldSession session) {
@@ -443,7 +459,9 @@ public class BookingService {
                 .totalAmount(booking.getTotalAmount())
                 .depositAmount(booking.getDepositAmount())
                 .status(booking.getStatus())
-                .createdAt(booking.getCreatedAt())
+                .expiresAt(booking.getExpiresAt())
+                .renewCount(booking.getRenewCount() != null ? booking.getRenewCount() : 0)
+                .createdAt(booking.createdAt != null ? booking.getCreatedAt() : null)
                 .build();
     }
 }

@@ -262,35 +262,81 @@
     padding: 0 0.5rem 0.5rem 0.5rem;
   }
 
+  .floatingCard {
+    border-radius: 1rem;
+  }
+
   .mainBar {
-    padding: 0.85rem 1rem;
-    gap: 0.75rem;
-  }
-
-  .cartInfoGroup {
-    gap: 0.5rem;
-  }
-
-  .cartBadge {
-    font-size: 0.8rem;
-    padding: 0.3rem 0.65rem;
-  }
-
-  .timerBox {
-    font-size: 0.8rem;
-  }
-
-  .totalPrice {
-    font-size: 1.1rem;
-  }
-
-  .actionGroup {
-    width: 100%;
+    padding: 0.6rem 0.75rem;
+    gap: 0.4rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
   }
 
-  .toggleDrawerBtn, .checkoutBtn {
-    flex: 1;
+  .cartInfoGroup {
+    order: 1;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.4rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .cartBadge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+  }
+
+  .timerBox {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+  }
+
+  .priceGroup {
+    order: 2;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
+  }
+
+  .totalLabel {
+    font-size: 0.6rem;
+    margin-bottom: -0.1rem;
+  }
+
+  .totalPrice {
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+
+  .actionGroup {
+    order: 3;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    width: auto;
+  }
+
+  .toggleDrawerBtn {
+    padding: 0.45rem 0.6rem;
+    font-size: 0.75rem;
+    border-radius: 0.4rem;
+    background: #f1f5f9;
+    border: none;
+    gap: 0.2rem;
+  }
+
+  .checkoutBtn {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.78rem;
+    border-radius: 0.4rem;
+    box-shadow: none;
+    gap: 0.25rem;
   }
 }
