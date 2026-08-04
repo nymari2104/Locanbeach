@@ -88,7 +88,7 @@ function PaymentContent() {
     setRenewing(true);
     setRenewError(null);
     try {
-      const res = await apiPost<any>(`/bookings/${bookingId}/renew-hold`, {});
+      const res = await apiPost<any>(`/bookings/hold/${bookingId}/renew`, {});
       if (res.expiresAt) {
         const expTime = new Date(res.expiresAt).getTime();
         const secs = Math.floor((expTime - Date.now()) / 1000);
