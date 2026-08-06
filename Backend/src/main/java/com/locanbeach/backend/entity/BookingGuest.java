@@ -27,12 +27,6 @@ public class BookingGuest {
     @Column(name = "is_primary", columnDefinition = "boolean default false")
     private boolean isPrimary;
 
-    @Column(name = "face_image_url", columnDefinition = "text")
-    private String faceImageUrl;
-
-    @Column(name = "id_card_image_url", columnDefinition = "text")
-    private String idCardImageUrl;
-
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

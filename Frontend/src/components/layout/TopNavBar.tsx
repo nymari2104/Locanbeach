@@ -37,6 +37,35 @@ function CartNavIcon() {
   );
 }
 
+function UserNavIcon() {
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    const role = localStorage.getItem("userRole");
+    if (token) {
+      setIsLoggedIn(true);
+      setUserRole(role);
+    } else {
+      setIsLoggedIn(false);
+      setUserRole(null);
+    }
+  }, []);
+
+  const targetHref = isLoggedIn 
+    ? (userRole === "STAFF" ? "/staff" : userRole === "HOUSEKEEPER" ? "/housekeeping" : "/admin")
+    : "/login";
+
+  return (
+    <Link href={targetHref} title={isLoggedIn ? "Trang quản trị" : "Đăng nhập hệ thống"} style={{ color: 'inherit', display: 'flex', alignItems: 'center' }}>
+      <span className="material-symbols-outlined" style={{ cursor: 'pointer' }}>
+        {isLoggedIn ? "account_circle" : "person_outline"}
+      </span>
+    </Link>
+  );
+}
+
 export default function TopNavBar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -97,9 +126,7 @@ export default function TopNavBar() {
             <div className={styles.icons}>
               <CartNavIcon />
               <span className="material-symbols-outlined" style={{cursor: 'pointer'}}>language</span>
-              <Link href="/login" title="Đăng nhập hệ thống" style={{ color: 'inherit', display: 'flex', alignItems: 'center' }}>
-                <span className="material-symbols-outlined" style={{cursor: 'pointer'}}>account_circle</span>
-              </Link>
+              <UserNavIcon />
             </div>
             {!hideBookButton && (
               <Link href="/book" className={`mono-text ${styles.primaryButton}`}>

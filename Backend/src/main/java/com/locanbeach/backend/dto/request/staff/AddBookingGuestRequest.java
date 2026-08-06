@@ -19,7 +19,5 @@ public class AddBookingGuestRequest {
     private String idNumber;
     private String phone;
     private String email;
-    private String faceImageUrl;
-    private String idCardImageUrl;
     private boolean isPrimary;
 }

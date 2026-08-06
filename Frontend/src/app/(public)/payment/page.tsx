@@ -19,6 +19,16 @@ function PaymentContent() {
   const [renewing, setRenewing] = useState(false);
   const [renewError, setRenewError] = useState<string | null>(null);
 
+  const parseSecondsLeft = (expiresAtStr?: string): number => {
+    if (!expiresAtStr) return 600;
+    const expTime = new Date(expiresAtStr).getTime();
+    if (isNaN(expTime)) return 600;
+    const secs = Math.floor((expTime - Date.now()) / 1000);
+    return secs > 0 ? secs : 0;
+  };
+
+  const [expiresAtMs, setExpiresAtMs] = useState<number | null>(null);
+
   useEffect(() => {
     if (!bookingId) {
       setLoading(false);
@@ -34,9 +44,12 @@ function PaymentContent() {
         }
 
         if (res.expiresAt) {
-          const expTime = new Date(res.expiresAt).getTime();
-          const secs = Math.floor((expTime - Date.now()) / 1000);
-          setTimeLeft(secs > 0 ? secs : 0);
+          const expMs = new Date(res.expiresAt).getTime();
+          if (!isNaN(expMs)) {
+            setExpiresAtMs(expMs);
+            const secs = Math.floor((expMs - Date.now()) / 1000);
+            setTimeLeft(secs > 0 ? secs : 0);
+          }
         }
       } catch (err) {
         console.error("Failed to load VietQR data:", err);
@@ -48,24 +61,54 @@ function PaymentContent() {
     loadQrData();
   }, [bookingId]);
 
-  // Timer countdown interval
+  // Synchronize expiresAt across multiple open tabs/windows
   useEffect(() => {
-    if (timeLeft <= 0 || isConfirmed || !qrData) return;
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
+    if (!bookingId || typeof window === "undefined" || !("BroadcastChannel" in window)) return;
+    const channel = new BroadcastChannel(`booking_hold_${bookingId}`);
+    channel.onmessage = (event) => {
+      if (event.data?.expiresAt) {
+        const expMs = new Date(event.data.expiresAt).getTime();
+        if (!isNaN(expMs)) {
+          setExpiresAtMs(expMs);
+          if (event.data.renewCount !== undefined) {
+            setQrData((prev) => prev ? { ...prev, expiresAt: event.data.expiresAt, renewCount: event.data.renewCount } : null);
+          }
         }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [timeLeft, isConfirmed, qrData]);
+      }
+    };
+    return () => channel.close();
+  }, [bookingId]);
 
-  // Polling payment status every 3 seconds
+  // Absolute Date.now() timer calculation - 100% drift-free across tabs & focus events
   useEffect(() => {
-    if (!bookingId || isConfirmed || timeLeft <= 0) return;
+    if (!expiresAtMs || isConfirmed) return;
+
+    const updateTimer = () => {
+      const diffSec = Math.floor((expiresAtMs - Date.now()) / 1000);
+      setTimeLeft(diffSec > 0 ? diffSec : 0);
+    };
+
+    updateTimer();
+    const timer = setInterval(updateTimer, 1000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        updateTimer();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", updateTimer);
+
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", updateTimer);
+    };
+  }, [expiresAtMs, isConfirmed]);
+
+  // Polling payment status every 3 seconds (clean interval without constant recreation)
+  useEffect(() => {
+    if (!bookingId || isConfirmed) return;
 
     const interval = setInterval(async () => {
       try {
@@ -74,6 +117,12 @@ function PaymentContent() {
           setIsConfirmed(true);
         } else if (res.status === "CANCELLED") {
           setTimeLeft(0);
+          setExpiresAtMs(0);
+        } else if (res.expiresAt) {
+          const expMs = new Date(res.expiresAt).getTime();
+          if (!isNaN(expMs)) {
+            setExpiresAtMs(expMs);
+          }
         }
       } catch (err) {
         console.error("Error polling payment status:", err);
@@ -81,7 +130,7 @@ function PaymentContent() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [bookingId, isConfirmed, timeLeft]);
+  }, [bookingId, isConfirmed]);
 
   const handleRenewHold = async () => {
     if (!bookingId || renewing) return;
@@ -90,9 +139,16 @@ function PaymentContent() {
     try {
       const res = await apiPost<any>(`/bookings/hold/${bookingId}/renew`, {});
       if (res.expiresAt) {
-        const expTime = new Date(res.expiresAt).getTime();
-        const secs = Math.floor((expTime - Date.now()) / 1000);
+        const expMs = new Date(res.expiresAt).getTime();
+        setExpiresAtMs(expMs);
+        const secs = Math.floor((expMs - Date.now()) / 1000);
         setTimeLeft(secs > 0 ? secs : 600);
+
+        if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+          const channel = new BroadcastChannel(`booking_hold_${bookingId}`);
+          channel.postMessage({ expiresAt: res.expiresAt, renewCount: res.renewCount });
+          channel.close();
+        }
       } else {
         setTimeLeft(600);
       }

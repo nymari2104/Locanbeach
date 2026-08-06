@@ -180,8 +180,6 @@ Table booking_guests {
   booking_id uuid [not null, ref: > bookings.id]
   guest_id uuid [not null, ref: > guests.id]
   is_primary boolean [default: false]
-  face_image_url text
-  id_card_image_url text
   created_at timestamptz [default: `now()`]
 }
 

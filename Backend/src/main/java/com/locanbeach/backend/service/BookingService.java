@@ -1,6 +1,7 @@
 package com.locanbeach.backend.service;
 
 import com.locanbeach.backend.common.exception.AppException;
+import com.locanbeach.backend.common.exception.errorcode.GeneralErrorCode;
 import com.locanbeach.backend.dto.CouponDTO;
 import com.locanbeach.backend.dto.HoldItem;
 import com.locanbeach.backend.dto.HoldSession;
@@ -379,7 +380,7 @@ public class BookingService {
                 .orElseThrow(() -> new AppException(BookingErrorCode.BOOKING_NOT_FOUND));
 
         if (booking.getStatus() != BookingStatus.PENDING_DEPOSIT) {
-            throw new AppException(BookingErrorCode.INVALID_INPUT, "Chỉ có thể gia hạn khi đơn hàng ở trạng thái chờ đặt cọc.");
+            throw new AppException(GeneralErrorCode.INVALID_INPUT, "Chỉ có thể gia hạn khi đơn hàng ở trạng thái chờ đặt cọc.");
         }
 
         if (booking.getExpiresAt() != null && booking.getExpiresAt().isBefore(LocalDateTime.now())) {
@@ -392,7 +393,7 @@ public class BookingService {
 
         int currentRenew = booking.getRenewCount() != null ? booking.getRenewCount() : 0;
         if (currentRenew >= 3) {
-            throw new AppException(BookingErrorCode.INVALID_INPUT, "Đã đạt tối đa 3 lần gia hạn cho đơn hàng này.");
+            throw new AppException(GeneralErrorCode.INVALID_INPUT, "Đã đạt tối đa 3 lần gia hạn cho đơn hàng này.");
         }
 
         booking.setExpiresAt(LocalDateTime.now().plusMinutes(10));
@@ -461,7 +462,7 @@ public class BookingService {
                 .status(booking.getStatus())
                 .expiresAt(booking.getExpiresAt())
                 .renewCount(booking.getRenewCount() != null ? booking.getRenewCount() : 0)
-                .createdAt(booking.createdAt != null ? booking.getCreatedAt() : null)
+                .createdAt(booking.getCreatedAt())
                 .build();
     }
 }

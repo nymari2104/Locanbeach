@@ -140,8 +140,6 @@ public class StaffBookingService {
         bookingGuest.setBooking(booking);
         bookingGuest.setGuest(guest);
         bookingGuest.setPrimary(request.isPrimary());
-        bookingGuest.setFaceImageUrl(request.getFaceImageUrl());
-        bookingGuest.setIdCardImageUrl(request.getIdCardImageUrl());
         
         bookingGuestRepository.save(bookingGuest);
     }

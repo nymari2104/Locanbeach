@@ -598,7 +598,6 @@ function CheckoutContent() {
       });
 
       setBookingResult(confirmRes);
-      setBookingProgress("success");
       setIsMobileSummaryExpanded(false);
       router.push(`/payment?bookingId=${confirmRes.bookingId}`);
     } catch (err: any) {
@@ -613,87 +612,6 @@ function CheckoutContent() {
     }
   };
 
-  // Success view
-  if (bookingProgress === "success" && bookingResult) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.successWrapper}>
-          <span className={`material-symbols-outlined ${styles.successIcon}`}>check_circle</span>
-          <h1 className={styles.successTitle}>Đặt phòng thành công!</h1>
-          <p style={{ color: "var(--color-steel-secondary)" }}>Cảm ơn quý khách đã tin tưởng và chọn lựa The House - Lộc An Beach.</p>
-
-          <div className={styles.successCard}>
-            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--color-whisper-border)", paddingBottom: "0.5rem" }}>
-              <span style={{ fontWeight: "bold" }}>Mã đơn đặt phòng:</span>
-              <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "var(--color-primary)" }}>{bookingResult.bookingId.substring(0, 8).toUpperCase()}</span>
-            </div>
-            <div>
-              <strong>Hạng phòng:</strong> {bookingResult.categoryName} (Số phòng: <strong>{bookingResult.accommodationCode}</strong>)
-            </div>
-            <div>
-              <strong>Thời gian nghỉ:</strong> {checkinVisual} đến {checkoutVisual} ({numNights} đêm)
-            </div>
-            <div>
-              <strong>Khách hàng:</strong> {bookingResult.guestName} ({bookingResult.guestPhone})
-            </div>
-            <div style={{ borderTop: "1px solid var(--color-whisper-border)", paddingTop: "0.75rem", marginTop: "0.25rem" }}>
-              {bookingResult.discountAmount && bookingResult.discountAmount > 0 ? (
-                <>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.95rem", color: "#64748b" }}>
-                    <span>Giá phòng gốc:</span>
-                    <span>{(bookingResult.originalPrice || (bookingResult.totalAmount + bookingResult.discountAmount)).toLocaleString("vi-VN")}₫</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.95rem", color: "#16a34a", fontWeight: "bold" }}>
-                    <span>Giảm giá ({bookingResult.couponCode || "Coupon"}):</span>
-                    <span>-{bookingResult.discountAmount.toLocaleString("vi-VN")}₫</span>
-                  </div>
-                </>
-              ) : null}
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.1rem" }}>
-                <span>Tổng chi phí thực tế:</span>
-                <strong>{bookingResult.totalAmount.toLocaleString("vi-VN")}₫</strong>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "1.1rem", color: "#b45309", fontWeight: "bold", marginTop: "0.25rem" }}>
-                <span>Đặt cọc cần thanh toán (30%):</span>
-                <span>{bookingResult.depositAmount.toLocaleString("vi-VN")}₫</span>
-              </div>
-            </div>
-
-            {paymentMethod === "bank" && (
-              <div style={{ marginTop: "1rem", backgroundColor: "#fefcbf", border: "1px solid #fef08a", padding: "1rem", borderRadius: "12px", color: "#854d0e", fontSize: "0.875rem" }}>
-                <p style={{ fontWeight: "bold", margin: "0 0 0.5rem 0" }}>Thông tin tài khoản chuyển khoản:</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                  <div>Ngân hàng: <strong>Vietcombank (VCB)</strong></div>
-                  <div>Số tài khoản: <strong>123456789</strong></div>
-                  <div>Chủ tài khoản: <strong>The House Resort Loc An</strong></div>
-                  <div>Nội dung chuyển khoản: <strong style={{ color: "var(--color-primary)", fontSize: "0.95rem" }}>{bookingResult.bookingId.substring(0, 8).toUpperCase()} {bookingResult.guestPhone}</strong></div>
-                </div>
-              </div>
-            )}
-
-            {(paymentMethod === "momo" || paymentMethod === "vnpay") && (
-              <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
-                <p style={{ fontWeight: "bold", margin: 0, fontSize: "0.9rem" }}>Quét mã QR để đặt cọc qua {paymentMethod === "momo" ? "Ví MoMo" : "VNPay"}</p>
-                <div className={styles.qrContainer} style={{ width: "100%" }}>
-                  <div className={styles.qrMockup}>
-                    <div style={{ fontSize: "2rem", color: "var(--color-primary)" }}>QR CODE</div>
-                  </div>
-                  <span style={{ fontSize: "0.75rem", color: "var(--color-steel-secondary)" }}>Mã QR này chứa số tiền đặt cọc {bookingResult.depositAmount.toLocaleString("vi-VN")}₫</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
-            <button className={styles.successBackBtn} style={{ background: "#0284c7" }} onClick={() => router.push(`/payment?bookingId=${bookingResult.bookingId}`)}>
-              Thanh Toán Ngay Bằng VietQR (Tự Động Xác Nhận)
-            </button>
-            <button className={styles.successBackBtn} style={{ background: "#64748b" }} onClick={() => router.push("/")}>Quay lại Trang chủ</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const renderPaymentInstructions = () => {
     switch (paymentMethod) {

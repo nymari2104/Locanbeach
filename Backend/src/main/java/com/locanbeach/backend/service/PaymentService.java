@@ -42,6 +42,13 @@ public class PaymentService {
         String transferContent = vietQRService.generateTransferContent(booking.getId());
         String qrImageUrl = vietQRService.generateQrImageUrl(depositAmount, transferContent);
 
+        LocalDateTime expiresAt = booking.getExpiresAt();
+        if (expiresAt == null) {
+            expiresAt = booking.getCreatedAt() != null ? booking.getCreatedAt().plusMinutes(10) : LocalDateTime.now().plusMinutes(10);
+            booking.setExpiresAt(expiresAt);
+            bookingRepository.save(booking);
+        }
+
         return PaymentQrResponse.builder()
                 .bookingId(booking.getId())
                 .bookingCode(booking.getId().toString().substring(0, 8).toUpperCase())
@@ -53,7 +60,7 @@ public class PaymentService {
                 .transferContent(transferContent)
                 .qrImageUrl(qrImageUrl)
                 .status(booking.getStatus().name())
-                .expiresAt(booking.getExpiresAt())
+                .expiresAt(expiresAt)
                 .renewCount(booking.getRenewCount() != null ? booking.getRenewCount() : 0)
                 .build();
     }
@@ -155,13 +162,18 @@ public class PaymentService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new AppException(BookingErrorCode.BOOKING_NOT_FOUND));
 
+        LocalDateTime expiresAt = booking.getExpiresAt();
+        if (expiresAt == null) {
+            expiresAt = booking.getCreatedAt() != null ? booking.getCreatedAt().plusMinutes(10) : LocalDateTime.now().plusMinutes(10);
+        }
+
         return PaymentQrResponse.builder()
                 .bookingId(booking.getId())
                 .bookingCode(booking.getId().toString().substring(0, 8).toUpperCase())
                 .depositAmount(booking.getDepositAmount())
                 .totalAmount(booking.getTotalAmount())
                 .status(booking.getStatus().name())
-                .expiresAt(booking.getExpiresAt())
+                .expiresAt(expiresAt)
                 .renewCount(booking.getRenewCount() != null ? booking.getRenewCount() : 0)
                 .build();
     }

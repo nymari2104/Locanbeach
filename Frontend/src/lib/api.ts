@@ -117,8 +117,9 @@ async function handleResponse<T>(response: Response): Promise<T> {
       if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('userRole');
-        localStorage.removeItem('userName');
-        window.location.href = '/';
+        localStorage.removeItem('fullName');
+        localStorage.removeItem('username');
+        window.location.href = '/login';
       }
     }
     const errorCode = json && json.code ? json.code : `HTTP_${response.status}`;
@@ -134,8 +135,9 @@ async function handleResponse<T>(response: Response): Promise<T> {
         if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
           localStorage.removeItem('accessToken');
           localStorage.removeItem('userRole');
-          localStorage.removeItem('userName');
-          window.location.href = '/';
+          localStorage.removeItem('fullName');
+          localStorage.removeItem('username');
+          window.location.href = '/login';
         }
       }
       throw new ApiError(json.code, json.message || 'Yêu cầu không thành công');
