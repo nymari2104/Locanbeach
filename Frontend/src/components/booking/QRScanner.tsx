@@ -33,6 +33,10 @@ export default function QRScanner({ onScanSuccess, onClose }: QRScannerProps) {
     onScanSuccessRef.current = onScanSuccess;
   }, [onScanSuccess]);
 
+  const [zoomLevel, setZoomLevel] = useState<number>(1.8);
+  const zoomLevelRef = useRef<number>(1.8);
+  const [maxZoomSupported, setMaxZoomSupported] = useState<number>(3);
+
   const parseCCCDData = useCallback((decodedText: string) => {
     console.log("Scanned QR:", decodedText);
     const parts = decodedText.split('|');
@@ -56,27 +60,79 @@ export default function QRScanner({ onScanSuccess, onClose }: QRScannerProps) {
     }
   }, []);
 
-  const tick = useCallback(() => {
+  const changeZoom = async (newZoom: number) => {
+    setZoomLevel(newZoom);
+    zoomLevelRef.current = newZoom;
+
+    if (streamRef.current) {
+      try {
+        const videoTrack = streamRef.current.getVideoTracks()[0];
+        if (videoTrack && typeof videoTrack.applyConstraints === 'function') {
+          await videoTrack.applyConstraints({ advanced: [{ zoom: newZoom } as any] });
+        }
+      } catch (err) {
+        console.warn("Hardware zoom constraint note:", err);
+      }
+    }
+  };
+
+  const tick = useCallback(async () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
+
     if (video && video.readyState === video.HAVE_ENOUGH_DATA && canvas) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      if (ctx) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: "dontInvert",
-        });
+      // 1. Try Hardware-Accelerated Native BarcodeDetector API (Android Chrome / Samsung Internet)
+      if ('BarcodeDetector' in window) {
+        try {
+          const detector = new (window as any).BarcodeDetector({ formats: ['qr_code'] });
+          const detectedBarcodes = await detector.detect(video);
+          if (detectedBarcodes && detectedBarcodes.length > 0) {
+            const rawVal = detectedBarcodes[0].rawValue;
+            if (rawVal) {
+              const success = parseCCCDData(rawVal);
+              if (success) return;
+            }
+          }
+        } catch (bErr) {
+          // Fallback to jsQR below
+        }
+      }
+
+      // 2. Guaranteed Digital Canvas Zoom + Multi-Pass Scanning
+      const vWidth = video.videoWidth;
+      const vHeight = video.videoHeight;
+
+      if (vWidth > 0 && vHeight > 0) {
+        const currentZoom = zoomLevelRef.current || 1.8;
         
-        if (code) {
-          const success = parseCCCDData(code.data);
-          if (success) return; // Stop ticking if success
+        // Compute digitally zoomed crop box
+        const cropWidth = vWidth / currentZoom;
+        const cropHeight = vHeight / currentZoom;
+        const cropX = (vWidth - cropWidth) / 2;
+        const cropY = (vHeight - cropHeight) / 2;
+
+        const targetDim = 640;
+        canvas.width = targetDim;
+        canvas.height = targetDim;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (ctx) {
+          ctx.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, targetDim, targetDim);
+          const imageData = ctx.getImageData(0, 0, targetDim, targetDim);
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "attemptBoth",
+          });
+          
+          if (code) {
+            const success = parseCCCDData(code.data);
+            if (success) return; // Stop ticking if success
+          }
         }
       }
     }
-    requestRef.current = requestAnimationFrame(tick);
+
+    if (isMounted.current && streamRef.current) {
+      requestRef.current = requestAnimationFrame(tick);
+    }
   }, [parseCCCDData]);
 
   const isMounted = useRef(true);
@@ -85,24 +141,75 @@ export default function QRScanner({ onScanSuccess, onClose }: QRScannerProps) {
     return () => { isMounted.current = false; };
   }, []);
 
+  const stopCamera = () => {
+    if (requestRef.current) {
+      cancelAnimationFrame(requestRef.current);
+      requestRef.current = undefined;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => {
+        track.stop();
+      });
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraActive(false);
+  };
+
   const startCamera = async () => {
     setError('');
     setScanningMode('camera');
     try {
-      if (streamRef.current) stopCamera();
+      stopCamera();
       
-      let stream;
+      let stream: MediaStream;
       try {
         stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: { ideal: "environment" } } 
+          video: { 
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          } 
         });
       } catch (e) {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          } 
+        });
       }
 
       if (!isMounted.current) {
         stream.getTracks().forEach(track => track.stop());
         return;
+      }
+
+      // Check zoom capabilities
+      try {
+        const videoTrack = stream.getVideoTracks()[0];
+        if (videoTrack && typeof videoTrack.getCapabilities === 'function') {
+          const capabilities: any = videoTrack.getCapabilities();
+          const advancedConstraints: any = {};
+          
+          if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+            advancedConstraints.focusMode = 'continuous';
+          }
+          if (capabilities.zoom) {
+            setMaxZoomSupported(capabilities.zoom.max || 3);
+            const targetZoom = Math.min(Math.max(zoomLevel, capabilities.zoom.min || 1), capabilities.zoom.max || 3);
+            advancedConstraints.zoom = targetZoom;
+          }
+
+          if (Object.keys(advancedConstraints).length > 0) {
+            await videoTrack.applyConstraints({ advanced: [advancedConstraints] });
+          }
+        }
+      } catch (advancedErr) {
+        console.warn("Camera advanced capabilities note:", advancedErr);
       }
 
       streamRef.current = stream;
@@ -113,10 +220,7 @@ export default function QRScanner({ onScanSuccess, onClose }: QRScannerProps) {
         try {
           await videoRef.current.play();
         } catch (playErr: any) {
-          if (playErr.name !== 'AbortError') {
-            throw playErr;
-          }
-          // AbortError is expected if the video unmounts or srcObject changes before play finishes
+          if (playErr.name !== 'AbortError') throw playErr;
           return;
         }
 
@@ -131,17 +235,6 @@ export default function QRScanner({ onScanSuccess, onClose }: QRScannerProps) {
         setScanningMode('file');
       }
     }
-  };
-
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-    if (requestRef.current) {
-      cancelAnimationFrame(requestRef.current);
-    }
-    setIsCameraActive(false);
   };
 
   useEffect(() => {
@@ -160,24 +253,53 @@ export default function QRScanner({ onScanSuccess, onClose }: QRScannerProps) {
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, img.width, img.height);
-          const imageData = ctx.getImageData(0, 0, img.width, img.height);
-          const code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: "attemptBoth",
-          });
-          
-          if (code) {
-            parseCCCDData(code.data);
-          } else {
-            setError("Không tìm thấy mã QR trên ảnh. Hãy chụp lại ảnh rõ nét, vuông góc và đủ sáng hơn.");
+      img.onload = async () => {
+        // 1. Try Hardware-Accelerated BarcodeDetector on raw uploaded Image
+        if ('BarcodeDetector' in window) {
+          try {
+            const detector = new (window as any).BarcodeDetector({ formats: ['qr_code'] });
+            const detectedBarcodes = await detector.detect(img);
+            if (detectedBarcodes && detectedBarcodes.length > 0 && detectedBarcodes[0].rawValue) {
+              parseCCCDData(detectedBarcodes[0].rawValue);
+              return;
+            }
+          } catch (bErr) {
+            console.warn("BarcodeDetector image upload fallback:", bErr);
           }
         }
+
+        // 2. Multi-Scale Downsampling for jsQR (Fixes 12MP/48MP mobile camera photo sizes)
+        const maxDimensions = [1000, 800, 600, Math.max(img.width, img.height)];
+
+        for (const maxDim of maxDimensions) {
+          let scale = 1;
+          if (img.width > maxDim || img.height > maxDim) {
+            scale = maxDim / Math.max(img.width, img.height);
+          }
+
+          const targetW = Math.round(img.width * scale);
+          const targetH = Math.round(img.height * scale);
+
+          const canvas = document.createElement('canvas');
+          canvas.width = targetW;
+          canvas.height = targetH;
+          const ctx = canvas.getContext('2d');
+
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, targetW, targetH);
+            const imageData = ctx.getImageData(0, 0, targetW, targetH);
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+              inversionAttempts: "attemptBoth",
+            });
+
+            if (code) {
+              parseCCCDData(code.data);
+              return;
+            }
+          }
+        }
+
+        setError("Không tìm thấy mã QR trên ảnh. Vui lòng chọn ảnh chụp thẳng góc, đủ sáng và không bị che khuất mã QR.");
       };
       img.src = event.target?.result as string;
     };
@@ -236,6 +358,31 @@ export default function QRScanner({ onScanSuccess, onClose }: QRScannerProps) {
                 Đưa mã QR trên thẻ CCCD vào khung
               </div>
             </div>
+          </div>
+
+          {/* Zoom Controls Overlay (Supports Hardware + Digital Canvas Zoom) */}
+          <div style={{
+            position: 'absolute', bottom: '12px', left: 0, right: 0,
+            display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.4rem', zIndex: 10
+          }}>
+            <span style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 600, background: 'rgba(0,0,0,0.6)', padding: '0.2rem 0.5rem', borderRadius: '1rem' }}>
+              Zoom:
+            </span>
+            {[1, 1.5, 2, 2.5].map((z) => (
+              <button
+                key={z}
+                type="button"
+                onClick={() => changeZoom(z)}
+                style={{
+                  background: zoomLevel === z ? '#2563eb' : 'rgba(0, 0, 0, 0.7)',
+                  color: '#fff', border: '1px solid rgba(255,255,255,0.5)',
+                  padding: '0.25rem 0.65rem', borderRadius: '1rem',
+                  fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer'
+                }}
+              >
+                {z}x
+              </button>
+            ))}
           </div>
         </div>
       ) : (
