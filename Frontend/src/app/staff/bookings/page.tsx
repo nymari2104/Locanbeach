@@ -432,7 +432,7 @@ export default function BookingsPage() {
               <div className={styles.modalDetailRow}>
                 <span className={styles.modalDetailLabel}>Đã cọc:</span>
                 <span className="mono-text" style={{ color: '#059669' }}>
-                  {selectedBooking.depositAmount.toLocaleString('vi-VN')} VNĐ
+                  {(selectedBooking.depositAmount || 0).toLocaleString('vi-VN')} VNĐ
                 </span>
               </div>
             </div>

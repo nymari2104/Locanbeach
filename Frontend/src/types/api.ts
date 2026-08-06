@@ -150,12 +150,14 @@ export interface ConfirmBookingResponse {
   categoryName: string;
   guestName: string;
   guestPhone: string;
+  guestEmail?: string;
   checkinDate: string;
   checkoutDate: string;
   guestsCount: number;
   originalPrice?: number;
   discountAmount?: number;
   totalAmount: number;
+  depositAmount?: number;
   couponCode?: string;
   status: string;
   expiresAt?: string;
