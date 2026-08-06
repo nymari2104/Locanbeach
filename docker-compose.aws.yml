@@ -28,9 +28,7 @@ services:
 
   # ── Spring Boot Backend ──
   backend:
-    build:
-      context: ./Backend
-      dockerfile: Dockerfile
+    image: ghcr.io/nymari2104/locanbeach-backend:latest
     container_name: hotel-chatbot-backend
     restart: always
     env_file:
