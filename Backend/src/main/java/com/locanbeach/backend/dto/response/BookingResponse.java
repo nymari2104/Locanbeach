@@ -34,4 +34,5 @@ public class BookingResponse {
     private LocalDateTime expiresAt;
     private Integer renewCount;
     private LocalDateTime createdAt;
+    private java.util.List<GuestResponse> guests;
 }

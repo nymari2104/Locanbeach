@@ -39,7 +39,8 @@ public class Guest {
     @Convert(converter = com.locanbeach.backend.common.converter.CryptoConverter.class)
     private String idNumber;
 
-    @Column(name = "phone", length = 20)
+    @Column(name = "phone", length = 255)
+    @Convert(converter = com.locanbeach.backend.common.converter.CryptoConverter.class)
     private String phone;
 
     @Column(name = "email", length = 100)

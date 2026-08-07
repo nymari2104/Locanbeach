@@ -397,34 +397,6 @@ export default function QRScanner({ onScanSuccess, onClose }: QRScannerProps) {
       )}
 
       <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
-        <div style={{ position: 'relative', overflow: 'hidden', display: 'inline-block', width: '100%', maxWidth: '300px' }}>
-          <button 
-            style={{
-              width: '100%',
-              padding: '0.75rem 1rem',
-              background: '#2563eb', color: '#fff',
-              border: 'none', borderRadius: '0.375rem',
-              cursor: 'pointer', fontWeight: 600,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
-            }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '1.2rem' }}>
-              add_a_photo
-            </span>
-            {scanningMode === 'camera' ? 'Camera mờ? Chụp ảnh rõ nét hơn' : 'Chọn ảnh CCCD để quét'}
-          </button>
-          <input 
-            type="file" 
-            accept="image/*" 
-            capture="environment"
-            onChange={handleFileUpload}
-            style={{
-              position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-              opacity: 0, cursor: 'pointer'
-            }}
-          />
-        </div>
-
         <button 
           onClick={() => { stopCamera(); onClose(); }}
           style={{

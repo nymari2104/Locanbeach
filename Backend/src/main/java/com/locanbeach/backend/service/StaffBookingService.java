@@ -57,49 +57,67 @@ public class StaffBookingService {
     }
 
     @Transactional
+    public BookingResponse updateGuests(UUID id, com.locanbeach.backend.dto.request.staff.CheckInRequest request) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new AppException(BookingErrorCode.BOOKING_NOT_FOUND));
+        
+        saveGuestList(booking, request);
+        return mapToResponse(bookingRepository.save(booking));
+    }
+
+    @Transactional
     public BookingResponse checkIn(UUID id, com.locanbeach.backend.dto.request.staff.CheckInRequest request) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new AppException(BookingErrorCode.BOOKING_NOT_FOUND));
         
-        if (booking.getStatus() != BookingStatus.CONFIRMED && booking.getStatus() != BookingStatus.PENDING_DEPOSIT) {
+        if (booking.getStatus() == BookingStatus.CONFIRMED || booking.getStatus() == BookingStatus.PENDING_DEPOSIT) {
+            booking.setStatus(BookingStatus.CHECKED_IN);
+            booking.setActualCheckinAt(LocalDateTime.now());
+            if (booking.getAccommodation() != null) {
+                booking.getAccommodation().setOperationalStatus(com.locanbeach.backend.entity.enums.OperationalStatus.OCCUPIED);
+            }
+        } else if (booking.getStatus() != BookingStatus.CHECKED_IN) {
             throw new AppException(BookingErrorCode.INVALID_CHECKIN_STATUS);
         }
         
-        booking.setStatus(BookingStatus.CHECKED_IN);
-        booking.setActualCheckinAt(LocalDateTime.now());
-        if (booking.getAccommodation() != null) {
-            booking.getAccommodation().setOperationalStatus(com.locanbeach.backend.entity.enums.OperationalStatus.OCCUPIED);
-        }
-        
         if (request != null && request.getGuests() != null) {
-            for (int i = 0; i < request.getGuests().size(); i++) {
-                com.locanbeach.backend.dto.request.staff.GuestInputDTO guestDto = request.getGuests().get(i);
-                Guest guest = new Guest();
-                guest.setFullName(guestDto.getFullName());
-                guest.setIdNumber(guestDto.getIdentityCard());
-                guest.setIdType(com.locanbeach.backend.entity.enums.GuestIdType.CCCD);
-                guest.setPhone(guestDto.getPhone());
-                guest.setGender(guestDto.getGender());
-                
-                if (guestDto.getDateOfBirth() != null && !guestDto.getDateOfBirth().trim().isEmpty()) {
-                    try {
-                        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                        guest.setDob(LocalDate.parse(guestDto.getDateOfBirth(), formatter));
-                    } catch (Exception e) {
-                        // Ignore parse error for DOB
-                    }
-                }
-                guest = guestRepository.save(guest);
-                
-                BookingGuest bg = new BookingGuest();
-                bg.setBooking(booking);
-                bg.setGuest(guest);
-                bg.setPrimary(i == 0);
-                bookingGuestRepository.save(bg);
-            }
+            saveGuestList(booking, request);
         }
         
         return mapToResponse(bookingRepository.save(booking));
+    }
+
+    private void saveGuestList(Booking booking, com.locanbeach.backend.dto.request.staff.CheckInRequest request) {
+        if (request == null || request.getGuests() == null) return;
+
+        java.util.List<BookingGuest> bgList = bookingGuestRepository.findByBookingId(booking.getId());
+        bookingGuestRepository.deleteAll(bgList);
+
+        for (int i = 0; i < request.getGuests().size(); i++) {
+            com.locanbeach.backend.dto.request.staff.GuestInputDTO guestDto = request.getGuests().get(i);
+            Guest guest = new Guest();
+            guest.setFullName(guestDto.getFullName());
+            guest.setIdNumber(guestDto.getIdentityCard());
+            guest.setIdType(com.locanbeach.backend.entity.enums.GuestIdType.CCCD);
+            guest.setPhone(guestDto.getPhone());
+            guest.setGender(guestDto.getGender());
+            
+            if (guestDto.getDateOfBirth() != null && !guestDto.getDateOfBirth().trim().isEmpty()) {
+                try {
+                    java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                    guest.setDob(LocalDate.parse(guestDto.getDateOfBirth(), formatter));
+                } catch (Exception e) {
+                    // Ignore parse error for DOB
+                }
+            }
+            guest = guestRepository.save(guest);
+            
+            BookingGuest bg = new BookingGuest();
+            bg.setBooking(booking);
+            bg.setGuest(guest);
+            bg.setPrimary(i == 0);
+            bookingGuestRepository.save(bg);
+        }
     }
 
     @Transactional
@@ -187,13 +205,7 @@ public class StaffBookingService {
         
         java.util.List<BookingGuest> bgList = bookingGuestRepository.findByBookingId(booking.getId());
         bookingGuestRepository.deleteAll(bgList);
-        for (BookingGuest bg : bgList) {
-            try {
-                guestRepository.delete(bg.getGuest());
-            } catch (Exception e) {
-                // Ignore if guest is still referenced somewhere
-            }
-        }
+        // Note: Master Guest records in 'guests' table are preserved for 36 months compliance per Decree 96/2016/ND-CP
 
         java.util.List<com.locanbeach.backend.entity.BookingService> bsList = bookingServiceRepository.findByBookingId(booking.getId());
         bookingServiceRepository.deleteAll(bsList);
@@ -205,12 +217,29 @@ public class StaffBookingService {
     }
 
     private BookingResponse mapToResponse(Booking booking) {
+        java.util.List<BookingGuest> bgList = bookingGuestRepository.findByBookingId(booking.getId());
+        java.util.List<com.locanbeach.backend.dto.response.GuestResponse> guestResponses = bgList.stream().map(bg -> {
+            Guest g = bg.getGuest();
+            return com.locanbeach.backend.dto.response.GuestResponse.builder()
+                    .id(g.getId())
+                    .fullName(g.getFullName())
+                    .dob(g.getDob())
+                    .gender(g.getGender())
+                    .nationality(g.getNationality())
+                    .idType(g.getIdType())
+                    .idNumber(g.getIdNumber())
+                    .phone(g.getPhone())
+                    .email(g.getEmail())
+                    .isPrimary(bg.isPrimary())
+                    .build();
+        }).collect(java.util.stream.Collectors.toList());
+
         return BookingResponse.builder()
                 .bookingId(booking.getId())
-                .accommodationId(booking.getAccommodation().getId())
-                .accommodationCode(booking.getAccommodation().getCode())
-                .categoryId(booking.getAccommodation().getCategory().getId())
-                .categoryName(booking.getAccommodation().getCategory().getName())
+                .accommodationId(booking.getAccommodation() != null ? booking.getAccommodation().getId() : null)
+                .accommodationCode(booking.getAccommodation() != null ? booking.getAccommodation().getCode() : null)
+                .categoryId(booking.getAccommodation() != null && booking.getAccommodation().getCategory() != null ? booking.getAccommodation().getCategory().getId() : null)
+                .categoryName(booking.getAccommodation() != null && booking.getAccommodation().getCategory() != null ? booking.getAccommodation().getCategory().getName() : null)
                 .guestName(booking.getGuestName())
                 .guestPhone(booking.getGuestPhone())
                 .checkinDate(booking.getCheckinDate())
@@ -219,6 +248,8 @@ public class StaffBookingService {
                 .totalAmount(booking.getTotalAmount())
                 .depositAmount(booking.getDepositAmount())
                 .status(booking.getStatus())
+                .createdAt(booking.getCreatedAt())
+                .guests(guestResponses)
                 .build();
     }
 }

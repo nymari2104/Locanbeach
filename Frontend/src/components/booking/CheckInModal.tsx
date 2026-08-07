@@ -19,9 +19,19 @@ export interface GuestInput {
 }
 
 export default function CheckInModal({ booking, onClose, onCheckIn }: CheckInModalProps) {
-  const [guests, setGuests] = useState<GuestInput[]>([
-    { fullName: booking.guestName, identityCard: '', phone: booking.guestPhone || '' } // Initial lead guest
-  ]);
+  const initialGuests: GuestInput[] = (booking.guests && booking.guests.length > 0)
+    ? booking.guests.map(g => ({
+        id: g.id,
+        fullName: g.fullName,
+        identityCard: g.idNumber || '',
+        phone: g.phone || '',
+        gender: g.gender || '',
+        dateOfBirth: g.dob || '',
+        address: g.nationality || ''
+      }))
+    : [{ fullName: booking.guestName, identityCard: '', phone: booking.guestPhone || '' }];
+
+  const [guests, setGuests] = useState<GuestInput[]>(initialGuests);
   const [isScanning, setIsScanning] = useState(false);
   const [targetGuestIndex, setTargetGuestIndex] = useState<number | null>(null);
 
@@ -220,7 +230,7 @@ export default function CheckInModal({ booking, onClose, onCheckIn }: CheckInMod
                     borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 600
                   }}
                 >
-                  Xác nhận Check-in
+                  Xác nhận
                 </button>
               </div>
             </form>

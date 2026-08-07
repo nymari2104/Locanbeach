@@ -158,10 +158,23 @@ export interface ConfirmBookingResponse {
   discountAmount?: number;
   totalAmount: number;
   depositAmount?: number;
-  couponCode?: string;
   status: string;
   expiresAt?: string;
   renewCount?: number;
+  guests?: GuestResponse[];
+}
+
+export interface GuestResponse {
+  id?: string;
+  fullName: string;
+  dob?: string;
+  gender?: string;
+  nationality?: string;
+  idType?: string;
+  idNumber?: string;
+  phone?: string;
+  email?: string;
+  isPrimary?: boolean;
 }
 
 export interface PaymentQrResponse {

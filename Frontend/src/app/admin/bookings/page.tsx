@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { apiGet, apiPost, apiPut } from "@/lib/api";
-import { BookingStatus, PageResponse, ConfirmBookingResponse } from "@/types/api";
+import { BookingStatus, PageResponse, ConfirmBookingResponse, GuestResponse } from "@/types/api";
 import CheckInModal, { GuestInput } from "@/components/booking/CheckInModal";
 import styles from "./page.module.css";
 
@@ -130,15 +130,120 @@ export default function BookingsPage() {
     });
   };
 
-  const handleCheckInSubmit = async (id: string, guests: GuestInput[]) => {
-    try {
-      const res = await apiPost<BookingResponse>(`/staff/bookings/${id}/check-in`, { guests });
-      setSelectedBooking(res);
-      setCheckInBooking(null);
-      await fetchBookings();
-    } catch (err: any) {
-      alert("Lỗi khi nhận phòng: " + err.message);
+  // Temporary guest list map per booking before Check-in
+  const [tempGuestsMap, setTempGuestsMap] = useState<Record<string, GuestInput[]>>({});
+  // Persistent guest cache per booking so closing and re-opening never loses guest list
+  const [savedGuestsCache, setSavedGuestsCache] = useState<Record<string, GuestResponse[]>>({});
+
+  const handleOpenBookingDetails = (b: BookingResponse) => {
+    const cachedGuests = savedGuestsCache[b.bookingId] || (tempGuestsMap[b.bookingId] ? tempGuestsMap[b.bookingId].map((g, i) => ({
+      id: g.id,
+      fullName: g.fullName,
+      idNumber: g.identityCard,
+      phone: g.phone,
+      gender: g.gender,
+      dob: g.dateOfBirth,
+      nationality: g.address,
+      isPrimary: i === 0
+    })) : undefined);
+
+    if (b.guests && b.guests.length > 0) {
+      setSelectedBooking(b);
+    } else if (cachedGuests && cachedGuests.length > 0) {
+      setSelectedBooking({ ...b, guests: cachedGuests });
+    } else {
+      setSelectedBooking(b);
+      // Fetch full details from backend to ensure guests are loaded if already in DB
+      apiGet<BookingResponse>(`/staff/bookings/${b.bookingId}`).then(details => {
+        if (details) {
+          if (details.guests && details.guests.length > 0) {
+            setSavedGuestsCache(prev => ({ ...prev, [b.bookingId]: details.guests! }));
+          }
+          setSelectedBooking(details);
+        }
+      }).catch(() => {});
     }
+  };
+
+  const handleCheckInSubmit = async (id: string, guests: GuestInput[]) => {
+    const mappedGuests: GuestResponse[] = guests.map((g, i) => ({
+      id: g.id,
+      fullName: g.fullName,
+      idNumber: g.identityCard,
+      phone: g.phone,
+      gender: g.gender,
+      dob: g.dateOfBirth,
+      nationality: g.address,
+      isPrimary: i === 0
+    }));
+
+    setSavedGuestsCache(prev => ({ ...prev, [id]: mappedGuests }));
+
+    const currentStatus = checkInBooking?.status || selectedBooking?.status;
+
+    if (currentStatus === 'CHECKED_IN') {
+      try {
+        let res: BookingResponse;
+        try {
+          res = await apiPost<BookingResponse>(`/staff/bookings/${id}/update-guests`, { guests });
+        } catch (e) {
+          res = await apiPost<BookingResponse>(`/staff/bookings/${id}/check-in`, { guests });
+        }
+        setSelectedBooking(res);
+        if (res.guests && res.guests.length > 0) {
+          setSavedGuestsCache(prev => ({ ...prev, [id]: res.guests! }));
+        }
+        await fetchBookings();
+      } catch (err: any) {
+        alert("Lỗi khi lưu thông tin khách vào CSDL: " + err.message);
+      }
+      setCheckInBooking(null);
+    } else {
+      // For CONFIRMED (ĐÃ XÁC NHẬN) bookings: store in local state, write DB only when Check-in button is clicked
+      setTempGuestsMap(prev => ({ ...prev, [id]: guests }));
+      setSelectedBooking(prev => (prev ? { ...prev, guests: mappedGuests } : null));
+      setCheckInBooking(null);
+    }
+  };
+
+  const handleActualCheckIn = (id: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: "Xác nhận nhận phòng (Check-in)",
+      message: `Bạn có chắc chắn muốn thực hiện Check-in nhận phòng cho đơn booking của khách ${selectedBooking?.guestName || ''} (Phòng ${selectedBooking?.accommodationCode || ''})?`,
+      confirmText: "Xác nhận Check-in",
+      isDanger: false,
+      onConfirm: async () => {
+        try {
+          const currentTemp = tempGuestsMap[id];
+          let guestPayload: any[] | undefined = undefined;
+
+          if (currentTemp && currentTemp.length > 0) {
+            guestPayload = currentTemp;
+          } else if (selectedBooking?.guests && selectedBooking.guests.length > 0) {
+            guestPayload = selectedBooking.guests.map(g => ({
+              fullName: g.fullName,
+              identityCard: g.idNumber || '',
+              phone: g.phone || '',
+              gender: g.gender || '',
+              dateOfBirth: g.dob || '',
+              address: g.nationality || ''
+            }));
+          }
+
+          const res = await apiPost<BookingResponse>(`/staff/bookings/${id}/check-in`, { guests: guestPayload });
+          setSelectedBooking(res);
+          setTempGuestsMap(prev => {
+            const next = { ...prev };
+            delete next[id];
+            return next;
+          });
+          await fetchBookings();
+        } catch (err: any) {
+          alert("Lỗi khi Check-in: " + err.message);
+        }
+      }
+    });
   };
 
   const handleCheckOut = (id: string) => {
@@ -329,7 +434,7 @@ export default function BookingsPage() {
                   </tr>
                 ) : (
                   bookings.map(b => (
-                    <tr key={b.bookingId} onClick={() => setSelectedBooking(b)} style={{ cursor: "pointer" }}>
+                    <tr key={b.bookingId} onClick={() => handleOpenBookingDetails(b)} style={{ cursor: "pointer" }}>
                       <td className="mono-text" style={{ fontSize: '0.8rem' }}>{b.bookingId.split('-')[0]}</td>
                       <td className="mono-text">{b.accommodationCode || b.categoryName}</td>
                       <td style={{ fontWeight: 500 }}>{b.guestName}</td>
@@ -361,7 +466,7 @@ export default function BookingsPage() {
               <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>Không có dữ liệu</div>
             ) : (
               bookings.map(b => (
-                <div key={b.bookingId} className={styles.bookingCard} onClick={() => setSelectedBooking(b)}>
+                <div key={b.bookingId} className={styles.bookingCard} onClick={() => handleOpenBookingDetails(b)}>
                   <div className={styles.cardHeader}>
                     <div className={styles.cardTitle}>{b.guestName}</div>
                   </div>
@@ -453,6 +558,61 @@ export default function BookingsPage() {
                   {(selectedBooking.depositAmount || 0).toLocaleString('vi-VN')} VNĐ
                 </span>
               </div>
+
+              {/* Checked-in Guest Details Section */}
+              <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px dashed #cbd5e1' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '1.1rem', color: '#0284c7' }}>badge</span>
+                    Danh sách khách lưu trú (Khai báo tạm trú)
+                  </h4>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setCheckInBooking(selectedBooking);
+                    }}
+                    style={{
+                      background: '#e0f2fe', color: '#0284c7', border: '1px solid #bae6fd',
+                      padding: '0.3rem 0.75rem', borderRadius: '0.375rem', fontSize: '0.8rem',
+                      fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem'
+                    }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>edit_note</span>
+                    {selectedBooking.guests && selectedBooking.guests.length > 0 ? 'Cập nhật / Bổ sung' : '+ Thêm thông tin khách'}
+                  </button>
+                </div>
+                
+                {selectedBooking.guests && selectedBooking.guests.length > 0 ? (
+                  <div style={{ overflowX: 'auto', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0', padding: '0.5rem' }}>
+                    <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse', textAlign: 'left' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>
+                          <th style={{ padding: '0.4rem' }}>STT</th>
+                          <th style={{ padding: '0.4rem' }}>Họ tên</th>
+                          <th style={{ padding: '0.4rem' }}>Số CCCD / Passport</th>
+                          <th style={{ padding: '0.4rem' }}>Ngày sinh</th>
+                          <th style={{ padding: '0.4rem' }}>Giới tính</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedBooking.guests.map((g, idx) => (
+                          <tr key={g.id || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                            <td style={{ padding: '0.4rem' }}>{idx + 1}</td>
+                            <td style={{ padding: '0.4rem', fontWeight: 500, color: '#0f172a' }}>{g.fullName}</td>
+                            <td style={{ padding: '0.4rem', fontFamily: 'monospace', fontWeight: 600, color: '#0284c7' }}>{g.idNumber || '—'}</td>
+                            <td style={{ padding: '0.4rem' }}>{g.dob || '—'}</td>
+                            <td style={{ padding: '0.4rem' }}>{g.gender || '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div style={{ color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic', background: '#f8fafc', padding: '0.75rem', borderRadius: '0.375rem', border: '1px dashed #e2e8f0', textAlign: 'center' }}>
+                    Chưa thực hiện Check-in / Chưa có thông tin khách lưu trú
+                  </div>
+                )}
+              </div>
             </div>
             <div className={styles.modalFooter} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button className={`${styles.btn} ${styles.btnOutline}`} onClick={() => setSelectedBooking(null)}>Đóng</button>
@@ -470,10 +630,7 @@ export default function BookingsPage() {
 
               {selectedBooking.status === 'CONFIRMED' && (
                 <>
-                  <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => {
-                    setCheckInBooking(selectedBooking);
-                    setSelectedBooking(null);
-                  }}>
+                  <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => handleActualCheckIn(selectedBooking.bookingId)}>
                     Check-in
                   </button>
                   <button className={`${styles.btn}`} style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none' }} onClick={() => handleStatusChange(selectedBooking.bookingId, 'CANCELLED')}>
@@ -496,7 +653,10 @@ export default function BookingsPage() {
       {checkInBooking && (
         <CheckInModal
           booking={checkInBooking}
-          onClose={() => setCheckInBooking(null)}
+          onClose={() => {
+            setSelectedBooking(checkInBooking);
+            setCheckInBooking(null);
+          }}
           onCheckIn={handleCheckInSubmit}
         />
       )}

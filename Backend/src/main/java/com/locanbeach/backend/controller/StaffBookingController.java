@@ -72,6 +72,14 @@ public class StaffBookingController {
                 ApiResponse.success("Checked in successfully", staffBookingService.checkIn(id, request)));
     }
 
+    @PostMapping("/{id}/update-guests")
+    public ResponseEntity<ApiResponse<BookingResponse>> updateGuests(
+            @PathVariable UUID id,
+            @Valid @RequestBody com.locanbeach.backend.dto.request.staff.CheckInRequest request) {
+        return ResponseEntity.ok(
+                ApiResponse.success("Updated guests successfully", staffBookingService.updateGuests(id, request)));
+    }
+
     @PostMapping("/{id}/check-out")
     public ResponseEntity<ApiResponse<BookingResponse>> checkOut(@PathVariable UUID id) {
         return ResponseEntity.ok(
